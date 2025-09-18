@@ -21,10 +21,10 @@ import {
   TwitterIcon,
   GithubIcon,
   DiscordIcon,
-  HeartFilledIcon,
   SearchIcon,
   Logo,
 } from "@/components/icons";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 export const Navbar = () => {
   const searchInput = (
@@ -63,7 +63,7 @@ export const Navbar = () => {
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  "data-[active=true]:text-primary data-[active=true]:font-medium"
                 )}
                 color="foreground"
                 href={item.href}
@@ -93,16 +93,26 @@ export const Navbar = () => {
         </NavbarItem>
         <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
         <NavbarItem className="hidden md:flex">
-          <Button
-            isExternal
-            as={Link}
-            className="text-sm font-normal text-default-600 bg-default-100"
-            href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
-          >
-            Sponsor
-          </Button>
+          <SignedOut>
+            <Button
+              as={NextLink}
+              className="text-sm font-normal text-default-600 bg-default-100"
+              href="/sign-in"
+              variant="flat"
+            >
+              Get Started
+            </Button>
+          </SignedOut>
+
+          <SignedIn>
+            {/* Avatar + menu Profile/Settings/Sign out */}
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: { userButtonAvatarBox: "w-8 h-8" },
+              }}
+            />
+          </SignedIn>
         </NavbarItem>
       </NavbarContent>
 

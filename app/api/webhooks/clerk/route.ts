@@ -43,10 +43,14 @@ export async function POST(req: Request) {
     const firstName = data.first_name as string | undefined;
     const lastName = data.last_name as string | undefined;
     const imageUrl = data.image_url as string | undefined;
+    // Debug: log toàn bộ data và role
+    console.log("[Clerk Webhook] data:", JSON.stringify(data, null, 2));
+    const role = data.public_metadata?.role || "user";
+    console.log("[Clerk Webhook] role:", role);
 
     await User.findOneAndUpdate(
       { clerkUserId },
-      { $set: { email, firstName, lastName, imageUrl } },
+      { $set: { email, firstName, lastName, imageUrl, role } },
       { upsert: true, new: true }
     );
   }
