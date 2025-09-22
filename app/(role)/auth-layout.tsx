@@ -3,9 +3,11 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { Link } from "@heroui/link";
-import { Navbar } from "@/components/navbar";
 import dynamic from "next/dynamic";
+
 import { useUserRole } from "./useUserRole";
+
+import { Navbar } from "@/components/navbar";
 const StaffLayout = dynamic(() => import("./staff-layout"));
 const DoctorLayout = dynamic(() => import("./doctor-layout"));
 
@@ -31,6 +33,7 @@ export function AuthAwareChrome({ children }: { children: React.ReactNode }) {
   if (role === "doctor") {
     return <DoctorLayout>{children}</DoctorLayout>;
   }
+
   return (
     <div className="relative flex flex-col h-screen">
       <Navbar />
