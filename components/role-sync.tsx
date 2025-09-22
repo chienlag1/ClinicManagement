@@ -30,7 +30,7 @@ export function RoleSync({ currentRole, onRoleUpdate }: RoleSyncProps) {
       } else {
         setError(data.error || "Failed to check sync status");
       }
-    } catch (err) {
+    } catch {
       setError("Network error");
     } finally {
       setIsLoading(false);
@@ -57,7 +57,7 @@ export function RoleSync({ currentRole, onRoleUpdate }: RoleSyncProps) {
       } else {
         setError(data.error || "Failed to sync role");
       }
-    } catch (err) {
+    } catch {
       setError("Network error");
     } finally {
       setIsLoading(false);
@@ -94,19 +94,19 @@ export function RoleSync({ currentRole, onRoleUpdate }: RoleSyncProps) {
 
       <div className="flex gap-2">
         <Button
+          isLoading={isLoading}
           size="sm"
           variant="bordered"
           onPress={checkSyncStatus}
-          isLoading={isLoading}
         >
           Check Status
         </Button>
 
         <Button
-          size="sm"
           color="primary"
-          onPress={syncRole}
           isLoading={isLoading}
+          size="sm"
+          onPress={syncRole}
         >
           Sync Role
         </Button>

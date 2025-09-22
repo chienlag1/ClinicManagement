@@ -26,10 +26,10 @@ export function Providers({ children, themeProps }: ProvidersProps) {
 
   return (
     <ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
       afterSignInUrl="/"
       afterSignUpUrl="/"
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
     >
       <HeroUIProvider navigate={router.push}>
         <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
