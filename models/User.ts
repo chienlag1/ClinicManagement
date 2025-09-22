@@ -9,7 +9,7 @@ const UserSchema = new Schema(
     imageUrl: String,
     role: { type: String, default: "user" },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export type UserDoc = {

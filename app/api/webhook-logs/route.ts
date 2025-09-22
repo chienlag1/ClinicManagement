@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+
 import { connectMongo } from "@/lib/mongodb";
 import { User } from "@/models/User";
 
 export async function GET() {
   const { userId } = await auth();
+
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -21,7 +23,7 @@ export async function GET() {
           error: "User not found in database",
           suggestion: "Try syncing your role first",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -36,7 +38,7 @@ export async function GET() {
     if (!clerkUser.ok) {
       return NextResponse.json(
         { error: "Failed to fetch user from Clerk" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -68,11 +70,12 @@ export async function GET() {
         webhookUrl: "/api/webhooks/clerk",
       },
     });
-  } catch (error) {
-    console.error("[Webhook Logs] Error:", error);
+  } catch {
+    // Error fetching webhook logs
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

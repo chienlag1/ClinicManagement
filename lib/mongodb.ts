@@ -2,7 +2,6 @@
 import mongoose from "mongoose";
 
 declare global {
-  // eslint-disable-next-line no-var
   var mongooseConn:
     | { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null }
     | undefined;
@@ -30,5 +29,6 @@ export async function connectMongo() {
   }
 
   global.mongooseConn.conn = await global.mongooseConn.promise;
+
   return global.mongooseConn.conn;
 }

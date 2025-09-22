@@ -21,7 +21,7 @@ export default function DoctorDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold">Today's Appointments</h3>
+            <h3 className="text-lg font-semibold">Today&apos;s Appointments</h3>
           </CardHeader>
           <CardBody>
             <div className="text-3xl font-bold text-blue-600">12</div>
@@ -64,7 +64,7 @@ export default function DoctorDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold">Today's Schedule</h3>
+            <h3 className="text-lg font-semibold">Today&apos;s Schedule</h3>
           </CardHeader>
           <CardBody>
             <div className="space-y-4">
@@ -75,7 +75,7 @@ export default function DoctorDashboardPage() {
                     9:00 AM - General Checkup
                   </p>
                 </div>
-                <Button size="sm" color="primary">
+                <Button color="primary" size="sm">
                   View
                 </Button>
               </div>
@@ -84,7 +84,7 @@ export default function DoctorDashboardPage() {
                   <p className="font-medium">Sarah Johnson</p>
                   <p className="text-sm text-gray-500">10:30 AM - Follow-up</p>
                 </div>
-                <Button size="sm" color="primary">
+                <Button color="primary" size="sm">
                   View
                 </Button>
               </div>
@@ -95,7 +95,7 @@ export default function DoctorDashboardPage() {
                     2:00 PM - Consultation
                   </p>
                 </div>
-                <Button size="sm" color="primary">
+                <Button color="primary" size="sm">
                   View
                 </Button>
               </div>
@@ -109,19 +109,19 @@ export default function DoctorDashboardPage() {
           </CardHeader>
           <CardBody>
             <div className="grid grid-cols-2 gap-4">
-              <Button color="primary" className="h-20 flex flex-col">
+              <Button className="h-20 flex flex-col" color="primary">
                 <span className="text-lg">📋</span>
                 <span>New Prescription</span>
               </Button>
-              <Button color="secondary" className="h-20 flex flex-col">
+              <Button className="h-20 flex flex-col" color="secondary">
                 <span className="text-lg">📊</span>
                 <span>View Reports</span>
               </Button>
-              <Button color="success" className="h-20 flex flex-col">
+              <Button className="h-20 flex flex-col" color="success">
                 <span className="text-lg">👥</span>
                 <span>Patient Records</span>
               </Button>
-              <Button color="warning" className="h-20 flex flex-col">
+              <Button className="h-20 flex flex-col" color="warning">
                 <span className="text-lg">🔬</span>
                 <span>Lab Results</span>
               </Button>
