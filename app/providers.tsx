@@ -7,6 +7,7 @@ import { HeroUIProvider } from "@heroui/system";
 import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ClerkProvider } from "@clerk/nextjs";
+
 import { NotificationProvider } from "@/components/notification-popup";
 
 export interface ProvidersProps {
@@ -27,16 +28,14 @@ export function Providers({ children, themeProps }: ProvidersProps) {
 
   return (
     <ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
       afterSignInUrl="/"
       afterSignUpUrl="/"
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
     >
       <HeroUIProvider navigate={router.push}>
         <NextThemesProvider {...themeProps}>
-          <NotificationProvider>
-            {children}
-          </NotificationProvider>
+          <NotificationProvider>{children}</NotificationProvider>
         </NextThemesProvider>
       </HeroUIProvider>
     </ClerkProvider>

@@ -7,7 +7,7 @@ import { Icon } from "@iconify/react";
 export default function StaffDashboard() {
   const stats = [
     {
-      title: "Today's Appointments",
+      title: "Today&apos;s Appointments",
       value: "12",
       icon: "lucide:calendar",
       color: "text-blue-600",
@@ -92,7 +92,7 @@ export default function StaffDashboard() {
                   </p>
                 </div>
                 <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                  <Icon icon={stat.icon} className={`w-6 h-6 ${stat.color}`} />
+                  <Icon className={`w-6 h-6 ${stat.color}`} icon={stat.icon} />
                 </div>
               </div>
             </CardBody>
@@ -113,8 +113,8 @@ export default function StaffDashboard() {
                 <div key={activity.id} className="flex items-start gap-3">
                   <div className="p-2 bg-gray-100 rounded-lg">
                     <Icon
-                      icon={activity.icon}
                       className="w-4 h-4 text-gray-600"
+                      icon={activity.icon}
                     />
                   </div>
                   <div className="flex-1">
@@ -138,8 +138,8 @@ export default function StaffDashboard() {
             <div className="grid grid-cols-2 gap-3">
               <button className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-center transition-colors">
                 <Icon
-                  icon="lucide:calendar-plus"
                   className="w-6 h-6 text-blue-600 mx-auto mb-2"
+                  icon="lucide:calendar-plus"
                 />
                 <p className="text-sm font-medium text-blue-900">
                   New Appointment
@@ -147,8 +147,8 @@ export default function StaffDashboard() {
               </button>
               <button className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center transition-colors">
                 <Icon
-                  icon="lucide:user-plus"
                   className="w-6 h-6 text-green-600 mx-auto mb-2"
+                  icon="lucide:user-plus"
                 />
                 <p className="text-sm font-medium text-green-900">
                   Add Patient
@@ -156,8 +156,8 @@ export default function StaffDashboard() {
               </button>
               <button className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center transition-colors">
                 <Icon
-                  icon="lucide:file-text"
                   className="w-6 h-6 text-purple-600 mx-auto mb-2"
+                  icon="lucide:file-text"
                 />
                 <p className="text-sm font-medium text-purple-900">
                   View Records
@@ -165,8 +165,8 @@ export default function StaffDashboard() {
               </button>
               <button className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-center transition-colors">
                 <Icon
-                  icon="lucide:pill"
                   className="w-6 h-6 text-orange-600 mx-auto mb-2"
+                  icon="lucide:pill"
                 />
                 <p className="text-sm font-medium text-orange-900">
                   Prescriptions
@@ -177,10 +177,10 @@ export default function StaffDashboard() {
         </Card>
       </div>
 
-      {/* Today's Schedule */}
+      {/* Today&apos;s Schedule */}
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold">Today's Schedule</h3>
+          <h3 className="text-lg font-semibold">Today&apos;s Schedule</h3>
         </CardHeader>
         <CardBody>
           <div className="space-y-3">

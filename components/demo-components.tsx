@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
+
 import { Pagination, usePagination } from "./pagination";
 import { useNotification, NotificationModal } from "./notification-popup";
 
@@ -16,8 +17,10 @@ const mockData = Array.from({ length: 100 }, (_, i) => ({
 
 export function DemoComponents() {
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<"success" | "error" | "warning" | "info">("info");
-  
+  const [modalType, setModalType] = useState<
+    "success" | "error" | "warning" | "info"
+  >("info");
+
   const {
     currentPage,
     itemsPerPage,
@@ -40,7 +43,9 @@ export function DemoComponents() {
   const endIndex = startIndex + itemsPerPage;
   const currentData = mockData.slice(startIndex, endIndex);
 
-  const handleNotificationDemo = (type: "success" | "error" | "warning" | "info") => {
+  const handleNotificationDemo = (
+    type: "success" | "error" | "warning" | "info",
+  ) => {
     switch (type) {
       case "success":
         showSuccess("Thành công!", "Dữ liệu đã được lưu thành công.");
@@ -58,8 +63,8 @@ export function DemoComponents() {
   };
 
   const handleLoadingDemo = () => {
-    const id = showLoading("Đang xử lý...", "Vui lòng chờ trong giây lát.");
-    
+    showLoading("Đang xử lý...", "Vui lòng chờ trong giây lát.");
+
     // Simulate async operation
     setTimeout(() => {
       showSuccess("Hoàn thành!", "Dữ liệu đã được xử lý thành công.");
@@ -75,7 +80,7 @@ export function DemoComponents() {
       },
       () => {
         showInfo("Đã hủy", "Hành động đã được hủy.");
-      }
+      },
     );
   };
 
@@ -95,9 +100,10 @@ export function DemoComponents() {
         </CardHeader>
         <CardBody className="space-y-4">
           <div className="text-sm text-gray-600">
-            Hiển thị {startIndex + 1}-{Math.min(endIndex, totalItems)} trong tổng số {totalItems} items
+            Hiển thị {startIndex + 1}-{Math.min(endIndex, totalItems)} trong
+            tổng số {totalItems} items
           </div>
-          
+
           {/* Data table */}
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full">
@@ -121,8 +127,8 @@ export function DemoComponents() {
                           item.status === "active"
                             ? "bg-green-100 text-green-800"
                             : item.status === "inactive"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {item.status}
@@ -136,18 +142,18 @@ export function DemoComponents() {
 
           {/* Pagination */}
           <Pagination
-            totalItems={totalItems}
+            color="primary"
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
-            onItemsPerPageChange={handleItemsPerPageChange}
             itemsPerPageOptions={[5, 10, 20, 50]}
-            showTotal={true}
+            showFirstLast={true}
             showItemsPerPage={true}
             showQuickJump={true}
-            showFirstLast={true}
+            showTotal={true}
             size="md"
-            color="primary"
+            totalItems={totalItems}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            onPageChange={handlePageChange}
           />
         </CardBody>
       </Card>
@@ -186,10 +192,7 @@ export function DemoComponents() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button
-              color="secondary"
-              onPress={handleLoadingDemo}
-            >
+            <Button color="secondary" onPress={handleLoadingDemo}>
               Loading Notification
             </Button>
             <Button
@@ -210,28 +213,16 @@ export function DemoComponents() {
         </CardHeader>
         <CardBody>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button
-              color="success"
-              onPress={() => handleModalDemo("success")}
-            >
+            <Button color="success" onPress={() => handleModalDemo("success")}>
               Success Modal
             </Button>
-            <Button
-              color="danger"
-              onPress={() => handleModalDemo("error")}
-            >
+            <Button color="danger" onPress={() => handleModalDemo("error")}>
               Error Modal
             </Button>
-            <Button
-              color="warning"
-              onPress={() => handleModalDemo("warning")}
-            >
+            <Button color="warning" onPress={() => handleModalDemo("warning")}>
               Warning Modal
             </Button>
-            <Button
-              color="primary"
-              onPress={() => handleModalDemo("info")}
-            >
+            <Button color="primary" onPress={() => handleModalDemo("info")}>
               Info Modal
             </Button>
           </div>
@@ -240,32 +231,38 @@ export function DemoComponents() {
 
       {/* Modal Component */}
       <NotificationModal
+        cancelText="Hủy"
+        confirmText="Xác nhận"
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        type={modalType}
-        title={
-          modalType === "success" ? "Thành công!" :
-          modalType === "error" ? "Lỗi!" :
-          modalType === "warning" ? "Cảnh báo!" :
-          "Thông tin"
-        }
         message={
-          modalType === "success" ? "Dữ liệu đã được lưu thành công." :
-          modalType === "error" ? "Đã xảy ra lỗi khi xử lý dữ liệu." :
-          modalType === "warning" ? "Dữ liệu có thể không chính xác." :
-          "Đây là thông báo thông tin."
+          modalType === "success"
+            ? "Dữ liệu đã được lưu thành công."
+            : modalType === "error"
+              ? "Đã xảy ra lỗi khi xử lý dữ liệu."
+              : modalType === "warning"
+                ? "Dữ liệu có thể không chính xác."
+                : "Đây là thông báo thông tin."
         }
-        onConfirm={() => {
-          setShowModal(false);
-          showSuccess("Đã xác nhận!", "Bạn đã xác nhận thông báo.");
-        }}
+        showCancel={true}
+        title={
+          modalType === "success"
+            ? "Thành công!"
+            : modalType === "error"
+              ? "Lỗi!"
+              : modalType === "warning"
+                ? "Cảnh báo!"
+                : "Thông tin"
+        }
+        type={modalType}
         onCancel={() => {
           setShowModal(false);
           showInfo("Đã hủy", "Bạn đã hủy thông báo.");
         }}
-        confirmText="Xác nhận"
-        cancelText="Hủy"
-        showCancel={true}
+        onClose={() => setShowModal(false)}
+        onConfirm={() => {
+          setShowModal(false);
+          showSuccess("Đã xác nhận!", "Bạn đã xác nhận thông báo.");
+        }}
       />
     </div>
   );

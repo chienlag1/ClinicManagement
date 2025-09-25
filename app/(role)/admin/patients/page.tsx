@@ -6,8 +6,12 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Icon } from "@iconify/react";
+
 import { Pagination, usePagination } from "@/components/pagination";
-import { useNotification, NotificationModal } from "@/components/notification-popup";
+import {
+  useNotification,
+  NotificationModal,
+} from "@/components/notification-popup";
 
 // Mock data
 const mockPatients = Array.from({ length: 50 }, (_, i) => ({
@@ -17,8 +21,17 @@ const mockPatients = Array.from({ length: 50 }, (_, i) => ({
   phone: `0${Math.floor(Math.random() * 900000000) + 100000000}`,
   age: Math.floor(Math.random() * 60) + 18,
   gender: i % 2 === 0 ? "Nam" : "Nữ",
-  status: i % 4 === 0 ? "active" : i % 4 === 1 ? "inactive" : i % 4 === 2 ? "pending" : "blocked",
-  createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+  status:
+    i % 4 === 0
+      ? "active"
+      : i % 4 === 1
+        ? "inactive"
+        : i % 4 === 2
+          ? "pending"
+          : "blocked",
+  createdAt: new Date(
+    Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000,
+  ).toISOString(),
 }));
 
 export default function PatientsPage() {
@@ -28,7 +41,9 @@ export default function PatientsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
-  const [modalType, setModalType] = useState<"delete" | "edit" | "view">("view");
+  const [modalType, setModalType] = useState<"delete" | "edit" | "view">(
+    "view",
+  );
 
   const {
     currentPage,
@@ -37,26 +52,23 @@ export default function PatientsPage() {
     handleItemsPerPageChange,
   } = usePagination(1, 10);
 
-  const {
-    showSuccess,
-    showError,
-    showConfirm,
-  } = useNotification();
+  const { showSuccess } = useNotification();
 
   // Filter patients
   useEffect(() => {
     let filtered = patients;
 
     if (searchTerm) {
-      filtered = filtered.filter(patient =>
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.phone.includes(searchTerm)
+      filtered = filtered.filter(
+        (patient) =>
+          patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          patient.phone.includes(searchTerm),
       );
     }
 
     if (statusFilter !== "all") {
-      filtered = filtered.filter(patient => patient.status === statusFilter);
+      filtered = filtered.filter((patient) => patient.status === statusFilter);
     }
 
     setFilteredPatients(filtered);
@@ -89,8 +101,10 @@ export default function PatientsPage() {
 
   const confirmDelete = () => {
     if (selectedPatient) {
-      setPatients(patients.filter(p => p.id !== selectedPatient.id));
-      setFilteredPatients(filteredPatients.filter(p => p.id !== selectedPatient.id));
+      setPatients(patients.filter((p) => p.id !== selectedPatient.id));
+      setFilteredPatients(
+        filteredPatients.filter((p) => p.id !== selectedPatient.id),
+      );
       showSuccess("Thành công!", "Bệnh nhân đã được xóa thành công.");
       setShowModal(false);
     }
@@ -141,15 +155,18 @@ export default function PatientsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
               placeholder="Tìm kiếm bệnh nhân..."
+              startContent={
+                <Icon className="w-4 h-4 text-gray-400" icon="lucide:search" />
+              }
               value={searchTerm}
               onValueChange={setSearchTerm}
-              startContent={<Icon icon="lucide:search" className="w-4 h-4 text-gray-400" />}
             />
             <Select
               placeholder="Lọc theo trạng thái"
               selectedKeys={[statusFilter]}
               onSelectionChange={(keys) => {
                 const value = Array.from(keys)[0] as string;
+
                 setStatusFilter(value);
               }}
             >
@@ -159,7 +176,10 @@ export default function PatientsPage() {
               <SelectItem key="pending">Chờ duyệt</SelectItem>
               <SelectItem key="blocked">Bị khóa</SelectItem>
             </Select>
-            <Button color="primary" startContent={<Icon icon="lucide:plus" className="w-4 h-4" />}>
+            <Button
+              color="primary"
+              startContent={<Icon className="w-4 h-4" icon="lucide:plus" />}
+            >
               Thêm bệnh nhân
             </Button>
           </div>
@@ -205,30 +225,30 @@ export default function PatientsPage() {
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
                         <Button
+                          isIconOnly
                           size="sm"
                           variant="light"
-                          isIconOnly
                           onPress={() => handleView(patient)}
                         >
-                          <Icon icon="lucide:eye" className="w-4 h-4" />
+                          <Icon className="w-4 h-4" icon="lucide:eye" />
                         </Button>
                         <Button
+                          isIconOnly
+                          color="primary"
                           size="sm"
                           variant="light"
-                          color="primary"
-                          isIconOnly
                           onPress={() => handleEdit(patient)}
                         >
-                          <Icon icon="lucide:edit" className="w-4 h-4" />
+                          <Icon className="w-4 h-4" icon="lucide:edit" />
                         </Button>
                         <Button
+                          isIconOnly
+                          color="danger"
                           size="sm"
                           variant="light"
-                          color="danger"
-                          isIconOnly
                           onPress={() => handleDelete(patient)}
                         >
-                          <Icon icon="lucide:trash-2" className="w-4 h-4" />
+                          <Icon className="w-4 h-4" icon="lucide:trash-2" />
                         </Button>
                       </div>
                     </td>
@@ -240,7 +260,10 @@ export default function PatientsPage() {
 
           {currentPatients.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              <Icon icon="lucide:users" className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <Icon
+                className="w-12 h-12 mx-auto mb-4 text-gray-300"
+                icon="lucide:users"
+              />
               <p>Không tìm thấy bệnh nhân nào</p>
             </div>
           )}
@@ -249,40 +272,46 @@ export default function PatientsPage() {
 
       {/* Pagination */}
       <Pagination
-        totalItems={totalItems}
+        color="primary"
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
-        onPageChange={handlePageChange}
-        onItemsPerPageChange={handleItemsPerPageChange}
         itemsPerPageOptions={[5, 10, 20, 50]}
-        showTotal={true}
+        showFirstLast={true}
         showItemsPerPage={true}
         showQuickJump={true}
-        showFirstLast={true}
+        showTotal={true}
         size="md"
-        color="primary"
+        totalItems={totalItems}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        onPageChange={handlePageChange}
       />
 
       {/* Modal */}
       <NotificationModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        type={modalType === "delete" ? "error" : "info"}
-        title={
-          modalType === "delete" ? "Xác nhận xóa bệnh nhân" :
-          modalType === "edit" ? "Chỉnh sửa bệnh nhân" :
-          "Thông tin bệnh nhân"
-        }
-        message={
-          modalType === "delete" ? `Bạn có chắc chắn muốn xóa bệnh nhân "${selectedPatient?.name}" không? Hành động này không thể hoàn tác.` :
-          modalType === "edit" ? `Chỉnh sửa thông tin bệnh nhân "${selectedPatient?.name}"` :
-          `Thông tin chi tiết của bệnh nhân "${selectedPatient?.name}"`
-        }
-        onConfirm={modalType === "delete" ? confirmDelete : () => setShowModal(false)}
-        onCancel={() => setShowModal(false)}
-        confirmText={modalType === "delete" ? "Xóa" : "Đóng"}
         cancelText="Hủy"
+        confirmText={modalType === "delete" ? "Xóa" : "Đóng"}
+        isOpen={showModal}
+        message={
+          modalType === "delete"
+            ? `Bạn có chắc chắn muốn xóa bệnh nhân "${selectedPatient?.name}" không? Hành động này không thể hoàn tác.`
+            : modalType === "edit"
+              ? `Chỉnh sửa thông tin bệnh nhân "${selectedPatient?.name}"`
+              : `Thông tin chi tiết của bệnh nhân "${selectedPatient?.name}"`
+        }
         showCancel={modalType === "delete"}
+        title={
+          modalType === "delete"
+            ? "Xác nhận xóa bệnh nhân"
+            : modalType === "edit"
+              ? "Chỉnh sửa bệnh nhân"
+              : "Thông tin bệnh nhân"
+        }
+        type={modalType === "delete" ? "error" : "info"}
+        onCancel={() => setShowModal(false)}
+        onClose={() => setShowModal(false)}
+        onConfirm={
+          modalType === "delete" ? confirmDelete : () => setShowModal(false)
+        }
       />
     </div>
   );

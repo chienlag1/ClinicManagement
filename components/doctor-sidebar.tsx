@@ -1,18 +1,11 @@
 "use client";
 
 import React from "react";
-import { Avatar } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-} from "@heroui/dropdown";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify/react";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 
@@ -31,7 +24,7 @@ type NavSection = {
 export const DoctorSidebar = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const [activeItem, setActiveItem] = React.useState("dashboard");
-  const { signOut } = useAuth();
+  // const { signOut } = useAuth();
   const { user } = useUser();
   const router = useRouter();
 
@@ -39,10 +32,10 @@ export const DoctorSidebar = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleLogout = async () => {
-    await signOut();
-    router.push("/sign-in");
-  };
+  // const handleLogout = async () => {
+  //   await signOut();
+  //   router.push("/sign-in");
+  // };
 
   const navigation: NavSection[] = [
     {
@@ -120,7 +113,10 @@ export const DoctorSidebar = () => {
       {!isOpen && (
         <div
           className="fixed inset-0 bg-overlay/50 z-40 lg:hidden"
+          role="button"
+          tabIndex={0}
           onClick={toggleSidebar}
+          onKeyDown={(e) => e.key === "Escape" && toggleSidebar()}
         />
       )}
 
@@ -145,17 +141,17 @@ export const DoctorSidebar = () => {
           >
             {isOpen ? (
               <path
+                d="M15 19l-7-7 7-7"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M15 19l-7-7 7-7"
               />
             ) : (
               <path
+                d="M9 5l7 7-7 7"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M9 5l7 7-7 7"
               />
             )}
           </svg>
@@ -173,10 +169,10 @@ export const DoctorSidebar = () => {
             viewBox="0 0 24 24"
           >
             <path
+              d="M6 18L18 6M6 6l12 12"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
             />
           </svg>
         </button>
@@ -226,9 +222,9 @@ export const DoctorSidebar = () => {
               {section.items.map((item) => (
                 <NavItem
                   key={item.label}
-                  item={item}
                   isActive={activeItem === item.href.split("/").pop()}
                   isCollapsed={!isOpen}
+                  item={item}
                   onClick={() => {
                     setActiveItem(item.href.split("/").pop() || "dashboard");
                     router.push(item.href);
@@ -267,14 +263,14 @@ const NavItem: React.FC<NavItemProps> = ({
   isCollapsed,
   onClick,
 }) => {
-  const { label, icon, href, badge } = item;
+  const { label, icon, badge } = item;
 
   const content = (
     <Button
-      variant="flat"
-      color={isActive ? "primary" : "default"}
       className={`justify-start ${isCollapsed ? "justify-center px-0 h-10 w-10 min-w-10" : "w-full h-9"} mb-1`}
+      color={isActive ? "primary" : "default"}
       startContent={!isCollapsed && <NavIcon icon={icon} />}
+      variant="flat"
       onPress={onClick}
     >
       {isCollapsed ? (
@@ -342,14 +338,14 @@ const NavIcon: React.FC<{ icon: string; size?: "sm" | "md" }> = ({
         className={iconSize}
         fill="none"
         stroke="currentColor"
-        viewBox="0 0 24 24"
         style={{ strokeWidth: 1.5 }}
+        viewBox="0 0 24 24"
       >
-        <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
+        <path d={iconPath} strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     );
   }
 
   // Fallback to iconify if icon not found
-  return <Icon icon={icon} className={iconSize} />;
+  return <Icon className={iconSize} icon={icon} />;
 };

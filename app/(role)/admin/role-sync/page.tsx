@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
+
 import { RoleSync } from "@/components/role-sync";
 
 export default function RoleSyncPage() {
@@ -13,12 +14,14 @@ export default function RoleSyncPage() {
       if (!userId) return;
       try {
         const res = await fetch("/api/role", { cache: "no-store" });
+
         if (res.ok) {
           const data = await res.json();
+
           setCurrentRole(data.role);
         }
-      } catch (error) {
-        console.error("Error fetching role:", error);
+      } catch {
+        // console.error("Error fetching role:", error);
       }
     }
     if (isSignedIn) fetchRole();
@@ -47,16 +50,16 @@ export default function RoleSyncPage() {
           <h3 className="text-lg font-semibold mb-2">How to use:</h3>
           <ol className="list-decimal list-inside space-y-1 text-sm">
             <li>
-              Click "Check Status" to see if your role in Clerk matches your
-              role in the database
+              Click &quot;Check Status&quot; to see if your role in Clerk
+              matches your role in the database
             </li>
             <li>
-              If they don't match, click "Sync Role" to update your database
-              role
+              If they don&apos;t match, click &quot;Sync Role&quot; to update
+              your database role
             </li>
             <li>
               This is useful when you change your role in Clerk Dashboard but it
-              doesn't automatically sync
+              doesn&apos;t automatically sync
             </li>
           </ol>
         </div>

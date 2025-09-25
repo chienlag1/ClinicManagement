@@ -9,8 +9,10 @@ export function useUserRole() {
     async function fetchRole() {
       if (!userId) return;
       const res = await fetch("/api/role", { cache: "no-store" });
+
       if (res.ok) {
         const data = await res.json();
+
         setRole(data.role);
       }
     }

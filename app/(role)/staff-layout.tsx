@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+
 import { StaffSidebar } from "@/components/staff-sidebar";
 
 export default function StaffLayout({
