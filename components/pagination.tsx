@@ -30,7 +30,13 @@ export interface PaginationProps {
   /** Size của pagination */
   size?: "sm" | "md" | "lg";
   /** Color theme */
-  color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
+  color?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
   /** Có hiển thị compact mode không */
   compact?: boolean;
   /** Custom class name */
@@ -65,6 +71,7 @@ export function Pagination({
 
   const handleItemsPerPageChange = (value: string) => {
     const newItemsPerPage = parseInt(value);
+
     onItemsPerPageChange?.(newItemsPerPage);
     // Reset về trang 1 khi thay đổi items per page
     onPageChange(1);
@@ -79,7 +86,9 @@ export function Pagination({
   }
 
   return (
-    <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
+    <div
+      className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}
+    >
       {/* Thông tin tổng số items */}
       {showTotal && (
         <div className="text-sm text-gray-600">
@@ -92,18 +101,17 @@ export function Pagination({
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">Hiển thị:</span>
           <Select
-            size={size}
+            className="w-20"
             selectedKeys={[itemsPerPage.toString()]}
+            size={size}
             onSelectionChange={(keys) => {
               const value = Array.from(keys)[0] as string;
+
               handleItemsPerPageChange(value);
             }}
-            className="w-20"
           >
             {itemsPerPageOptions.map((option) => (
-              <SelectItem key={option.toString()}>
-                {option}
-              </SelectItem>
+              <SelectItem key={option.toString()}>{option}</SelectItem>
             ))}
           </Select>
           <span className="text-sm text-gray-600">items/trang</span>
@@ -115,40 +123,40 @@ export function Pagination({
         {/* First page button */}
         {showFirstLast && currentPage > 1 && (
           <Button
+            isIconOnly
+            className="min-w-8"
             size={size}
             variant="bordered"
             onPress={() => handlePageChange(1)}
-            isIconOnly
-            className="min-w-8"
           >
-            <Icon icon="lucide:chevrons-left" className="w-4 h-4" />
+            <Icon className="w-4 h-4" icon="lucide:chevrons-left" />
           </Button>
         )}
 
         {/* Previous page button */}
         {currentPage > 1 && (
           <Button
+            isIconOnly
+            className="min-w-8"
             size={size}
             variant="bordered"
             onPress={() => handlePageChange(currentPage - 1)}
-            isIconOnly
-            className="min-w-8"
           >
-            <Icon icon="lucide:chevron-left" className="w-4 h-4" />
+            <Icon className="w-4 h-4" icon="lucide:chevron-left" />
           </Button>
         )}
 
         {/* Page numbers */}
         {!compact && (
           <HeroUIPagination
-            total={totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            size={size}
-            color={color}
             showControls
             showShadow
             className="mx-2"
+            color={color}
+            page={currentPage}
+            size={size}
+            total={totalPages}
+            onChange={handlePageChange}
           />
         )}
 
@@ -166,26 +174,26 @@ export function Pagination({
         {/* Next page button */}
         {currentPage < totalPages && (
           <Button
+            isIconOnly
+            className="min-w-8"
             size={size}
             variant="bordered"
             onPress={() => handlePageChange(currentPage + 1)}
-            isIconOnly
-            className="min-w-8"
           >
-            <Icon icon="lucide:chevron-right" className="w-4 h-4" />
+            <Icon className="w-4 h-4" icon="lucide:chevron-right" />
           </Button>
         )}
 
         {/* Last page button */}
         {showFirstLast && currentPage < totalPages && (
           <Button
+            isIconOnly
+            className="min-w-8"
             size={size}
             variant="bordered"
             onPress={() => handlePageChange(totalPages)}
-            isIconOnly
-            className="min-w-8"
           >
-            <Icon icon="lucide:chevrons-right" className="w-4 h-4" />
+            <Icon className="w-4 h-4" icon="lucide:chevrons-right" />
           </Button>
         )}
       </div>
@@ -195,14 +203,15 @@ export function Pagination({
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">Đi đến:</span>
           <input
-            type="number"
-            min="1"
-            max={totalPages}
             className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
+            max={totalPages}
+            min="1"
             placeholder="Trang"
+            type="number"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 const page = parseInt((e.target as HTMLInputElement).value);
+
                 if (page && page >= 1 && page <= totalPages) {
                   handleQuickJump(page);
                   (e.target as HTMLInputElement).value = "";
@@ -255,7 +264,11 @@ export const paginationUtils = {
   /**
    * Tính toán thông tin pagination từ API response
    */
-  getPaginationInfo: (totalItems: number, currentPage: number, itemsPerPage: number) => {
+  getPaginationInfo: (
+    totalItems: number,
+    currentPage: number,
+    itemsPerPage: number,
+  ) => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);

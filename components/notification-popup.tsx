@@ -1,14 +1,32 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import React, { createContext, useContext, useState, useCallback } from "react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Icon } from "@iconify/react";
+
 import { cn } from "@/lib/utils";
 
 // Types
-export type NotificationType = "success" | "error" | "warning" | "info" | "loading";
-export type NotificationPosition = "top-right" | "top-left" | "bottom-right" | "bottom-left" | "top-center" | "bottom-center";
+export type NotificationType =
+  | "success"
+  | "error"
+  | "warning"
+  | "info"
+  | "loading";
+export type NotificationPosition =
+  | "top-right"
+  | "top-left"
+  | "bottom-right"
+  | "bottom-left"
+  | "top-center"
+  | "bottom-center";
 
 export interface Notification {
   id: string;
@@ -28,8 +46,21 @@ export interface Notification {
 export interface NotificationAction {
   label: string;
   action: () => void;
-  variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "shadow" | "ghost";
-  color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
+  variant?:
+    | "solid"
+    | "bordered"
+    | "light"
+    | "flat"
+    | "faded"
+    | "shadow"
+    | "ghost";
+  color?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
 }
 
 export interface NotificationPopupProps {
@@ -43,12 +74,37 @@ interface NotificationContextType {
   showNotification: (notification: Omit<Notification, "id">) => string;
   hideNotification: (id: string) => void;
   hideAllNotifications: () => void;
-  showSuccess: (title: string, message?: string, options?: Partial<Notification>) => string;
-  showError: (title: string, message?: string, options?: Partial<Notification>) => string;
-  showWarning: (title: string, message?: string, options?: Partial<Notification>) => string;
-  showInfo: (title: string, message?: string, options?: Partial<Notification>) => string;
-  showLoading: (title: string, message?: string, options?: Partial<Notification>) => string;
-  showConfirm: (title: string, message: string, onConfirm: () => void, onCancel?: () => void) => string;
+  showSuccess: (
+    title: string,
+    message?: string,
+    options?: Partial<Notification>,
+  ) => string;
+  showError: (
+    title: string,
+    message?: string,
+    options?: Partial<Notification>,
+  ) => string;
+  showWarning: (
+    title: string,
+    message?: string,
+    options?: Partial<Notification>,
+  ) => string;
+  showInfo: (
+    title: string,
+    message?: string,
+    options?: Partial<Notification>,
+  ) => string;
+  showLoading: (
+    title: string,
+    message?: string,
+    options?: Partial<Notification>,
+  ) => string;
+  showConfirm: (
+    title: string,
+    message: string,
+    onConfirm: () => void,
+    onCancel?: () => void,
+  ) => string;
 }
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
@@ -56,46 +112,59 @@ const NotificationContext = createContext<NotificationContextType | null>(null);
 // Hook để sử dụng notification context
 export function useNotification() {
   const context = useContext(NotificationContext);
+
   if (!context) {
-    throw new Error("useNotification must be used within a NotificationProvider");
+    throw new Error(
+      "useNotification must be used within a NotificationProvider",
+    );
   }
+
   return context;
 }
 
 // Provider component
-export function NotificationProvider({ children }: { children: React.ReactNode }) {
+export function NotificationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const showNotification = useCallback((notification: Omit<Notification, "id">) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newNotification: Notification = {
-      id,
-      duration: 5000, // 5 seconds default
-      position: "top-right",
-      showCloseButton: true,
-      showIcon: true,
-      ...notification,
-    };
+  const showNotification = useCallback(
+    (notification: Omit<Notification, "id">) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const newNotification: Notification = {
+        id,
+        duration: 5000, // 5 seconds default
+        position: "top-right",
+        showCloseButton: true,
+        showIcon: true,
+        ...notification,
+      };
 
-    setNotifications(prev => [...prev, newNotification]);
+      setNotifications((prev) => [...prev, newNotification]);
 
-    // Auto hide notification
-    if (newNotification.duration && newNotification.duration > 0) {
-      setTimeout(() => {
-        hideNotification(id);
-      }, newNotification.duration);
-    }
+      // Auto hide notification
+      if (newNotification.duration && newNotification.duration > 0) {
+        setTimeout(() => {
+          hideNotification(id);
+        }, newNotification.duration);
+      }
 
-    return id;
-  }, []);
+      return id;
+    },
+    [],
+  );
 
   const hideNotification = useCallback((id: string) => {
-    setNotifications(prev => {
-      const notification = prev.find(n => n.id === id);
+    setNotifications((prev) => {
+      const notification = prev.find((n) => n.id === id);
+
       if (notification?.onClose) {
         notification.onClose();
       }
-      return prev.filter(n => n.id !== id);
+
+      return prev.filter((n) => n.id !== id);
     });
   }, []);
 
@@ -104,84 +173,111 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   // Convenience methods
-  const showSuccess = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
-    return showNotification({
-      type: "success",
-      title,
-      message,
-      ...options,
-    });
-  }, [showNotification]);
+  const showSuccess = useCallback(
+    (title: string, message?: string, options?: Partial<Notification>) => {
+      return showNotification({
+        type: "success",
+        title,
+        message,
+        ...options,
+      });
+    },
+    [showNotification],
+  );
 
-  const showError = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
-    return showNotification({
-      type: "error",
-      title,
-      message,
-      duration: 0, // Error notifications don't auto-hide
-      ...options,
-    });
-  }, [showNotification]);
+  const showError = useCallback(
+    (title: string, message?: string, options?: Partial<Notification>) => {
+      return showNotification({
+        type: "error",
+        title,
+        message,
+        duration: 0, // Error notifications don't auto-hide
+        ...options,
+      });
+    },
+    [showNotification],
+  );
 
-  const showWarning = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
-    return showNotification({
-      type: "warning",
-      title,
-      message,
-      duration: 7000, // Warning notifications stay longer
-      ...options,
-    });
-  }, [showNotification]);
+  const showWarning = useCallback(
+    (title: string, message?: string, options?: Partial<Notification>) => {
+      return showNotification({
+        type: "warning",
+        title,
+        message,
+        duration: 7000, // Warning notifications stay longer
+        ...options,
+      });
+    },
+    [showNotification],
+  );
 
-  const showInfo = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
-    return showNotification({
-      type: "info",
-      title,
-      message,
-      ...options,
-    });
-  }, [showNotification]);
+  const showInfo = useCallback(
+    (title: string, message?: string, options?: Partial<Notification>) => {
+      return showNotification({
+        type: "info",
+        title,
+        message,
+        ...options,
+      });
+    },
+    [showNotification],
+  );
 
-  const showLoading = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
-    return showNotification({
-      type: "loading",
-      title,
-      message,
-      duration: 0, // Loading notifications don't auto-hide
-      showCloseButton: false,
-      ...options,
-    });
-  }, [showNotification]);
+  const showLoading = useCallback(
+    (title: string, message?: string, options?: Partial<Notification>) => {
+      return showNotification({
+        type: "loading",
+        title,
+        message,
+        duration: 0, // Loading notifications don't auto-hide
+        showCloseButton: false,
+        ...options,
+      });
+    },
+    [showNotification],
+  );
 
-  const showConfirm = useCallback((title: string, message: string, onConfirm: () => void, onCancel?: () => void) => {
-    return showNotification({
-      type: "warning",
-      title,
-      message,
-      duration: 0,
-      showCloseButton: false,
-      actions: [
-        {
-          label: "Hủy",
-          action: () => {
-            hideNotification(showNotification({ type: "warning", title, message }));
-            onCancel?.();
+  const showConfirm = useCallback(
+    (
+      title: string,
+      message: string,
+      onConfirm: () => void,
+      onCancel?: () => void,
+    ) => {
+      return showNotification({
+        type: "warning",
+        title,
+        message,
+        duration: 0,
+        showCloseButton: false,
+        actions: [
+          {
+            label: "Hủy",
+            action: () => {
+              hideNotification(
+                showNotification({ type: "warning", title, message }),
+              );
+              onCancel?.();
+            },
+            variant: "bordered",
+            color: "default",
           },
-          variant: "bordered",
-          color: "default",
-        },
-        {
-          label: "Xác nhận",
-          action: () => {
-            hideNotification(showNotification({ type: "warning", title, message }));
-            onConfirm();
+          {
+            label: "Xác nhận",
+            action: () => {
+              hideNotification(
+                showNotification({ type: "warning", title, message }),
+              );
+              onConfirm();
+            },
+            variant: "solid",
+            color: "danger",
           },
-          variant: "solid",
-          color: "danger",
-        },
-      ],
-    });
-  }, [showNotification, hideNotification]);
+        ],
+      });
+    },
+    [showNotification, hideNotification],
+  );
 
   const contextValue: NotificationContextType = {
     notifications,
@@ -199,16 +295,25 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   return (
     <NotificationContext.Provider value={contextValue}>
       {children}
-      <NotificationContainer notifications={notifications} onClose={hideNotification} />
+      <NotificationContainer
+        notifications={notifications}
+        onClose={hideNotification}
+      />
     </NotificationContext.Provider>
   );
 }
 
 // Notification container component
-function NotificationContainer({ notifications, onClose }: { notifications: Notification[], onClose: (id: string) => void }) {
+function NotificationContainer({
+  notifications,
+  onClose,
+}: {
+  notifications: Notification[];
+  onClose: (id: string) => void;
+}) {
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
-      {notifications.map(notification => (
+      {notifications.map((notification) => (
         <NotificationPopup
           key={notification.id}
           notification={notification}
@@ -220,7 +325,10 @@ function NotificationContainer({ notifications, onClose }: { notifications: Noti
 }
 
 // Main notification popup component
-export function NotificationPopup({ notification, onClose }: NotificationPopupProps) {
+export function NotificationPopup({
+  notification,
+  onClose,
+}: NotificationPopupProps) {
   if (!notification) return null;
 
   const {
@@ -290,13 +398,13 @@ export function NotificationPopup({ notification, onClose }: NotificationPopupPr
     <div
       className={cn(
         "fixed pointer-events-auto max-w-sm w-full mx-4",
-        getPositionClasses()
+        getPositionClasses(),
       )}
     >
       <div
         className={cn(
           "p-4 rounded-lg border shadow-lg backdrop-blur-sm",
-          getColor()
+          getColor(),
         )}
       >
         <div className="flex items-start gap-3">
@@ -304,11 +412,8 @@ export function NotificationPopup({ notification, onClose }: NotificationPopupPr
           {showIcon && (
             <div className="flex-shrink-0 mt-0.5">
               <Icon
+                className={cn("w-5 h-5", type === "loading" && "animate-spin")}
                 icon={getIcon()}
-                className={cn(
-                  "w-5 h-5",
-                  type === "loading" && "animate-spin"
-                )}
               />
             </div>
           )}
@@ -326,11 +431,11 @@ export function NotificationPopup({ notification, onClose }: NotificationPopupPr
                 {actions.map((action, index) => (
                   <Button
                     key={index}
+                    className="text-xs"
+                    color={action.color || "primary"}
                     size="sm"
                     variant={action.variant || "solid"}
-                    color={action.color || "primary"}
                     onPress={action.action}
-                    className="text-xs"
                   >
                     {action.label}
                   </Button>
@@ -342,10 +447,10 @@ export function NotificationPopup({ notification, onClose }: NotificationPopupPr
           {/* Close button */}
           {showCloseButton && (
             <button
-              onClick={onClose}
               className="flex-shrink-0 p-1 hover:bg-black/5 rounded transition-colors"
+              onClick={onClose}
             >
-              <Icon icon="lucide:x" className="w-4 h-4" />
+              <Icon className="w-4 h-4" icon="lucide:x" />
             </button>
           )}
         </div>
@@ -355,13 +460,13 @@ export function NotificationPopup({ notification, onClose }: NotificationPopupPr
 }
 
 // Modal notification component (for important notifications)
-export function NotificationModal({ 
-  isOpen, 
-  onClose, 
-  type = "info", 
-  title, 
-  message, 
-  onConfirm, 
+export function NotificationModal({
+  isOpen,
+  onClose,
+  type = "info",
+  title,
+  message,
+  onConfirm,
   onCancel,
   confirmText = "Xác nhận",
   cancelText = "Hủy",
@@ -423,13 +528,17 @@ export function NotificationModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} size="md" onClose={onClose}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <Icon
+              className={cn(
+                "w-6 h-6",
+                getColor(),
+                type === "loading" && "animate-spin",
+              )}
               icon={getIcon()}
-              className={cn("w-6 h-6", getColor(), type === "loading" && "animate-spin")}
             />
             <span className="text-lg font-semibold">{title}</span>
           </div>
@@ -445,8 +554,8 @@ export function NotificationModal({
           )}
           <Button
             color={type === "error" ? "danger" : "primary"}
-            onPress={handleConfirm}
             isLoading={type === "loading"}
+            onPress={handleConfirm}
           >
             {confirmText}
           </Button>
@@ -462,7 +571,9 @@ export const notificationUtils = {
    * Tạo notification từ API error
    */
   createErrorFromApi: (error: any): Omit<Notification, "id"> => {
-    const message = error?.message || error?.error || "Đã xảy ra lỗi không xác định";
+    const message =
+      error?.message || error?.error || "Đã xảy ra lỗi không xác định";
+
     return {
       type: "error",
       title: "Lỗi",
@@ -489,7 +600,7 @@ export const notificationUtils = {
     title: string,
     message: string,
     onConfirm: () => void,
-    onCancel?: () => void
+    onCancel?: () => void,
   ): Omit<Notification, "id"> => {
     return {
       type: "warning",

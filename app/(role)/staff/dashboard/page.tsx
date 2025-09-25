@@ -7,7 +7,7 @@ import { Icon } from "@iconify/react";
 export default function StaffDashboard() {
   const stats = [
     {
-      title: "Today's Appointments",
+      title: "Today&apos;s Appointments",
       value: "12",
       icon: "lucide:calendar",
       color: "text-blue-600",
@@ -177,7 +177,7 @@ export default function StaffDashboard() {
         </Card>
       </div>
 
-      {/* Today's Schedule */}
+      {/* Today&apos;s Schedule */}
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold">Today&apos;s Schedule</h3>
