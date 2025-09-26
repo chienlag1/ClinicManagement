@@ -43,6 +43,7 @@ export default function MedicineManager() {
   const fetchMedicines = async () => {
     try {
       const res = await axios.get("/api/medicines");
+
       setMedicines(res.data);
     } catch (error) {
       console.error("Failed to fetch medicines", error);
@@ -58,17 +59,20 @@ export default function MedicineManager() {
       !newMedicine.unit
     ) {
       alert("Please fill all fields!");
+
       return;
     }
 
     try {
       if (editingId) {
         const res = await axios.put(`/api/medicines/${editingId}`, newMedicine);
+
         setMedicines(
           medicines.map((m) => (m._id === editingId ? res.data : m))
         );
       } else {
         const res = await axios.post("/api/medicines", newMedicine);
+
         setMedicines([...medicines, res.data]);
       }
 
@@ -123,6 +127,7 @@ export default function MedicineManager() {
     <div className="space-y-6">
       <div className="flex justify-end">
         <button
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           onClick={() => {
             setEditingId(null);
             setNewMedicine({
@@ -134,9 +139,8 @@ export default function MedicineManager() {
             });
             setIsOpen(true);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          <Icon icon="lucide:plus-circle" className="w-5 h-5" />
+          <Icon className="w-5 h-5" icon="lucide:plus-circle" />
           Add Medicine
         </button>
       </div>
@@ -175,16 +179,16 @@ export default function MedicineManager() {
                   <td className="p-3">{med.unit}</td>
                   <td className="p-3 text-center flex justify-center gap-2">
                     <button
-                      onClick={() => handleEdit(med)}
                       className="text-blue-600 hover:text-blue-800"
+                      onClick={() => handleEdit(med)}
                     >
-                      <Icon icon="lucide:edit" className="w-5 h-5" />
+                      <Icon className="w-5 h-5" icon="lucide:edit" />
                     </button>
                     <button
-                      onClick={() => handleDelete(med._id)}
                       className="text-red-600 hover:text-red-800"
+                      onClick={() => handleDelete(med._id)}
                     >
-                      <Icon icon="lucide:trash-2" className="w-5 h-5" />
+                      <Icon className="w-5 h-5" icon="lucide:trash-2" />
                     </button>
                   </td>
                 </tr>
@@ -204,14 +208,20 @@ export default function MedicineManager() {
               label="Code"
               value={newMedicine.medicine_code}
               onChange={(e) =>
-                setNewMedicine({ ...newMedicine, medicine_code: e.target.value })
+                setNewMedicine({
+                  ...newMedicine,
+                  medicine_code: e.target.value,
+                })
               }
             />
             <Input
               label="Name"
               value={newMedicine.medicine_name}
               onChange={(e) =>
-                setNewMedicine({ ...newMedicine, medicine_name: e.target.value })
+                setNewMedicine({
+                  ...newMedicine,
+                  medicine_name: e.target.value,
+                })
               }
             />
             <Input
