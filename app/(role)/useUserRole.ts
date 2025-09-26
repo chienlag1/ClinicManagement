@@ -5,8 +5,19 @@ export function useUserRole() {
   const { userId, isSignedIn, isLoaded } = useAuth();
   const [role, setRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
+    // Only run on client side after mounting
+    if (!isMounted) {
+      return;
+    }
+
     // Wait for Clerk to load first
     if (!isLoaded) {
       return;
@@ -36,7 +47,7 @@ export function useUserRole() {
     }
 
     fetchRole();
-  }, [userId, isSignedIn, isLoaded]);
+  }, [userId, isSignedIn, isLoaded, isMounted]);
 
   return { role, isLoading };
 }
