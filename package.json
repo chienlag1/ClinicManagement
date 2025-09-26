@@ -35,6 +35,7 @@
     "@heroui/popover": "2.3.26",
     "@heroui/progress": "2.2.21",
     "@heroui/radio": "2.3.26",
+    "@heroui/react": "^2.8.4",
     "@heroui/react-utils": "2.1.13",
     "@heroui/scroll-shadow": "2.3.17",
     "@heroui/select": "2.4.27",
