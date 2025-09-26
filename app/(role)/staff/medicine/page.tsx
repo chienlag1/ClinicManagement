@@ -9,9 +9,10 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@heroui/react";
+} from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 import axios from "axios";
 
 interface Medicine {
@@ -33,7 +34,7 @@ export default function MedicineManager() {
     unit: "",
   });
   const [isOpen, setIsOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null); // ✅ track editing
+  const [editingId, setEditingId] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -224,13 +225,21 @@ export default function MedicineManager() {
                 })
               }
             />
-            <Input
+
+
+            <Select
               label="Type"
-              value={newMedicine.type}
+              selectedKeys={[newMedicine.type]}
               onChange={(e) =>
                 setNewMedicine({ ...newMedicine, type: e.target.value })
               }
-            />
+            >
+              <SelectItem key="kháng sinh">Kháng sinh</SelectItem>
+              <SelectItem key="an thần">An thần</SelectItem>
+              <SelectItem key="vitamin">Vitamin</SelectItem>
+              <SelectItem key="thuốc giảm đau">Thuốc giảm đau</SelectItem>
+            </Select>
+
             <Input
               type="number"
               label="Price"
@@ -242,13 +251,20 @@ export default function MedicineManager() {
                 })
               }
             />
-            <Input
-              label="Unit (Viên/Hộp/Chai)"
-              value={newMedicine.unit}
+
+
+            <Select
+              label="Unit"
+              selectedKeys={[newMedicine.unit]}
               onChange={(e) =>
                 setNewMedicine({ ...newMedicine, unit: e.target.value })
               }
-            />
+            >
+              <SelectItem key="viên">Viên</SelectItem>
+              <SelectItem key="hộp">Hộp</SelectItem>
+              <SelectItem key="chai">Chai</SelectItem>
+              <SelectItem key="ống">Ống</SelectItem>
+            </Select>
           </ModalBody>
           <ModalFooter>
             <Button variant="flat" onClick={() => setIsOpen(false)}>
