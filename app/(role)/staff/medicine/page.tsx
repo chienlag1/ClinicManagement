@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardBody } from "@heroui/card";
 import { Icon } from "@iconify/react";
 import {
@@ -9,12 +9,13 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Button,
-  Input,
 } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import axios from "axios";
 
 interface Medicine {
-  id: number;
+  _id?: string; // Mongo ID
   medicine_code: string;
   medicine_name: string;
   type: string;
@@ -23,76 +24,88 @@ interface Medicine {
 }
 
 export default function MedicineManager() {
-  const [medicines, setMedicines] = useState<Medicine[]>([
-    {
-      id: 1,
-      medicine_code: "MED001",
-      medicine_name: "Paracetamol 500mg",
-      type: "Thuốc giảm đau",
-      price: 15000,
-      unit: "Viên",
-    },
-    {
-      id: 2,
-      medicine_code: "MED002",
-      medicine_name: "Amoxicillin 250mg",
-      type: "Kháng sinh",
-      price: 25000,
-      unit: "Viên",
-    },
-    {
-      id: 3,
-      medicine_code: "MED003",
-      medicine_name: "Vitamin C 1000mg",
-      type: "Vitamin",
-      price: 8000,
-      unit: "Viên",
-    },
-  ]);
-
-  const [newMedicine, setNewMedicine] = useState<Omit<Medicine, "id">>({
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [newMedicine, setNewMedicine] = useState<Medicine>({
     medicine_code: "",
     medicine_name: "",
     type: "",
     price: 0,
     unit: "",
   });
-
   const [isOpen, setIsOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null); // ✅ track editing
 
-  const handleAddMedicine = () => {
+
+  useEffect(() => {
+    fetchMedicines();
+  }, []);
+
+  const fetchMedicines = async () => {
+    try {
+      const res = await axios.get("/api/medicines");
+      setMedicines(res.data);
+    } catch (error) {
+      console.error("Failed to fetch medicines", error);
+    }
+  };
+
+
+  const handleSaveMedicine = async () => {
     if (
       !newMedicine.medicine_code ||
       !newMedicine.medicine_name ||
       !newMedicine.type ||
       !newMedicine.unit
     ) {
-      alert("Vui lòng nhập đầy đủ thông tin!");
+      alert("Please fill all fields!");
       return;
     }
 
-    const newItem: Medicine = {
-      id: medicines.length + 1,
-      ...newMedicine,
-    };
-    setMedicines([...medicines, newItem]);
-    setNewMedicine({
-      medicine_code: "",
-      medicine_name: "",
-      type: "",
-      price: 0,
-      unit: "",
-    });
-    setIsOpen(false);
-  };
+    try {
+      if (editingId) {
+        const res = await axios.put(`/api/medicines/${editingId}`, newMedicine);
+        setMedicines(
+          medicines.map((m) => (m._id === editingId ? res.data : m))
+        );
+      } else {
+        const res = await axios.post("/api/medicines", newMedicine);
+        setMedicines([...medicines, res.data]);
+      }
 
-  const handleDelete = (id: number) => {
-    if (confirm("Bạn có chắc chắn muốn xóa thuốc này?")) {
-      setMedicines(medicines.filter((m) => m.id !== id));
+      setNewMedicine({
+        medicine_code: "",
+        medicine_name: "",
+        type: "",
+        price: 0,
+        unit: "",
+      });
+      setEditingId(null);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Failed to save medicine", error);
     }
   };
 
-  // Gắn màu tag theo loại thuốc
+  const handleDelete = async (id?: string) => {
+    if (!id) return;
+    if (confirm("Are you sure you want to delete this medicine?")) {
+      try {
+        await axios.delete(`/api/medicines/${id}`);
+        setMedicines(medicines.filter((m) => m._id !== id));
+      } catch (error) {
+        console.error("Failed to delete medicine", error);
+      }
+    }
+  };
+
+
+  const handleEdit = (med: Medicine) => {
+    setNewMedicine(med);
+    setEditingId(med._id || null);
+    setIsOpen(true);
+  };
+
+
   const getTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
       case "thuốc giảm đau":
@@ -108,37 +121,45 @@ export default function MedicineManager() {
 
   return (
     <div className="space-y-6">
-      {/* Nút thêm thuốc */}
       <div className="flex justify-end">
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            setEditingId(null);
+            setNewMedicine({
+              medicine_code: "",
+              medicine_name: "",
+              type: "",
+              price: 0,
+              unit: "",
+            });
+            setIsOpen(true);
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <Icon icon="lucide:plus-circle" className="w-5 h-5" />
-          Thêm thuốc mới
+          Add Medicine
         </button>
       </div>
 
-      {/* Danh sách thuốc */}
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold">Danh sách thuốc</h3>
+          <h3 className="text-lg font-semibold">Medicine List</h3>
         </CardHeader>
         <CardBody>
           <table className="w-full border border-gray-200 text-sm">
             <thead className="bg-gray-50 text-gray-700">
               <tr>
-                <th className="p-3 text-left">Mã thuốc</th>
-                <th className="p-3 text-left">Tên thuốc</th>
-                <th className="p-3 text-left">Loại thuốc</th>
-                <th className="p-3 text-left">Giá</th>
-                <th className="p-3 text-left">Đơn vị</th>
-                <th className="p-3 text-center">Thao tác</th>
+                <th className="p-3 text-left">Code</th>
+                <th className="p-3 text-left">Name</th>
+                <th className="p-3 text-left">Type</th>
+                <th className="p-3 text-left">Price</th>
+                <th className="p-3 text-left">Unit</th>
+                <th className="p-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {medicines.map((med) => (
-                <tr key={med.id} className="border-t hover:bg-gray-50">
+                <tr key={med._id} className="border-t hover:bg-gray-50">
                   <td className="p-3">{med.medicine_code}</td>
                   <td className="p-3">{med.medicine_name}</td>
                   <td className="p-3">
@@ -153,11 +174,14 @@ export default function MedicineManager() {
                   <td className="p-3">{med.price.toLocaleString()} VND</td>
                   <td className="p-3">{med.unit}</td>
                   <td className="p-3 text-center flex justify-center gap-2">
-                    <button className="text-blue-600 hover:text-blue-800">
+                    <button
+                      onClick={() => handleEdit(med)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       <Icon icon="lucide:edit" className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(med.id)}
+                      onClick={() => handleDelete(med._id)}
                       className="text-red-600 hover:text-red-800"
                     >
                       <Icon icon="lucide:trash-2" className="w-5 h-5" />
@@ -170,27 +194,28 @@ export default function MedicineManager() {
         </CardBody>
       </Card>
 
-      {/* Modal thêm thuốc */}
       <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
         <ModalContent>
-          <ModalHeader>Thêm thuốc mới</ModalHeader>
+          <ModalHeader>
+            {editingId ? "Edit Medicine" : "Add New Medicine"}
+          </ModalHeader>
           <ModalBody>
             <Input
-              label="Mã thuốc"
+              label="Code"
               value={newMedicine.medicine_code}
               onChange={(e) =>
                 setNewMedicine({ ...newMedicine, medicine_code: e.target.value })
               }
             />
             <Input
-              label="Tên thuốc"
+              label="Name"
               value={newMedicine.medicine_name}
               onChange={(e) =>
                 setNewMedicine({ ...newMedicine, medicine_name: e.target.value })
               }
             />
             <Input
-              label="Loại thuốc"
+              label="Type"
               value={newMedicine.type}
               onChange={(e) =>
                 setNewMedicine({ ...newMedicine, type: e.target.value })
@@ -198,7 +223,7 @@ export default function MedicineManager() {
             />
             <Input
               type="number"
-              label="Giá"
+              label="Price"
               value={newMedicine.price.toString()}
               onChange={(e) =>
                 setNewMedicine({
@@ -208,7 +233,7 @@ export default function MedicineManager() {
               }
             />
             <Input
-              label="Đơn vị (Viên/Hộp/Chai)"
+              label="Unit (Viên/Hộp/Chai)"
               value={newMedicine.unit}
               onChange={(e) =>
                 setNewMedicine({ ...newMedicine, unit: e.target.value })
@@ -217,10 +242,10 @@ export default function MedicineManager() {
           </ModalBody>
           <ModalFooter>
             <Button variant="flat" onClick={() => setIsOpen(false)}>
-              Hủy
+              Cancel
             </Button>
-            <Button color="primary" onClick={handleAddMedicine}>
-              Lưu
+            <Button color="primary" onClick={handleSaveMedicine}>
+              {editingId ? "Update" : "Save"}
             </Button>
           </ModalFooter>
         </ModalContent>
