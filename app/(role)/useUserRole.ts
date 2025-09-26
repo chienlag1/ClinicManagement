@@ -2,22 +2,41 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
 export function useUserRole() {
-  const { userId, isSignedIn } = useAuth();
+  const { userId, isSignedIn, isLoaded } = useAuth();
   const [role, setRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Wait for Clerk to load first
+    if (!isLoaded) {
+      return;
+    }
+
     async function fetchRole() {
-      if (!userId) return;
-      const res = await fetch("/api/role", { cache: "no-store" });
+      if (!userId || !isSignedIn) {
+        setIsLoading(false);
+        return;
+      }
 
-      if (res.ok) {
-        const data = await res.json();
+      try {
+        const res = await fetch("/api/role", { cache: "no-store" });
 
-        setRole(data.role);
+        if (res.ok) {
+          const data = await res.json();
+          console.log("Role fetched:", data.role); // Debug log
+          setRole(data.role);
+        } else {
+          console.error("Failed to fetch role, status:", res.status);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user role:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
-    if (isSignedIn) fetchRole();
-  }, [userId, isSignedIn]);
 
-  return role;
+    fetchRole();
+  }, [userId, isSignedIn, isLoaded]);
+
+  return { role, isLoading };
 }

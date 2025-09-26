@@ -14,17 +14,8 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import axios from "axios";
-
-import { MEDICINE_TYPES, MEDICINE_UNITS } from "@/types";
-
-interface Medicine {
-  _id?: string; // Mongo ID
-  medicine_code: string;
-  medicine_name: string;
-  type: string;
-  price: number;
-  unit: string;
-}
+import Swal from "sweetalert2";
+import { Medicine, MEDICINE_TYPES, MEDICINE_UNITS } from "@/types/medicine";
 
 export default function MedicineManager() {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
@@ -37,7 +28,6 @@ export default function MedicineManager() {
   });
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-
 
   useEffect(() => {
     fetchMedicines();
@@ -53,7 +43,6 @@ export default function MedicineManager() {
     }
   };
 
-
   const handleSaveMedicine = async () => {
     if (
       !newMedicine.medicine_code ||
@@ -61,8 +50,11 @@ export default function MedicineManager() {
       !newMedicine.type ||
       !newMedicine.unit
     ) {
-      alert("Please fill all fields!");
-
+      Swal.fire({
+        title: "Error!",
+        text: "Please fill all fields!",
+        icon: "error",
+      });
       return;
     }
 
@@ -73,10 +65,26 @@ export default function MedicineManager() {
         setMedicines(
           medicines.map((m) => (m._id === editingId ? res.data : m))
         );
+
+        Swal.fire({
+          title: "Updated!",
+          text: "Medicine has been updated successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
       } else {
         const res = await axios.post("/api/medicines", newMedicine);
 
         setMedicines([...medicines, res.data]);
+
+        Swal.fire({
+          title: "Added!",
+          text: "Medicine has been added successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
       }
 
       setNewMedicine({
@@ -90,21 +98,50 @@ export default function MedicineManager() {
       setIsOpen(false);
     } catch (error) {
       console.error("Failed to save medicine", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to save medicine. Please try again.",
+        icon: "error",
+      });
     }
   };
 
   const handleDelete = async (id?: string) => {
     if (!id) return;
-    if (confirm("Are you sure you want to delete this medicine?")) {
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
       try {
         await axios.delete(`/api/medicines/${id}`);
         setMedicines(medicines.filter((m) => m._id !== id));
+
+        Swal.fire({
+          title: "Deleted!",
+          text: "Medicine has been deleted.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
       } catch (error) {
         console.error("Failed to delete medicine", error);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to delete medicine. Please try again.",
+          icon: "error",
+        });
       }
     }
   };
-
 
   const handleEdit = (med: Medicine) => {
     setNewMedicine(med);
@@ -112,10 +149,14 @@ export default function MedicineManager() {
     setIsOpen(true);
   };
 
-
   const getTypeColor = (type: string) => {
     const found = MEDICINE_TYPES.find((t) => t.key === type.toLowerCase());
     return found ? found.color : "bg-gray-100 text-gray-600";
+  };
+
+  const getTypeLabel = (type: string) => {
+    const found = MEDICINE_TYPES.find((t) => t.key === type.toLowerCase());
+    return found ? found.label : type;
   };
 
   return (
@@ -167,7 +208,7 @@ export default function MedicineManager() {
                         med.type
                       )}`}
                     >
-                      {med.type}
+                      {getTypeLabel(med.type)}
                     </span>
                   </td>
                   <td className="p-3">{med.price.toLocaleString()} VND</td>
@@ -220,7 +261,6 @@ export default function MedicineManager() {
               }
             />
 
-
             <Select
               label="Type"
               selectedKeys={[newMedicine.type]}
@@ -244,7 +284,6 @@ export default function MedicineManager() {
                 })
               }
             />
-
 
             <Select
               label="Unit"
