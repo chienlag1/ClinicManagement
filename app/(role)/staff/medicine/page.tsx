@@ -15,6 +15,8 @@ import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import axios from "axios";
 
+import { MEDICINE_TYPES, MEDICINE_UNITS } from "@/types";
+
 interface Medicine {
   _id?: string; // Mongo ID
   medicine_code: string;
@@ -112,16 +114,8 @@ export default function MedicineManager() {
 
 
   const getTypeColor = (type: string) => {
-    switch (type.toLowerCase()) {
-      case "thuốc giảm đau":
-        return "bg-blue-100 text-blue-600";
-      case "kháng sinh":
-        return "bg-green-100 text-green-600";
-      case "vitamin":
-        return "bg-yellow-100 text-yellow-700";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
+    const found = MEDICINE_TYPES.find((t) => t.key === type.toLowerCase());
+    return found ? found.color : "bg-gray-100 text-gray-600";
   };
 
   return (
@@ -234,15 +228,14 @@ export default function MedicineManager() {
                 setNewMedicine({ ...newMedicine, type: e.target.value })
               }
             >
-              <SelectItem key="kháng sinh">Kháng sinh</SelectItem>
-              <SelectItem key="an thần">An thần</SelectItem>
-              <SelectItem key="vitamin">Vitamin</SelectItem>
-              <SelectItem key="thuốc giảm đau">Thuốc giảm đau</SelectItem>
+              {MEDICINE_TYPES.map((t) => (
+                <SelectItem key={t.key}>{t.label}</SelectItem>
+              ))}
             </Select>
 
             <Input
-              type="number"
               label="Price"
+              type="number"
               value={newMedicine.price.toString()}
               onChange={(e) =>
                 setNewMedicine({
@@ -260,10 +253,9 @@ export default function MedicineManager() {
                 setNewMedicine({ ...newMedicine, unit: e.target.value })
               }
             >
-              <SelectItem key="viên">Viên</SelectItem>
-              <SelectItem key="hộp">Hộp</SelectItem>
-              <SelectItem key="chai">Chai</SelectItem>
-              <SelectItem key="ống">Ống</SelectItem>
+              {MEDICINE_UNITS.map((u) => (
+                <SelectItem key={u.key}>{u.label}</SelectItem>
+              ))}
             </Select>
           </ModalBody>
           <ModalFooter>
