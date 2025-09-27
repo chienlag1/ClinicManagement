@@ -21,7 +21,7 @@ export default function RoleSyncPage() {
           setCurrentRole(data.role);
         }
       } catch {
-        // console.error("Error fetching role:", error);
+        // Error fetching role - handled by UI state
       }
     }
     if (isSignedIn) fetchRole();

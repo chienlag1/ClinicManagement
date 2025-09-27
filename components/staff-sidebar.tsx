@@ -24,18 +24,12 @@ type NavSection = {
 export const StaffSidebar = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const [activeItem, setActiveItem] = React.useState("dashboard");
-  // const { signOut } = useAuth();
   const { user } = useUser();
   const router = useRouter();
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
-  // const handleLogout = async () => {
-  //   await signOut();
-  //   router.push("/sign-in");
-  // };
 
   const navigation: NavSection[] = [
     {
@@ -77,6 +71,11 @@ export const StaffSidebar = () => {
           label: "Billing",
           icon: "lucide:credit-card",
           href: "/staff/billing",
+        },
+         {
+          label: "Medicine Manager",
+          icon: "lucide:box",
+          href: "/staff/medicine",
         },
       ],
     },

@@ -24,18 +24,12 @@ type NavSection = {
 export const DoctorSidebar = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const [activeItem, setActiveItem] = React.useState("dashboard");
-  // const { signOut } = useAuth();
   const { user } = useUser();
   const router = useRouter();
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
-  // const handleLogout = async () => {
-  //   await signOut();
-  //   router.push("/sign-in");
-  // };
 
   const navigation: NavSection[] = [
     {

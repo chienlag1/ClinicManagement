@@ -32,11 +32,7 @@ export async function POST() {
     const clerkData = await clerkUser.json();
     const role = clerkData.public_metadata?.role || "user";
 
-    // console.log("[Sync Role] Syncing user role:", {
-    //   userId,
-    //   role,
-    //   publicMetadata: clerkData.public_metadata,
-    // });
+    // Syncing user role from Clerk metadata
 
     // Cập nhật role trong database
     const updatedUser = await User.findOneAndUpdate(
@@ -51,7 +47,7 @@ export async function POST() {
       message: "Role synced successfully",
     });
   } catch {
-    // console.error("[Sync Role] Error:", error);
+    // Error syncing role - return error response
 
     return NextResponse.json(
       { error: "Internal server error" },
@@ -79,7 +75,7 @@ export async function GET() {
     });
 
     if (!clerkUser.ok) {
-      // console.error("[Sync Role] Clerk API error:", await clerkUser.text());
+      // Clerk API error - return error response
 
       return NextResponse.json(
         { error: "Failed to fetch user from Clerk" },
@@ -90,21 +86,13 @@ export async function GET() {
     const clerkData = await clerkUser.json();
     const clerkRole = clerkData.public_metadata?.role || "user";
 
-    // console.log("[Sync Role] Clerk data:", {
-    //   userId,
-    //   clerkRole,
-    //   publicMetadata: clerkData.public_metadata,
-    // });
+    // Clerk data retrieved successfully
 
     // Lấy role từ database
     const dbUser = await User.findOne({ clerkUserId: userId });
     const dbRole = dbUser?.role || "user";
 
-    // console.log("[Sync Role] Database data:", {
-    //   userId,
-    //   dbRole,
-    //   userExists: !!dbUser,
-    // });
+    // Database data retrieved successfully
 
     return NextResponse.json({
       clerkRole,
@@ -114,7 +102,7 @@ export async function GET() {
       userExists: !!dbUser,
     });
   } catch {
-    // console.error("[Sync Role] Error:", error);
+    // Error syncing role - return error response
 
     return NextResponse.json(
       { error: "Internal server error" },

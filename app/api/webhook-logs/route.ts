@@ -71,7 +71,7 @@ export async function GET() {
       },
     });
   } catch {
-    // console.error("[Webhook Logs] Error:", error);
+    // Error fetching webhook logs
 
     return NextResponse.json(
       { error: "Internal server error" },
