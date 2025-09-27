@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { useUserRole } from "./useUserRole";
 
 import { Navbar } from "@/components/navbar";
+import { Spinner } from "@heroui/spinner";
 const StaffLayout = dynamic(() => import("./staff-layout"));
 const DoctorLayout = dynamic(() => import("./doctor-layout"));
 
@@ -15,7 +16,19 @@ export function AuthAwareChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuth =
     pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up");
-  const role = useUserRole();
+  const { role, isLoading } = useUserRole();
+
+  // Show loading spinner while determining user role or auth state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <Spinner size="lg" color="primary" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isAuth) {
     return (
@@ -27,11 +40,17 @@ export function AuthAwareChrome({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Debug log
+  console.log("Current role:", role, "isLoading:", isLoading);
+
   if (role === "staff") {
     return <StaffLayout>{children}</StaffLayout>;
   }
   if (role === "doctor") {
     return <DoctorLayout>{children}</DoctorLayout>;
+  }
+  if (role === "admin") {
+    return <StaffLayout>{children}</StaffLayout>; // Admin uses staff layout for now
   }
 
   return (

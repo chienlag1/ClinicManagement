@@ -72,6 +72,11 @@ export const StaffSidebar = () => {
           icon: "lucide:credit-card",
           href: "/staff/billing",
         },
+         {
+          label: "Medicine Manager",
+          icon: "lucide:box",
+          href: "/staff/medicine",
+        },
       ],
     },
     {
