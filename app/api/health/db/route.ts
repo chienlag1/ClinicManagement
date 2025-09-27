@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-import { NextResponse } from "next/server";
+import mongoose from 'mongoose';
+import { NextResponse } from 'next/server';
 
-import { connectMongo } from "@/lib/mongodb";
+import { connectMongo } from '@/lib/mongodb';
 
 export async function GET() {
   try {
@@ -12,10 +12,10 @@ export async function GET() {
   } catch (error: unknown) {
     return NextResponse.json(
       { connected: false, error: (error as Error).message },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';

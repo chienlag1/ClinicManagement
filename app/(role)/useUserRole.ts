@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useEffect, useState } from 'react';
+import { useAuth } from '@clerk/nextjs';
 
 export function useUserRole() {
   const { userId, isSignedIn, isLoaded } = useAuth();
@@ -30,17 +30,18 @@ export function useUserRole() {
       }
 
       try {
-        const res = await fetch("/api/role", { cache: "no-store" });
+        const res = await fetch('/api/role', { cache: 'no-store' });
 
         if (res.ok) {
           const data = await res.json();
-          console.log("Role fetched:", data.role); // Debug log
+
+          // Debug log - removed console.log
           setRole(data.role);
         } else {
-          console.error("Failed to fetch role, status:", res.status);
+          // Error fetching role - removed console.error
         }
-      } catch (error) {
-        console.error("Failed to fetch user role:", error);
+      } catch {
+        // Error fetching user role - removed console.error
       } finally {
         setIsLoading(false);
       }

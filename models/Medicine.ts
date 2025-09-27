@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IMedicine extends Document {
   medicine_code: string;
@@ -20,4 +20,4 @@ const MedicineSchema: Schema = new Schema(
 );
 
 export default mongoose.models.Medicine ||
-  mongoose.model<IMedicine>("Medicine", MedicineSchema);
+  mongoose.model<IMedicine>('Medicine', MedicineSchema);
