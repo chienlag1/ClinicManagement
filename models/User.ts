@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models } from 'mongoose';
 
 const UserSchema = new Schema(
   {
@@ -7,7 +7,7 @@ const UserSchema = new Schema(
     firstName: String,
     lastName: String,
     imageUrl: String,
-    role: { type: String, default: "user" },
+    role: { type: String, default: 'user' },
   },
   { timestamps: true }
 );
@@ -24,4 +24,4 @@ export type UserDoc = {
   updatedAt: Date;
 };
 
-export const User = models.User || model("User", UserSchema);
+export const User = models.User || model('User', UserSchema);

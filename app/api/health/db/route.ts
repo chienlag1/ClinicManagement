@@ -1,11 +1,13 @@
-import mongoose from "mongoose";
-import { NextResponse } from "next/server";
-import { connectMongo } from "@/lib/mongodb";
+import mongoose from 'mongoose';
+import { NextResponse } from 'next/server';
+
+import { connectMongo } from '@/lib/mongodb';
 
 export async function GET() {
   try {
     await connectMongo();
     const readyState = mongoose.connection.readyState; // 1 = connected
+
     return NextResponse.json({ connected: readyState === 1, readyState });
   } catch (error: unknown) {
     return NextResponse.json(
@@ -15,5 +17,5 @@ export async function GET() {
   }
 }
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
