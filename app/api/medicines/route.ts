@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { connectMongo } from "@/lib/mongodb";
-import Medicine from "@/models/Medicine";
+import { connectMongo } from '@/lib/mongodb';
+import Medicine from '@/models/Medicine';
 
 export async function GET() {
   try {
@@ -11,7 +11,7 @@ export async function GET() {
     return NextResponse.json(medicines, { status: 200 });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch medicines" },
+      { error: 'Failed to fetch medicines' },
       { status: 500 }
     );
   }
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     return NextResponse.json(newMed, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to create medicine" },
+      { error: 'Failed to create medicine' },
       { status: 500 }
     );
   }
@@ -36,11 +36,11 @@ export async function DELETE(req: Request) {
   try {
     await connectMongo();
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const id = searchParams.get('id');
 
     if (!id) {
       return NextResponse.json(
-        { error: "Medicine ID is required" },
+        { error: 'Medicine ID is required' },
         { status: 400 }
       );
     }
@@ -49,15 +49,15 @@ export async function DELETE(req: Request) {
 
     if (!deleted) {
       return NextResponse.json(
-        { error: "Medicine not found" },
+        { error: 'Medicine not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ message: "Medicine deleted successfully" });
+    return NextResponse.json({ message: 'Medicine deleted successfully' });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete medicine" },
+      { error: 'Failed to delete medicine' },
       { status: 500 }
     );
   }

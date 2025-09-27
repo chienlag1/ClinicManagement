@@ -1,5 +1,5 @@
 // lib/mongodb.ts
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 declare global {
   var mongooseConn:
@@ -11,7 +11,7 @@ export async function connectMongo() {
   if (global.mongooseConn?.conn) return global.mongooseConn.conn;
 
   if (!process.env.MONGODB_URI) {
-    throw new Error("Missing MONGODB_URI");
+    throw new Error('Missing MONGODB_URI');
   }
 
   if (!global.mongooseConn) {
@@ -20,7 +20,7 @@ export async function connectMongo() {
 
   if (!global.mongooseConn.promise) {
     global.mongooseConn.promise = mongoose.connect(process.env.MONGODB_URI, {
-      dbName: "clinic",
+      dbName: 'clinic',
       // gợi ý thêm:
       // bufferCommands: false,
       // maxPoolSize: 10,
