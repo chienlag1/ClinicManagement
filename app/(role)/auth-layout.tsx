@@ -49,9 +49,6 @@ export function AuthAwareChrome({ children }: { children: React.ReactNode }) {
   if (role === "doctor") {
     return <DoctorLayout>{children}</DoctorLayout>;
   }
-  if (role === "admin") {
-    return <StaffLayout>{children}</StaffLayout>; // Admin uses staff layout for now
-  }
 
   return (
     <div className="relative flex flex-col h-screen">
