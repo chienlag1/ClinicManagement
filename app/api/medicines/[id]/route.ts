@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import Medicine from "@/models/Medicine";
-import { connectMongo } from "@/lib/mongodb";
-
+import Medicine from '@/models/Medicine';
+import { connectMongo } from '@/lib/mongodb';
 
 export async function GET(
   req: Request,
@@ -14,12 +13,11 @@ export async function GET(
   const medicine = await Medicine.findById(id);
 
   if (!medicine) {
-    return NextResponse.json({ error: "Medicine not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Medicine not found' }, { status: 404 });
   }
 
   return NextResponse.json(medicine);
 }
-
 
 export async function PUT(
   req: Request,
@@ -32,12 +30,11 @@ export async function PUT(
   const updated = await Medicine.findByIdAndUpdate(id, data, { new: true });
 
   if (!updated) {
-    return NextResponse.json({ error: "Medicine not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Medicine not found' }, { status: 404 });
   }
 
   return NextResponse.json(updated);
 }
-
 
 export async function DELETE(
   req: Request,
@@ -49,8 +46,8 @@ export async function DELETE(
   const deleted = await Medicine.findByIdAndDelete(id);
 
   if (!deleted) {
-    return NextResponse.json({ error: "Medicine not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Medicine not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ message: "Medicine deleted" });
+  return NextResponse.json({ message: 'Medicine deleted' });
 }
