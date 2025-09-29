@@ -39,7 +39,11 @@ export const StaffSidebar = () => {
           icon: 'lucide:layout-dashboard',
           href: '/staff/dashboard',
         },
-        { label: 'Patients', icon: 'lucide:users', href: '/staff/patients' },
+        {
+          label: 'Patients',
+          icon: 'lucide:users',
+          href: '/staff/patient-manager',
+        },
         {
           label: 'Appointments',
           icon: 'lucide:calendar',
@@ -63,6 +67,11 @@ export const StaffSidebar = () => {
           href: '/staff/prescriptions',
         },
         {
+          label: 'Patient Manager',
+          icon: 'lucide:users',
+          href: '/staff/patient-manager',
+        },
+        {
           label: 'Lab Results',
           icon: 'lucide:flask',
           href: '/staff/lab-results',
@@ -75,7 +84,7 @@ export const StaffSidebar = () => {
         {
           label: 'Medicine Manager',
           icon: 'lucide:box',
-          href: '/staff/medicine',
+          href: '/staff/medicine-manager',
         },
       ],
     },
