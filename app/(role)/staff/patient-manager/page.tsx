@@ -1,425 +1,249 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Icon } from '@iconify/react';
-import { Card, CardHeader, CardBody } from '@heroui/card';
-import { Button } from '@heroui/button';
-import { Input } from '@heroui/input';
-import { Select, SelectItem } from '@heroui/select';
+import dayjs from 'dayjs';
+
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@heroui/modal';
-import { Spinner } from '@heroui/spinner';
-import { Pagination, usePagination } from '@/components/pagination';
-import { useNotification } from '@/components/notification-popup';
+  CRUDTemplate,
+  CRUDModal,
+  useCRUD,
+  crudUtils,
+  CRUDColumn,
+  CRUDField,
+} from '@/components/crud-template';
+import { NotificationModal } from '@/components/notification-popup';
 
-type Gender = 'male' | 'female';
-
-type Patient = {
+// Kiểu dữ liệu patient (khớp với model Patient)
+export interface Patient {
   _id?: string;
   name: string;
-  gender: Gender;
-  birth_date: string; // ISO string for client form handling
+  gender: 'male' | 'female';
+  birth_date: string; // dùng string để binding form
   phone: string;
   address: string;
-};
+  createdAt?: string;
+  updatedAt?: string;
+}
 
-type ListResponse = {
-  items: Patient[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-};
+const GENDER_OPTIONS = [
+  { key: 'male', label: 'Nam' },
+  { key: 'female', label: 'Nữ' },
+];
 
-export default function PatientManagerPage() {
+export default function PatientManagerNew() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // query states
-  const [search, setSearch] = useState('');
-  const [gender, setGender] = useState<'all' | Gender>('all');
   const {
-    currentPage,
-    itemsPerPage,
-    handlePageChange,
-    handleItemsPerPageChange,
-  } = usePagination();
+    data,
+    filteredData,
+    setFilteredData,
+    searchTerm,
+    setSearchTerm,
+    filterValue,
+    setFilterValue,
+    isModalOpen,
+    setIsModalOpen,
+    editingItem,
+    showDeleteModal,
+    setShowDeleteModal,
+    deletingItem,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    showSuccess,
+    showError,
+  } = useCRUD<Patient>(patients);
 
-  // pagination info
-  const [total, setTotal] = useState(0);
-  const pages = useMemo(
-    () => Math.max(1, Math.ceil(total / itemsPerPage)),
-    [total, itemsPerPage]
-  );
-
-  const { showSuccess, showError, showConfirm } = useNotification();
-
-  // add modal
-  const [isOpen, setIsOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<Patient>({
-    name: '',
-    gender: 'male',
-    birth_date: '',
-    phone: '',
-    address: '',
-  });
-
+  // Fetch patients
   useEffect(() => {
     fetchPatients();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, itemsPerPage, gender]);
+  }, []);
+
+  useEffect(() => {
+    setFilteredData(patients);
+  }, [patients, setFilteredData]);
+
+  useEffect(() => {
+    const filtered = crudUtils.filterData(
+      patients,
+      searchTerm,
+      filterValue,
+      ['name', 'phone'],
+      'gender'
+    );
+    setFilteredData(filtered);
+  }, [searchTerm, filterValue, patients, setFilteredData]);
 
   const fetchPatients = async () => {
     try {
       setIsLoading(true);
-      setError(null);
-
-      const params = new URLSearchParams();
-      if (search.trim()) params.set('search', search.trim());
-      if (gender !== 'all') params.set('gender', gender);
-      params.set('page', String(currentPage));
-      params.set('limit', String(itemsPerPage));
-
-      const res = await axios.get<ListResponse>(
-        `/api/patients?${params.toString()}`
-      );
-      setPatients(res.data.items);
-      setTotal(res.data.total);
-    } catch (e) {
-      setError('Không thể tải danh sách bệnh nhân. Vui lòng thử lại.');
-      showError('Lỗi!', 'Không thể tải danh sách bệnh nhân');
+      const res = await axios.get('/api/patients');
+      setPatients(res.data.items || res.data); // API patients trả về {items, total} → lấy items
+    } catch {
+      showError('Lỗi', 'Không thể tải danh sách bệnh nhân.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSearch = async () => {
-    handlePageChange(1);
-    await fetchPatients();
-  };
-
-  const clearSearch = async () => {
-    setSearch('');
-    handlePageChange(1);
-    await fetchPatients();
-  };
-
-  const handleAdd = () => {
-    setForm({
-      name: '',
-      gender: 'male',
-      birth_date: '',
-      phone: '',
-      address: '',
-    });
-    setEditingId(null);
-    setIsOpen(true);
-  };
-
-  const handleSave = async () => {
-    if (
-      !form.name ||
-      !form.gender ||
-      !form.birth_date ||
-      !form.phone ||
-      !form.address
-    ) {
-      setError('Vui lòng điền đầy đủ thông tin bắt buộc.');
-      return;
-    }
-
+  const handleSavePatient = async (patientData: Patient) => {
     try {
       setIsLoading(true);
-      setError(null);
+
       const payload = {
-        ...form,
-        birth_date: new Date(form.birth_date).toISOString(),
+        ...patientData,
+        birth_date: new Date(patientData.birth_date).toISOString(),
       };
-      if (editingId) {
-        const res = await axios.put<Patient>(
-          `/api/patients/${editingId}`,
+
+      if (editingItem) {
+        // Update
+        const res = await axios.put(
+          `/api/patients/${editingItem._id}`,
           payload
         );
-        setPatients(prev =>
-          prev.map(p => (p._id === editingId ? res.data : p))
+        setPatients(
+          patients.map(p => (p._id === editingItem._id ? res.data : p))
         );
-        await fetchPatients();
-        showSuccess('Thành công!', 'Cập nhật bệnh nhân thành công');
+        showSuccess('Thành công', 'Cập nhật bệnh nhân thành công!');
       } else {
-        const res = await axios.post<Patient>('/api/patients', payload);
-        if (currentPage === 1)
-          setPatients(prev => [
-            res.data,
-            ...prev.slice(0, Math.max(0, itemsPerPage - 1)),
-          ]);
-        await fetchPatients();
-        showSuccess('Thành công!', 'Thêm bệnh nhân thành công');
+        // Create
+        const res = await axios.post('/api/patients', payload);
+        setPatients([...patients, res.data]);
+        showSuccess('Thành công', 'Thêm bệnh nhân mới thành công!');
       }
-      setIsOpen(false);
-    } catch (e: any) {
-      if (e?.response?.status === 409) {
-        setError('Số điện thoại đã tồn tại.');
-        showError('Lỗi!', 'Số điện thoại đã tồn tại');
+      setIsModalOpen(false);
+    } catch (err: any) {
+      if (err?.response?.status === 409) {
+        showError('Lỗi', 'Số điện thoại đã tồn tại!');
       } else {
-        setError('Không thể lưu bệnh nhân. Vui lòng thử lại.');
-        showError('Lỗi!', 'Không thể lưu bệnh nhân');
+        showError('Lỗi', 'Không thể lưu bệnh nhân.');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEdit = (p: Patient) => {
-    setForm({
-      _id: p._id,
-      name: p.name,
-      gender: p.gender,
-      birth_date: p.birth_date
-        ? new Date(p.birth_date).toISOString().slice(0, 10)
-        : '',
-      phone: p.phone,
-      address: p.address,
-    });
-    setEditingId(p._id || null);
-    setIsOpen(true);
+  const handleDeletePatient = async () => {
+    if (!deletingItem?._id) return;
+    try {
+      setIsLoading(true);
+      await axios.delete(`/api/patients/${deletingItem._id}`);
+      setPatients(patients.filter(p => p._id !== deletingItem._id));
+      showSuccess('Thành công', 'Xóa bệnh nhân thành công!');
+      setShowDeleteModal(false);
+    } catch {
+      showError('Lỗi', 'Không thể xóa bệnh nhân.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDelete = async (id?: string) => {
-    if (!id) return;
-    showConfirm(
-      'Xác nhận',
-      'Bạn có chắc chắn muốn xóa bệnh nhân này?',
-      async () => {
-        try {
-          setIsLoading(true);
-          await axios.delete(`/api/patients/${id}`);
-          setPatients(prev => prev.filter(p => p._id !== id));
-          await fetchPatients();
-          showSuccess('Thành công!', 'Xóa bệnh nhân thành công');
-        } catch {
-          showError('Lỗi!', 'Không thể xóa bệnh nhân');
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      () => {}
-    );
-  };
+  // Cột hiển thị
+  const columns: CRUDColumn<Patient>[] = [
+    { key: 'name', label: 'Họ tên' },
+    {
+      key: 'gender',
+      label: 'Giới tính',
+      render: value => (value === 'male' ? 'Nam' : 'Nữ'),
+    },
+    {
+      key: 'birth_date',
+      label: 'Ngày sinh',
+      render: value => dayjs(value).format('DD/MM/YYYY'),
+    },
+    { key: 'phone', label: 'Số điện thoại' },
+    { key: 'address', label: 'Địa chỉ' },
+  ];
 
-  const genderLabel = (g: string) =>
-    g === 'male' ? 'Nam' : g === 'female' ? 'Nữ' : g;
+  // Trường form
+  const fields: CRUDField<Patient>[] = [
+    {
+      key: 'name',
+      label: 'Họ tên',
+      type: 'text',
+      placeholder: 'Nhập họ tên',
+      required: true,
+    },
+    {
+      key: 'gender',
+      label: 'Giới tính',
+      type: 'select',
+      required: true,
+      options: GENDER_OPTIONS,
+      placeholder: 'Chọn giới tính',
+    },
+    {
+      key: 'birth_date',
+      label: 'Ngày sinh',
+      type: 'date',
+      required: true,
+    },
+    {
+      key: 'phone',
+      label: 'Số điện thoại',
+      type: 'text',
+      placeholder: 'Nhập số điện thoại',
+      required: true,
+    },
+    {
+      key: 'address',
+      label: 'Địa chỉ',
+      type: 'text',
+      placeholder: 'Nhập địa chỉ',
+      required: true,
+    },
+  ];
 
   return (
-    <div className='space-y-6'>
-      <div className='flex justify-between items-center'>
-        <h2 className='text-3xl font-bold mb-6 text-gray-800'>
-          Quản lý bệnh nhân
-        </h2>
-        <Button
-          color='primary'
-          onClick={handleAdd}
-          startContent={<Icon className='w-5 h-5' icon='lucide:user-plus' />}
-        >
-          Thêm bệnh nhân
-        </Button>
-      </div>
+    <>
+      <CRUDTemplate
+        addButtonText='Thêm bệnh nhân'
+        columns={columns}
+        data={data}
+        description='Quản lý thông tin bệnh nhân'
+        emptyStateIcon='lucide:user'
+        emptyStateMessage='Không tìm thấy bệnh nhân nào'
+        filterOptions={GENDER_OPTIONS}
+        filterPlaceholder='Lọc theo giới tính'
+        filterValue={filterValue}
+        filteredData={filteredData}
+        searchFields={['name', 'phone']}
+        searchPlaceholder='Tìm kiếm bệnh nhân...'
+        searchTerm={searchTerm}
+        setFilterValue={setFilterValue}
+        setSearchTerm={setSearchTerm}
+        title='Quản lý Bệnh nhân'
+        onAdd={handleAdd}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
 
-      <Card>
-        <CardHeader>
-          <div className='flex flex-col md:flex-row md:items-center gap-3 w-full'>
-            <div className='flex-1 flex gap-2 items-center'>
-              <Input
-                size='md'
-                placeholder='Tìm theo tên hoặc số điện thoại'
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                startContent={
-                  <Icon
-                    className='w-4 h-4 text-default-400'
-                    icon='lucide:search'
-                  />
-                }
-              />
-              <Button variant='flat' size='md' onClick={handleSearch}>
-                Tìm
-              </Button>
-              {search && (
-                <Button variant='flat' size='md' onClick={clearSearch}>
-                  Xóa
-                </Button>
-              )}
-            </div>
+      {/* Modal thêm/sửa */}
+      <CRUDModal
+        data={editingItem || ({} as Patient)}
+        fields={fields}
+        isLoading={isLoading}
+        isOpen={isModalOpen}
+        title={editingItem ? 'Chỉnh sửa Bệnh nhân' : 'Thêm Bệnh nhân Mới'}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSavePatient}
+      />
 
-            <div className='flex items-center gap-2'>
-              <Select
-                size='md'
-                className='w-40'
-                label='Giới tính'
-                selectedKeys={[gender]}
-                onChange={e => {
-                  const v = e.target.value as any;
-                  setGender(v === 'male' || v === 'female' ? v : 'all');
-                }}
-              >
-                <SelectItem key='all'>Tất cả</SelectItem>
-                <SelectItem key='male'>Nam</SelectItem>
-                <SelectItem key='female'>Nữ</SelectItem>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardBody>
-          {isLoading ? (
-            <div className='py-10 flex justify-center'>
-              <Spinner />
-            </div>
-          ) : error ? (
-            <div className='text-red-500 text-sm'>{error}</div>
-          ) : (
-            <div className='overflow-x-auto'>
-              <table className='w-full border border-gray-200 text-sm'>
-                <thead className='bg-gray-50 text-gray-700'>
-                  <tr>
-                    <th className='p-3 text-left'>Tên</th>
-                    <th className='p-3 text-left'>Giới tính</th>
-                    <th className='p-3 text-left'>Ngày sinh</th>
-                    <th className='p-3 text-left'>SĐT</th>
-                    <th className='p-3 text-left'>Địa chỉ</th>
-                    <th className='p-3 text-center'>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {patients.map(p => (
-                    <tr key={p._id} className='border-t hover:bg-gray-50'>
-                      <td className='p-3'>{p.name}</td>
-                      <td className='p-3'>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${p.gender === 'male' ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600'}`}
-                        >
-                          {genderLabel(p.gender)}
-                        </span>
-                      </td>
-                      <td className='p-3'>
-                        {p.birth_date
-                          ? new Date(p.birth_date).toLocaleDateString()
-                          : ''}
-                      </td>
-                      <td className='p-3'>{p.phone}</td>
-                      <td className='p-3'>{p.address}</td>
-                      <td className='p-3'>
-                        <div className='flex items-center gap-2 justify-center'>
-                          <Button
-                            size='sm'
-                            variant='flat'
-                            onClick={() => handleEdit(p)}
-                          >
-                            <Icon className='w-4 h-4' icon='lucide:edit' />
-                          </Button>
-                          <Button
-                            size='sm'
-                            color='danger'
-                            variant='flat'
-                            onClick={() => handleDelete(p._id)}
-                          >
-                            <Icon className='w-4 h-4' icon='lucide:trash-2' />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {patients.length === 0 && (
-                    <tr>
-                      <td
-                        className='p-6 text-center text-default-500'
-                        colSpan={6}
-                      >
-                        Không có dữ liệu
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Pagination */}
-          <div className='flex items-center justify-between mt-4'>
-            <div className='text-sm text-default-500'>
-              Tổng: {total} • Trang {currentPage}/{pages}
-            </div>
-            <Pagination
-              totalItems={total}
-              currentPage={currentPage}
-              itemsPerPage={itemsPerPage}
-              onPageChange={handlePageChange}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Add Modal */}
-      <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
-        <ModalContent>
-          <ModalHeader>
-            {editingId ? 'Chỉnh sửa Bệnh Nhân' : 'Thêm Bệnh Nhân'}
-          </ModalHeader>
-          <ModalBody>
-            <Input
-              label='Tên'
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-            />
-            <Select
-              label='Giới tính'
-              selectedKeys={[form.gender]}
-              onChange={e =>
-                setForm({
-                  ...form,
-                  gender: (e.target.value as Gender) || 'male',
-                })
-              }
-            >
-              <SelectItem key='male'>Nam</SelectItem>
-              <SelectItem key='female'>Nữ</SelectItem>
-            </Select>
-            <Input
-              label='Ngày sinh'
-              type='date'
-              value={form.birth_date}
-              onChange={e => setForm({ ...form, birth_date: e.target.value })}
-            />
-            <Input
-              label='Số điện thoại'
-              value={form.phone}
-              onChange={e => setForm({ ...form, phone: e.target.value })}
-            />
-            <Input
-              label='Địa chỉ'
-              value={form.address}
-              onChange={e => setForm({ ...form, address: e.target.value })}
-            />
-            {error && <div className='text-red-500 text-sm'>{error}</div>}
-          </ModalBody>
-          <ModalFooter>
-            <Button variant='flat' onClick={() => setIsOpen(false)}>
-              Hủy
-            </Button>
-            <Button color='primary' isDisabled={isLoading} onClick={handleSave}>
-              {editingId ? 'Cập nhật' : 'Lưu'}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </div>
+      {/* Modal xóa */}
+      <NotificationModal
+        cancelText='Hủy'
+        confirmText='Xóa'
+        isOpen={showDeleteModal}
+        message={`Bạn có chắc muốn xóa bệnh nhân "${deletingItem?.name}" không?`}
+        showCancel={true}
+        title='Xác nhận xóa bệnh nhân'
+        type='error'
+        onCancel={() => setShowDeleteModal(false)}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeletePatient}
+      />
+    </>
   );
 }
