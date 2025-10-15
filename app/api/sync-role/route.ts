@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
-import { connectMongo } from "@/lib/mongodb";
-import { User } from "@/models/User";
+import { connectMongo } from '@/lib/mongodb';
+import { User } from '@/models/User';
 
 export async function POST() {
   const { userId } = await auth();
 
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
@@ -18,19 +18,19 @@ export async function POST() {
     const clerkUser = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
     if (!clerkUser.ok) {
       return NextResponse.json(
-        { error: "Failed to fetch user from Clerk" },
-        { status: 400 },
+        { error: 'Failed to fetch user from Clerk' },
+        { status: 400 }
       );
     }
 
     const clerkData = await clerkUser.json();
-    const role = clerkData.public_metadata?.role || "user";
+    const role = clerkData.public_metadata?.role || 'user';
 
     // Syncing user role from Clerk metadata
 
@@ -38,20 +38,20 @@ export async function POST() {
     const updatedUser = await User.findOneAndUpdate(
       { clerkUserId: userId },
       { $set: { role } },
-      { upsert: true, new: true },
+      { upsert: true, new: true }
     );
 
     return NextResponse.json({
       success: true,
       role: updatedUser.role,
-      message: "Role synced successfully",
+      message: 'Role synced successfully',
     });
   } catch {
     // Error syncing role - return error response
 
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: 'Internal server error' },
+      { status: 500 }
     );
   }
 }
@@ -60,7 +60,7 @@ export async function GET() {
   const { userId } = await auth();
 
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
@@ -70,7 +70,7 @@ export async function GET() {
     const clerkUser = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -78,19 +78,19 @@ export async function GET() {
       // Clerk API error - return error response
 
       return NextResponse.json(
-        { error: "Failed to fetch user from Clerk" },
-        { status: 400 },
+        { error: 'Failed to fetch user from Clerk' },
+        { status: 400 }
       );
     }
 
     const clerkData = await clerkUser.json();
-    const clerkRole = clerkData.public_metadata?.role || "user";
+    const clerkRole = clerkData.public_metadata?.role || 'user';
 
     // Clerk data retrieved successfully
 
     // Lấy role từ database
     const dbUser = await User.findOne({ clerkUserId: userId });
-    const dbRole = dbUser?.role || "user";
+    const dbRole = dbUser?.role || 'user';
 
     // Database data retrieved successfully
 
@@ -105,8 +105,8 @@ export async function GET() {
     // Error syncing role - return error response
 
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: 'Internal server error' },
+      { status: 500 }
     );
   }
 }

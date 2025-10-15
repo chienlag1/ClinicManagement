@@ -1,24 +1,21 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Icon } from "@iconify/react";
+import React, { useState, useEffect } from 'react';
+import { Card, CardHeader, CardBody } from '@heroui/card';
+import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
+import { Select, SelectItem } from '@heroui/select';
+import { Icon } from '@iconify/react';
 import {
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@heroui/modal";
+} from '@heroui/modal';
 
-import { Pagination, usePagination } from "@/components/pagination";
-import {
-  useNotification,
-  NotificationModal,
-} from "@/components/notification-popup";
+import { Pagination, usePagination } from '@/components/pagination';
+import { useNotification } from '@/components/notification-popup';
 
 // Generic CRUD Template Props
 export interface CRUDTemplateProps<T> {
@@ -65,7 +62,7 @@ export interface CRUDModalProps<T> {
 export interface CRUDField<T> {
   key: keyof T;
   label: string;
-  type: "text" | "number" | "email" | "password" | "select" | "textarea";
+  type: 'text' | 'number' | 'email' | 'password' | 'select' | 'textarea'| 'date';
   placeholder?: string;
   required?: boolean;
   options?: { key: string; label: string }[];
@@ -76,24 +73,24 @@ export interface CRUDField<T> {
 export function CRUDTemplate<T extends { _id?: string; id?: string }>({
   title,
   description,
-  data,
+  data: _data,
   filteredData,
   searchTerm,
   setSearchTerm,
   filterValue,
   setFilterValue,
   filterOptions,
-  searchFields,
+  searchFields: _searchFields,
   columns,
   onAdd,
   onEdit,
   onDelete,
   onView,
-  emptyStateIcon = "lucide:inbox",
-  emptyStateMessage = "Không có dữ liệu",
-  addButtonText = "Thêm mới",
-  searchPlaceholder = "Tìm kiếm...",
-  filterPlaceholder = "Lọc theo...",
+  emptyStateIcon = 'lucide:inbox',
+  emptyStateMessage = 'Không có dữ liệu',
+  addButtonText = 'Thêm mới',
+  searchPlaceholder = 'Tìm kiếm...',
+  filterPlaceholder = 'Lọc theo...',
 }: CRUDTemplateProps<T>) {
   const {
     currentPage,
@@ -109,25 +106,25 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
   const currentData = filteredData.slice(startIndex, endIndex);
 
   const getItemId = (item: T) => {
-    return item._id || item.id || "";
+    return item._id || item.id || '';
   };
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-        <p className="text-gray-600 mt-2">{description}</p>
+        <h1 className='text-3xl font-bold text-gray-900'>{title}</h1>
+        <p className='text-gray-600 mt-2'>{description}</p>
       </div>
 
       {/* Filters */}
       <Card>
         <CardBody>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             <Input
               placeholder={searchPlaceholder}
               startContent={
-                <Icon className="w-4 h-4 text-gray-400" icon="lucide:search" />
+                <Icon className='w-4 h-4 text-gray-400' icon='lucide:search' />
               }
               value={searchTerm}
               onValueChange={setSearchTerm}
@@ -135,21 +132,22 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
             <Select
               placeholder={filterPlaceholder}
               selectedKeys={[filterValue]}
-              onSelectionChange={(keys) => {
+              onSelectionChange={keys => {
                 const value = Array.from(keys)[0] as string;
+
                 setFilterValue(value);
               }}
             >
-              <SelectItem key="all">Tất cả</SelectItem>
-              {filterOptions.map((option) => (
-                <SelectItem key={option.key}>
-                  {option.label}
-                </SelectItem>
-              )) as any}
+              <SelectItem key='all'>Tất cả</SelectItem>
+              {
+                filterOptions.map(option => (
+                  <SelectItem key={option.key}>{option.label}</SelectItem>
+                )) as any
+              }
             </Select>
             <Button
-              color="primary"
-              startContent={<Icon className="w-4 h-4" icon="lucide:plus" />}
+              color='primary'
+              startContent={<Icon className='w-4 h-4' icon='lucide:plus' />}
               onPress={onAdd}
             >
               {addButtonText}
@@ -161,64 +159,67 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
       {/* Data Table */}
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">Danh sách</h2>
+          <h2 className='text-xl font-semibold'>Danh sách</h2>
         </CardHeader>
         <CardBody>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className='overflow-x-auto'>
+            <table className='w-full'>
               <thead>
-                <tr className="border-b">
-                  {columns.map((column) => (
+                <tr className='border-b'>
+                  {columns.map(column => (
                     <th
                       key={String(column.key)}
-                      className="text-left py-3 px-4"
+                      className='text-left py-3 px-4'
                       style={{ width: column.width }}
                     >
                       {column.label}
                     </th>
                   ))}
-                  <th className="text-left py-3 px-4">Thao tác</th>
+                  <th className='text-left py-3 px-4'>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
-                {currentData.map((item) => (
-                  <tr key={getItemId(item)} className="border-b hover:bg-gray-50">
-                    {columns.map((column) => (
-                      <td key={String(column.key)} className="py-3 px-4">
+                {currentData.map(item => (
+                  <tr
+                    key={getItemId(item)}
+                    className='border-b hover:bg-gray-50'
+                  >
+                    {columns.map(column => (
+                      <td key={String(column.key)} className='py-3 px-4'>
                         {column.render
                           ? column.render(item[column.key], item)
-                          : String(item[column.key] || "")}
+                          : String(item[column.key] || '')}
                       </td>
                     ))}
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
+                    <td className='py-3 px-4'>
+                      <div className='flex gap-2'>
                         {onView && (
                           <Button
                             isIconOnly
-                            size="sm"
-                            variant="light"
+                            size='sm'
+                            variant='light'
                             onPress={() => onView(item)}
                           >
-                            <Icon className="w-4 h-4" icon="lucide:eye" />
+                            <Icon className='w-4 h-4' icon='lucide:eye' />
                           </Button>
                         )}
                         <Button
                           isIconOnly
-                          size="sm"
-                          color="primary"
-                          variant="light"
+                          size='sm'
+                          color='primary'
+                          variant='light'
                           onPress={() => onEdit(item)}
                         >
-                          <Icon className="w-4 h-4" icon="lucide:edit" />
+                          <Icon className='w-4 h-4' icon='lucide:edit' />
                         </Button>
                         <Button
                           isIconOnly
-                          size="sm"
-                          color="danger"
-                          variant="light"
+                          size='sm'
+                          color='danger'
+                          variant='light'
                           onPress={() => onDelete(item)}
                         >
-                          <Icon className="w-4 h-4" icon="lucide:trash-2" />
+                          <Icon className='w-4 h-4' icon='lucide:trash-2' />
                         </Button>
                       </div>
                     </td>
@@ -229,9 +230,9 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
           </div>
 
           {currentData.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className='text-center py-8 text-gray-500'>
               <Icon
-                className="w-12 h-12 mx-auto mb-4 text-gray-300"
+                className='w-12 h-12 mx-auto mb-4 text-gray-300'
                 icon={emptyStateIcon}
               />
               <p>{emptyStateMessage}</p>
@@ -242,7 +243,7 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
 
       {/* Pagination */}
       <Pagination
-        color="primary"
+        color='primary'
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         itemsPerPageOptions={[5, 10, 20, 50]}
@@ -250,7 +251,7 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
         showItemsPerPage={true}
         showQuickJump={true}
         showTotal={true}
-        size="md"
+        size='md'
         totalItems={totalItems}
         onItemsPerPageChange={handleItemsPerPageChange}
         onPageChange={handlePageChange}
@@ -280,7 +281,7 @@ export function CRUDModal<T>({
   };
 
   const handleFieldChange = (key: keyof T, value: any) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [key]: value,
     }));
@@ -288,51 +289,68 @@ export function CRUDModal<T>({
 
   const renderField = (field: CRUDField<T>) => {
     if (field.render) {
-      return field.render(formData[field.key], (value) =>
+      return field.render(formData[field.key], value =>
         handleFieldChange(field.key, value)
       );
     }
 
     switch (field.type) {
-      case "select":
+      case 'select':
         return (
           <Select
             label={field.label}
             placeholder={field.placeholder}
-            selectedKeys={[String(formData[field.key] || "")]}
-            onSelectionChange={(keys) => {
+            selectedKeys={[String(formData[field.key] || '')]}
+            onSelectionChange={keys => {
               const value = Array.from(keys)[0] as string;
+
               handleFieldChange(field.key, value);
             }}
           >
-            {field.options?.map((option) => (
-              <SelectItem key={option.key}>
-                {option.label}
-              </SelectItem>
-            )) as any}
+            {
+              field.options?.map(option => (
+                <SelectItem key={option.key}>{option.label}</SelectItem>
+              )) as any
+            }
           </Select>
         );
 
-      case "textarea":
+      case 'textarea':
         return (
           <textarea
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent'
             placeholder={field.placeholder}
-            value={String(formData[field.key] || "")}
-            onChange={(e) => handleFieldChange(field.key, e.target.value)}
             rows={4}
+            value={String(formData[field.key] || '')}
+            onChange={e => handleFieldChange(field.key, e.target.value)}
           />
         );
+         case 'date':
+      return (
+        <Input
+          isRequired={field.required}
+          label={field.label}
+          placeholder={field.placeholder}
+          type="date"
+          value={
+            formData[field.key]
+              ? String(formData[field.key]).split('T')[0] // để đảm bảo format YYYY-MM-DD
+              : ''
+          }
+          onValueChange={value => handleFieldChange(field.key, value)}
+        />
+      );
+        
 
       default:
         return (
           <Input
+            isRequired={field.required}
             label={field.label}
             placeholder={field.placeholder}
             type={field.type}
-            value={String(formData[field.key] || "")}
-            onValueChange={(value) => handleFieldChange(field.key, value)}
-            isRequired={field.required}
+            value={String(formData[field.key] || '')}
+            onValueChange={value => handleFieldChange(field.key, value)}
           />
         );
     }
@@ -343,23 +361,17 @@ export function CRUDModal<T>({
       <ModalContent>
         <ModalHeader>{title}</ModalHeader>
         <ModalBody>
-          <div className="space-y-4">
-            {fields.map((field) => (
-              <div key={String(field.key)}>
-                {renderField(field)}
-              </div>
+          <div className='space-y-4'>
+            {fields.map(field => (
+              <div key={String(field.key)}>{renderField(field)}</div>
             ))}
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button variant="flat" onPress={onClose}>
+          <Button variant='flat' onPress={onClose}>
             Hủy
           </Button>
-          <Button
-            color="primary"
-            onPress={handleSave}
-            isLoading={isLoading}
-          >
+          <Button color='primary' isLoading={isLoading} onPress={handleSave}>
             Lưu
           </Button>
         </ModalFooter>
@@ -374,8 +386,8 @@ export function useCRUD<T extends { _id?: string; id?: string }>(
 ) {
   const [data, setData] = useState<T[]>(initialData);
   const [filteredData, setFilteredData] = useState<T[]>(initialData);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterValue, setFilterValue] = useState("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValue, setFilterValue] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -401,14 +413,21 @@ export function useCRUD<T extends { _id?: string; id?: string }>(
   const confirmDelete = () => {
     if (deletingItem) {
       const itemId = deletingItem._id || deletingItem.id;
+
       if (itemId) {
-        setData(data.filter((item) => {
-          const id = item._id || item.id;
-          return id !== itemId;
-        }));
-        showSuccess("Thành công", "Xóa thành công!");
+        setData(
+          data.filter(item => {
+            const id = item._id || item.id;
+
+            return id !== itemId;
+          })
+        );
+
+        showSuccess('Thành công', 'Xóa thành công!');
       }
+
       setShowDeleteModal(false);
+
       setDeletingItem(null);
     }
   };
@@ -417,15 +436,17 @@ export function useCRUD<T extends { _id?: string; id?: string }>(
     if (editingItem) {
       // Update existing item
       const itemId = editingItem._id || editingItem.id;
-      setData(data.map((d) => {
-        const id = d._id || d.id;
-        return id === itemId ? item : d;
-      }));
-      showSuccess("Thành công", "Cập nhật thành công!");
+      setData(
+        data.map(d => {
+          const id = d._id || d.id;
+          return id === itemId ? item : d;
+        })
+      );
+      showSuccess('Thành công', 'Cập nhật thành công!');
     } else {
       // Add new item
       setData([...data, item]);
-      showSuccess("Thành công", "Thêm mới thành công!");
+      showSuccess('Thành công', 'Thêm mới thành công!');
     }
     setIsModalOpen(false);
     setEditingItem(null);
@@ -471,9 +492,9 @@ export const crudUtils = {
 
     // Apply search filter
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        searchFields.some((field) =>
-          String(item[field] || "")
+      filtered = filtered.filter(item =>
+        searchFields.some(field =>
+          String(item[field] || '')
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
         )
@@ -481,8 +502,8 @@ export const crudUtils = {
     }
 
     // Apply filter value
-    if (filterValue !== "all" && filterField) {
-      filtered = filtered.filter((item) => item[filterField] === filterValue);
+    if (filterValue !== 'all' && filterField) {
+      filtered = filtered.filter(item => item[filterField] === filterValue);
     }
 
     return filtered;
@@ -493,29 +514,29 @@ export const crudUtils = {
    */
   getStatusColor: (status: string) => {
     switch (status.toLowerCase()) {
-      case "active":
-      case "hoạt động":
-        return "bg-green-100 text-green-800";
-      case "inactive":
-      case "không hoạt động":
-        return "bg-red-100 text-red-800";
-      case "pending":
-      case "chờ duyệt":
-        return "bg-yellow-100 text-yellow-800";
-      case "blocked":
-      case "bị khóa":
-        return "bg-gray-100 text-gray-800";
+      case 'active':
+      case 'hoạt động':
+        return 'bg-green-100 text-green-800';
+      case 'inactive':
+      case 'không hoạt động':
+        return 'bg-red-100 text-red-800';
+      case 'pending':
+      case 'chờ duyệt':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'blocked':
+      case 'bị khóa':
+        return 'bg-gray-100 text-gray-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   },
 
   /**
    * Format currency
    */
-  formatCurrency: (amount: number, currency = "VND") => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
+  formatCurrency: (amount: number, currency = 'VND') => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
       currency: currency,
     }).format(amount);
   },
@@ -524,10 +545,10 @@ export const crudUtils = {
    * Format date
    */
   formatDate: (date: string | Date) => {
-    return new Intl.DateTimeFormat("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
+    return new Intl.DateTimeFormat('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
     }).format(new Date(date));
   },
 };
