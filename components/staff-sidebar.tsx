@@ -86,6 +86,11 @@ export const StaffSidebar = () => {
           icon: 'lucide:box',
           href: '/staff/medicine-manager',
         },
+        {
+          label: "Clinic Manager",
+          icon: "lucide:building",
+          href: "/staff/clinics",
+        },
       ],
     },
     {
