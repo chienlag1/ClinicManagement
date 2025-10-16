@@ -2,19 +2,21 @@
 import { NextResponse } from 'next/server';
 import Appointment from '@/models/Appointment';
 import { connectMongo } from '@/lib/mongodb';
-import Patient from '@/models/Patient';
 
-const USE_MOCK = true; // bật chế độ mock
+const USE_MOCK = true;
 
 export async function GET(
   req: Request,
   ctx: { params: Promise<{ doctorId: string }> }
 ) {
   if (USE_MOCK) {
-    // Mock data
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
     const mockAppointments = [
       {
         id: '1',
+        date: today,
         time: '08:30 AM - 09:00 AM',
         type: 'Checkup',
         notes: 'General health check',
@@ -22,6 +24,7 @@ export async function GET(
       },
       {
         id: '2',
+        date: today,
         time: '09:15 AM - 09:45 AM',
         type: 'Follow-up',
         notes: 'Review blood test results',
@@ -29,6 +32,7 @@ export async function GET(
       },
       {
         id: '3',
+        date: tomorrow,
         time: '10:00 AM - 10:30 AM',
         type: 'Consultation',
         notes: '',
@@ -38,17 +42,14 @@ export async function GET(
     return NextResponse.json(mockAppointments);
   }
 
-  // Kết nối MongoDB
   await connectMongo();
-
   const { doctorId } = await ctx.params;
-
-  // Lấy appointments thật
   const appointments = await Appointment.find({ doctorId }).populate('patientId');
 
   const formatted = appointments.map(a => ({
     id: a._id,
-    time: a.time,
+    date: new Date(a.time).toISOString().split('T')[0],
+    time: new Date(a.time).toLocaleTimeString(),
     type: a.type,
     notes: a.notes,
     patient: (a.patientId as any)?.name || 'Unknown',
