@@ -26,6 +26,12 @@ interface Doctor {
   specialty: string;
 }
 
+interface Patient {
+  _id: string;
+  patient_id: string;
+  name: string;
+}
+
 interface AppointmentFormProps {
   onSubmit: (
     isNewPatient: boolean,
@@ -50,7 +56,7 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
     phone: '',
     address: '',
   });
-  const [selectedPatientId, setSelectedPatientId] = useState('');
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [clinicId, setClinicId] = useState('');
   const [doctorId, setDoctorId] = useState('');
   const [priority, setPriority] = useState(false);
@@ -60,23 +66,38 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
   const [success, setSuccess] = useState('');
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]); // Khởi tạo là mảng rỗng
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clinicResponse = await fetch('/api/clinics');
+        const [clinicResponse, doctorResponse, patientResponse] = await Promise.all([
+          fetch('/api/clinics'),
+          fetch('/api/doctors'),
+          fetch('/api/patients'),
+        ]);
         if (!clinicResponse.ok) throw new Error('Không thể lấy danh sách phòng khám.');
         const clinicData = await clinicResponse.json();
         setClinics(clinicData);
         console.log('Fetched clinics:', clinicData);
 
-        const doctorResponse = await fetch('/api/doctors');
         if (!doctorResponse.ok) throw new Error('Không thể lấy danh sách bác sĩ.');
         const doctorData = await doctorResponse.json();
         setDoctors(doctorData);
         console.log('Fetched doctors:', doctorData);
+
+        if (!patientResponse.ok) throw new Error('Không thể lấy danh sách bệnh nhân.');
+        const patientData = await patientResponse.json();
+        if (Array.isArray(patientData)) {
+          setPatients(patientData); // Chỉ set nếu là mảng
+        } else {
+          setPatients([]); // Đặt rỗng nếu không phải mảng
+          console.warn('API /api/patients returned non-array data:', patientData);
+        }
+        console.log('Fetched patients:', patientData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi lấy dữ liệu.');
+        setPatients([]); // Đặt rỗng nếu có lỗi
         console.error('Fetch error:', err);
       }
     };
@@ -99,7 +120,7 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
     }
 
     if (!isNewPatient && !selectedPatientId) {
-      setError('Vui lòng nhập ID bệnh nhân.');
+      setError('Vui lòng chọn ID bệnh nhân.');
       return;
     }
 
@@ -137,7 +158,7 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
         phone: '',
         address: '',
       });
-      setSelectedPatientId('');
+      setSelectedPatientId(null);
       setClinicId('');
       setDoctorId('');
       setPriority(false);
@@ -267,15 +288,21 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
       ) : (
         <div>
           <label htmlFor='patientId' className='block text-sm font-medium text-gray-700'>
-            ID bệnh nhân
-            <input
+            Chọn bệnh nhân
+            <select
               id='patientId'
-              type='text'
-              value={selectedPatientId}
+              value={selectedPatientId || ''}
               onChange={e => setSelectedPatientId(e.target.value)}
               className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
               required
-            />
+            >
+              <option value=''>Chọn bệnh nhân</option>
+              {Array.isArray(patients) && patients.map((patient) => ( // Thêm kiểm tra Array.isArray
+                <option key={patient._id} value={patient.patient_id}>
+                  {patient.name} (ID: {patient.patient_id})
+                </option>
+              ))}
+            </select>
           </label>
         </div>
       )}

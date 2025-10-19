@@ -1,73 +1,34 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 import { connectMongo } from '@/lib/mongodb';
-import Patient from '@/models/Patient';
-import { Appointment } from '@/models/Appointment';
+import Appointment from '@/models/Appointment'; // Sửa import default
+
+const USE_MOCK = true; // Sử dụng mock tạm thời theo yêu cầu leader
 
 export async function POST(request: Request) {
   try {
+    if (USE_MOCK) {
+      const body = await request.json();
+      console.log('Mock received data:', body);
+      return NextResponse.json({ message: 'Đặt lịch thành công (mock)', appointment: body }, { status: 201 });
+    }
+
     await connectMongo();
     const body = await request.json();
     console.log('Received data:', body);
 
     const { isNewPatient, patientData, selectedPatientId, clinic_id, doctor_id, priority, symptoms, note } = body;
 
-    if (!clinic_id || !doctor_id) {
-      return NextResponse.json({ error: 'Thiếu phòng khám hoặc bác sĩ.' }, { status: 400 });
-    }
-
-    let patient_id;
-
-    if (isNewPatient) {
-      if (!patientData || !patientData.patient_id || !patientData.id_card || !patientData.name || !patientData.birth_date || !patientData.phone || !patientData.address) {
-        return NextResponse.json({ error: 'Thiếu thông tin bệnh nhân.' }, { status: 400 });
-      }
-
-      const existingPatient = await Patient.findOne({
-        $or: [
-          { patient_id: patientData.patient_id },
-          { id_card: patientData.id_card },
-          { phone: patientData.phone },
-        ],
-      });
-      if (existingPatient) {
-        return NextResponse.json(
-          { error: 'ID bệnh nhân, CMND/CCCD hoặc số điện thoại đã tồn tại.' },
-          { status: 400 }
-        );
-      }
-
-      const birthDate = new Date(patientData.birth_date);
-      if (isNaN(birthDate.getTime())) {
-        return NextResponse.json({ error: 'Ngày sinh không hợp lệ.' }, { status: 400 });
-      }
-
-      const patientDataWithDate = {
-        ...patientData,
-        birth_date: birthDate,
-      };
-
-      const newPatient = new Patient(patientDataWithDate);
-      await newPatient.save();
-      patient_id = newPatient._id;
-    } else {
-      if (!selectedPatientId) {
-        return NextResponse.json({ error: 'Thiếu ID bệnh nhân.' }, { status: 400 });
-      }
-      const patientExists = await Patient.findOne({ patient_id: selectedPatientId });
-      if (!patientExists) {
-        return NextResponse.json({ error: 'Bệnh nhân không tồn tại' }, { status: 404 });
-      }
-      patient_id = patientExists._id;
+    if (!doctor_id) { // Chỉ kiểm tra doctor_id vì mock dùng doctorId
+      return NextResponse.json({ error: 'Thiếu bác sĩ.' }, { status: 400 });
     }
 
     const appointment = new Appointment({
-      patient_id,
-      clinic_id: new mongoose.Types.ObjectId(clinic_id), // Chuyển chuỗi thành ObjectId
-      doctor_id: new mongoose.Types.ObjectId(doctor_id), // Chuyển chuỗi thành ObjectId
+      doctorId: doctor_id, // Sử dụng doctorId string
+      patientId: isNewPatient ? patientData?.patient_id : selectedPatientId, // Sử dụng patientId string
+      time: new Date(), // Thêm time mặc định
+      type: 'Consultation', // Giá trị mặc định
+      notes: note || '', // Gộp symptoms và note vào notes
       priority: priority || false,
-      symptoms: symptoms || '',
-      note: note || '',
     });
 
     await appointment.save();
@@ -86,13 +47,20 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
+  if (USE_MOCK) {
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    const mockAppointments = [
+      { id: '1', date: today, time: '08:30 AM - 09:00 AM', type: 'Checkup', notes: 'General health check', patient: 'John Doe' },
+      { id: '2', date: today, time: '09:15 AM - 09:45 AM', type: 'Follow-up', notes: 'Review blood test results', patient: 'Jane Smith' },
+      { id: '3', date: tomorrow, time: '10:00 AM - 10:30 AM', type: 'Consultation', notes: '', patient: 'Alice Johnson' },
+    ];
+    return NextResponse.json(mockAppointments);
+  }
+
   try {
     await connectMongo();
-    const appointments = await Appointment.find()
-      .populate('patient_id', 'name')
-      .populate('clinic_id', 'name address')
-      .populate('doctor_id', 'name specialty')
-      .lean();
+    const appointments = await Appointment.find().lean();
     console.log('Fetched appointments:', appointments);
     return NextResponse.json(appointments, { status: 200 });
   } catch (err) {

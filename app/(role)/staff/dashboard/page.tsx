@@ -7,20 +7,24 @@ import AppointmentForm from '@/components/AppointmentForm';
 
 interface Appointment {
   _id: string;
-  patient_id: { _id: string; name: string };
-  clinic_id: { _id: string; name: string; address: string };
-  doctor_id: { _id: string; name: string; specialty: string };
+  patient_id: { _id: string; name: string } | string; // Hỗ trợ cả object và string
+  clinic_id: { _id: string; name: string; address: string } | string;
+  doctor_id: { _id: string; name: string; specialty: string } | string;
   priority: boolean;
   symptoms: string;
-  note: string;
+  note: string; // Chỉ dùng note
   createdAt: string;
   updatedAt: string;
+  date?: string; // Thêm cho mock data
+  time?: string; // Thêm cho mock data
+  type?: string; // Thêm cho mock data
 }
 
 export default function StaffDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null); // State cho modal
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -66,6 +70,14 @@ export default function StaffDashboard() {
       })
       .then(data => setAppointments(data))
       .catch(err => console.error('Error refreshing appointments:', err));
+  };
+
+  const handleDetail = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+  };
+
+  const closeDetail = () => {
+    setSelectedAppointment(null);
   };
 
   const stats = [
@@ -253,7 +265,7 @@ export default function StaffDashboard() {
       {/* Today's Schedule */}
       <Card>
         <CardHeader>
-          <h3 className='text-lg font-semibold'>Today&apos Schedule</h3>
+          <h3 className='text-lg font-semibold'>Today&apos;s Schedule</h3> {/* Escape ' thành &apos; */}
         </CardHeader>
         <CardBody>
           {loading ? (
@@ -269,15 +281,16 @@ export default function StaffDashboard() {
                 >
                   <div className='flex items-center gap-3'>
                     <div className='text-sm font-medium text-gray-900 w-16'>
-                      {new Date(appointment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {appointment.time ? appointment.time : new Date(appointment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
-                    <div>
-                      <p className='font-medium text-gray-900'>
-                        {appointment.patient_id.name || `Patient ${index + 1}`}
-                      </p>
-                      <p className='text-sm text-gray-600'>Consultation</p>
-                    </div>
+                  <div>
+                    <p className='font-medium text-gray-900'>
+                      {typeof appointment.patient_id === 'string' ? appointment.patient_id : appointment.patient_id?.name || `Patient ${index + 1}`}
+                    </p>
+                    <p className='text-sm text-gray-600'>{appointment.type || 'Consultation'}</p>
                   </div>
+                </div>
+                <div className='flex gap-2'>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
                       appointment.priority ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
@@ -285,14 +298,44 @@ export default function StaffDashboard() {
                   >
                     {appointment.priority ? 'Confirmed' : 'Pending'}
                   </span>
+                  <button
+                    onClick={() => handleDetail(appointment)}
+                    className='px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs'
+                  >
+                    Detail
+                  </button>
                 </div>
-              ))}
-            </div>
-          ) : (
+              </div>
+            ))}
+          </div>
+        ) : (
             <p className='text-center text-gray-500'>Không có lịch hẹn hôm nay.</p>
           )}
         </CardBody>
       </Card>
+
+      {/* Modal for Appointment Details */}
+      {selectedAppointment && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white p-6 rounded-lg shadow-lg w-96'>
+            <h3 className='text-lg font-semibold mb-4'>Chi tiết lịch hẹn</h3>
+            <p><strong>ID:</strong> {selectedAppointment._id}</p>
+            <p><strong>Bệnh nhân:</strong> {typeof selectedAppointment.patient_id === 'string' ? selectedAppointment.patient_id : selectedAppointment.patient_id?.name || 'Unknown'}</p>
+            <p><strong>Phòng khám:</strong> {typeof selectedAppointment.clinic_id === 'string' ? selectedAppointment.clinic_id : selectedAppointment.clinic_id?.name || 'Unknown'} - {typeof selectedAppointment.clinic_id === 'string' ? '' : selectedAppointment.clinic_id?.address || ''}</p>
+            <p><strong>Bác sĩ:</strong> {typeof selectedAppointment.doctor_id === 'string' ? selectedAppointment.doctor_id : selectedAppointment.doctor_id?.name || 'Unknown'} {typeof selectedAppointment.doctor_id === 'string' ? '' : `(${selectedAppointment.doctor_id?.specialty || ''})`}</p>
+            <p><strong>Thời gian:</strong> {selectedAppointment.time || new Date(selectedAppointment.createdAt).toLocaleString()}</p>
+            <p><strong>Ưu tiên:</strong> {selectedAppointment.priority ? 'Có' : 'Không'}</p>
+            <p><strong>Triệu chứng:</strong> {selectedAppointment.symptoms || 'Không có'}</p>
+            <p><strong>Ghi chú:</strong> {selectedAppointment.note || 'Không có'}</p>
+            <button
+              onClick={closeDetail}
+              className='mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600'
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
