@@ -62,7 +62,14 @@ export interface CRUDModalProps<T> {
 export interface CRUDField<T> {
   key: keyof T;
   label: string;
-  type: 'text' | 'number' | 'email' | 'password' | 'select' | 'textarea'| 'date';
+  type:
+    | 'text'
+    | 'number'
+    | 'email'
+    | 'password'
+    | 'select'
+    | 'textarea'
+    | 'date';
   placeholder?: string;
   required?: boolean;
   options?: { key: string; label: string }[];
@@ -325,22 +332,21 @@ export function CRUDModal<T>({
             onChange={e => handleFieldChange(field.key, e.target.value)}
           />
         );
-         case 'date':
-      return (
-        <Input
-          isRequired={field.required}
-          label={field.label}
-          placeholder={field.placeholder}
-          type="date"
-          value={
-            formData[field.key]
-              ? String(formData[field.key]).split('T')[0] // để đảm bảo format YYYY-MM-DD
-              : ''
-          }
-          onValueChange={value => handleFieldChange(field.key, value)}
-        />
-      );
-        
+      case 'date':
+        return (
+          <Input
+            isRequired={field.required}
+            label={field.label}
+            placeholder={field.placeholder}
+            type='date'
+            value={
+              formData[field.key]
+                ? String(formData[field.key]).split('T')[0] // để đảm bảo format YYYY-MM-DD
+                : ''
+            }
+            onValueChange={value => handleFieldChange(field.key, value)}
+          />
+        );
 
       default:
         return (

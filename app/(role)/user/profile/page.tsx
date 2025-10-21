@@ -34,7 +34,9 @@ export default function UserProfile() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState<Omit<Patient, '_id' | 'patient_id'>>({
+  const [editFormData, setEditFormData] = useState<
+    Omit<Patient, '_id' | 'patient_id'>
+  >({
     id_card: '',
     name: '',
     gender: 'male',
@@ -57,7 +59,9 @@ export default function UserProfile() {
           id_card: data.items[0].id_card,
           name: data.items[0].name,
           gender: data.items[0].gender,
-          birth_date: new Date(data.items[0].birth_date).toISOString().split('T')[0],
+          birth_date: new Date(data.items[0].birth_date)
+            .toISOString()
+            .split('T')[0],
           phone: data.items[0].phone,
           address: data.items[0].address,
         });
@@ -117,7 +121,7 @@ export default function UserProfile() {
 
       setIsDeleteModalOpen(false);
       setPatient(null);
-      
+
       // Redirect to welcome page after successful deletion
       router.push('/');
     } catch (error: any) {
@@ -130,52 +134,55 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className='container mx-auto px-4 py-8'>
       <Card>
         <CardHeader>
-          <h1 className="text-2xl font-bold">Patient Profile</h1>
+          <h1 className='text-2xl font-bold'>Patient Profile</h1>
         </CardHeader>
         <CardBody>
           {patient ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className='space-y-4'>
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className="font-semibold">Patient ID:</label>
+                  <div className='font-semibold'>Patient ID:</div>
                   <p>{patient.patient_id}</p>
                 </div>
                 <div>
-                  <label className="font-semibold">ID Card:</label>
+                  <div className='font-semibold'>ID Card:</div>
                   <p>{patient.id_card}</p>
                 </div>
                 <div>
-                  <label className="font-semibold">Name:</label>
+                  <div className='font-semibold'>Name:</div>
                   <p>{patient.name}</p>
                 </div>
                 <div>
-                  <label className="font-semibold">Gender:</label>
-                  <p className="capitalize">{patient.gender}</p>
+                  <div className='font-semibold'>Gender:</div>
+                  <p className='capitalize'>{patient.gender}</p>
                 </div>
                 <div>
-                  <label className="font-semibold">Birth Date:</label>
+                  <div className='font-semibold'>Birth Date:</div>
                   <p>{new Date(patient.birth_date).toLocaleDateString()}</p>
                 </div>
                 <div>
-                  <label className="font-semibold">Phone:</label>
+                  <div className='font-semibold'>Phone:</div>
                   <p>{patient.phone}</p>
                 </div>
-                <div className="col-span-2">
-                  <label className="font-semibold">Address:</label>
+                <div className='col-span-2'>
+                  <div className='font-semibold'>Address:</div>
                   <p>{patient.address}</p>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2">
-                <Button variant="bordered" onClick={() => setIsEditModalOpen(true)}>
+              <div className='flex justify-end space-x-2'>
+                <Button
+                  variant='bordered'
+                  onClick={() => setIsEditModalOpen(true)}
+                >
                   Edit
                 </Button>
                 <Button
-                  variant="bordered"
-                  color="danger"
+                  variant='bordered'
+                  color='danger'
                   onClick={() => setIsDeleteModalOpen(true)}
                 >
                   Delete
@@ -183,10 +190,12 @@ export default function UserProfile() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-8 space-y-4">
-              <p className="text-gray-600">You haven't created your profile yet.</p>
-              <Button 
-                color="primary"
+            <div className='text-center py-8 space-y-4'>
+              <p className='text-gray-600'>
+                You haven&apos;t created your profile yet.
+              </p>
+              <Button
+                color='primary'
                 onClick={() => router.push('/patient-registration')}
               >
                 Go back
@@ -202,86 +211,112 @@ export default function UserProfile() {
           <form onSubmit={handleEdit}>
             <ModalHeader>Edit Patient Information</ModalHeader>
             <ModalBody>
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 <Input
-                  label="ID Card"
+                  label='ID Card'
                   required
                   value={editFormData.id_card}
-                  onChange={(e) =>
-                    setEditFormData({ ...editFormData, id_card: e.target.value })
+                  onChange={e =>
+                    setEditFormData({
+                      ...editFormData,
+                      id_card: e.target.value,
+                    })
                   }
                 />
                 <Input
-                  label="Name"
+                  label='Name'
                   required
                   value={editFormData.name}
-                  onChange={(e) =>
+                  onChange={e =>
                     setEditFormData({ ...editFormData, name: e.target.value })
                   }
                 />
-                <div className="w-full">
-                  <label className="block text-sm font-medium mb-2">Gender</label>
+                <div className='w-full'>
+                  <label htmlFor='edit-gender' className='block text-sm font-medium mb-2'>
+                    Gender
+                  </label>
                   <select
-                    className="w-full px-3 py-2 border rounded-md"
+                    id='edit-gender'
+                    className='w-full px-3 py-2 border rounded-md'
                     value={editFormData.gender}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, gender: e.target.value as 'male' | 'female' })
+                    onChange={e =>
+                      setEditFormData({
+                        ...editFormData,
+                        gender: e.target.value as 'male' | 'female',
+                      })
                     }
                     required
                   >
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
+                    <option value='male'>Male</option>
+                    <option value='female'>Female</option>
                   </select>
                 </div>
                 <Input
-                  type="date"
-                  label="Birth Date"
+                  type='date'
+                  label='Birth Date'
                   required
                   value={editFormData.birth_date}
-                  onChange={(e) =>
-                    setEditFormData({ ...editFormData, birth_date: e.target.value })
+                  onChange={e =>
+                    setEditFormData({
+                      ...editFormData,
+                      birth_date: e.target.value,
+                    })
                   }
                 />
                 <Input
-                  label="Phone"
+                  label='Phone'
                   required
                   value={editFormData.phone}
-                  onChange={(e) =>
+                  onChange={e =>
                     setEditFormData({ ...editFormData, phone: e.target.value })
                   }
                 />
                 <Input
-                  label="Address"
+                  label='Address'
                   required
                   value={editFormData.address}
-                  onChange={(e) =>
-                    setEditFormData({ ...editFormData, address: e.target.value })
+                  onChange={e =>
+                    setEditFormData({
+                      ...editFormData,
+                      address: e.target.value,
+                    })
                   }
                 />
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button variant="bordered" onClick={() => setIsEditModalOpen(false)}>
+              <Button
+                variant='bordered'
+                onClick={() => setIsEditModalOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" variant="solid">Save Changes</Button>
+              <Button type='submit' variant='solid'>
+                Save Changes
+              </Button>
             </ModalFooter>
           </form>
         </ModalContent>
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      >
         <ModalContent>
           <ModalHeader>Confirm Deletion</ModalHeader>
           <ModalBody>
             <p>Are you sure you want to delete your patient information?</p>
           </ModalBody>
           <ModalFooter>
-            <Button variant="bordered" onClick={() => setIsDeleteModalOpen(false)}>
+            <Button
+              variant='bordered'
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
               Cancel
             </Button>
-            <Button variant="solid" color="danger" onClick={handleDelete}>
+            <Button variant='solid' color='danger' onClick={handleDelete}>
               Delete
             </Button>
           </ModalFooter>

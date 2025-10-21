@@ -21,38 +21,36 @@ export async function GET(req: NextRequest) {
 
     const auth = getAuth(req);
     if (!auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get user role to determine access level
     const user = await User.findOne({ clerkUserId: auth.userId });
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     let items = [];
     let total = 0;
 
-    if (user.role === 'staff' || user.role === 'admin' || user.role === 'doctor') {
+    if (
+      user.role === 'staff' ||
+      user.role === 'admin' ||
+      user.role === 'doctor'
+    ) {
       // Staff/admin/doctor can see all patients
       const query: any = {};
-      
+
       // Apply search filter
       if (search) {
         query.$or = [
           { name: { $regex: search, $options: 'i' } },
           { phone: { $regex: search, $options: 'i' } },
           { id_card: { $regex: search, $options: 'i' } },
-          { patient_id: { $regex: search, $options: 'i' } }
+          { patient_id: { $regex: search, $options: 'i' } },
         ];
       }
-      
+
       // Apply gender filter
       if (gender) {
         query.gender = gender;
@@ -64,7 +62,7 @@ export async function GET(req: NextRequest) {
         .skip(skip)
         .limit(limit)
         .lean();
-      
+
       total = await Patient.countDocuments(query);
     } else {
       // Regular users can only see their own profile
@@ -90,10 +88,7 @@ export async function POST(req: NextRequest) {
   try {
     const auth = getAuth(req);
     if (!auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectMongo();
@@ -102,10 +97,7 @@ export async function POST(req: NextRequest) {
     // Get user role to determine access level
     const user = await User.findOne({ clerkUserId: auth.userId });
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Validate required fields
@@ -125,9 +117,14 @@ export async function POST(req: NextRequest) {
 
     // Determine target userId
     let targetUserId = auth.userId;
-    
+
     // If staff/admin/doctor, they can create patients for other users
-    if ((user.role === 'staff' || user.role === 'admin' || user.role === 'doctor') && body.userId) {
+    if (
+      (user.role === 'staff' ||
+        user.role === 'admin' ||
+        user.role === 'doctor') &&
+      body.userId
+    ) {
       targetUserId = body.userId;
     }
 

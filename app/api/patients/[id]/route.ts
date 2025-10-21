@@ -11,10 +11,7 @@ export async function GET(req: NextRequest, context: Ctx) {
   try {
     const auth = getAuth(req);
     if (!auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectMongo();
@@ -23,10 +20,7 @@ export async function GET(req: NextRequest, context: Ctx) {
     // Get user role to determine access level
     const user = await User.findOne({ clerkUserId: auth.userId });
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const doc = await Patient.findById(id);
@@ -35,19 +29,16 @@ export async function GET(req: NextRequest, context: Ctx) {
     }
 
     // Check access permissions
-    const hasAccess = 
-      user.role === 'staff' || 
-      user.role === 'admin' || 
-      user.role === 'doctor' || 
+    const hasAccess =
+      user.role === 'staff' ||
+      user.role === 'admin' ||
+      user.role === 'doctor' ||
       doc.userId === auth.userId;
 
     if (!hasAccess) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
-    
+
     return NextResponse.json(doc);
   } catch (error) {
     return NextResponse.json(
@@ -61,10 +52,7 @@ export async function PUT(req: NextRequest, context: Ctx) {
   try {
     const auth = getAuth(req);
     if (!auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectMongo();
@@ -74,10 +62,7 @@ export async function PUT(req: NextRequest, context: Ctx) {
     // Get user role to determine access level
     const user = await User.findOne({ clerkUserId: auth.userId });
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const data: any = {};
@@ -96,17 +81,14 @@ export async function PUT(req: NextRequest, context: Ctx) {
     }
 
     // Check access permissions
-    const hasAccess = 
-      user.role === 'staff' || 
-      user.role === 'admin' || 
-      user.role === 'doctor' || 
+    const hasAccess =
+      user.role === 'staff' ||
+      user.role === 'admin' ||
+      user.role === 'doctor' ||
       patient.userId === auth.userId;
 
     if (!hasAccess) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     const updated = await Patient.findByIdAndUpdate(id, data, {
@@ -130,10 +112,7 @@ export async function DELETE(req: NextRequest, context: Ctx) {
   try {
     const auth = getAuth(req);
     if (!auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectMongo();
@@ -142,10 +121,7 @@ export async function DELETE(req: NextRequest, context: Ctx) {
     // Get user role to determine access level
     const user = await User.findOne({ clerkUserId: auth.userId });
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Find the patient first to check access
@@ -155,17 +131,14 @@ export async function DELETE(req: NextRequest, context: Ctx) {
     }
 
     // Check access permissions
-    const hasAccess = 
-      user.role === 'staff' || 
-      user.role === 'admin' || 
-      user.role === 'doctor' || 
+    const hasAccess =
+      user.role === 'staff' ||
+      user.role === 'admin' ||
+      user.role === 'doctor' ||
       patient.userId === auth.userId;
 
     if (!hasAccess) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     const deleted = await Patient.findByIdAndDelete(id);

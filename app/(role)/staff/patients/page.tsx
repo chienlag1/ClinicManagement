@@ -43,14 +43,14 @@ const PatientManager = () => {
     {
       key: 'birth_date',
       label: 'Birth Date',
-      render: (value) => new Date(value).toLocaleDateString(),
+      render: value => new Date(value).toLocaleDateString(),
     },
     { key: 'phone', label: 'Phone' },
     { key: 'address', label: 'Address' },
     {
       key: 'createdAt',
       label: 'Created At',
-      render: (value) => new Date(value).toLocaleString(),
+      render: value => new Date(value).toLocaleString(),
     },
   ];
 
@@ -75,7 +75,7 @@ const PatientManager = () => {
       showNotification({
         title: 'Error',
         message: 'Failed to fetch patients',
-        type: 'error'
+        type: 'error',
       });
     } finally {
       setLoading(false);
@@ -100,27 +100,27 @@ const PatientManager = () => {
           showNotification({
             title: 'Success',
             message: 'Patient deleted successfully',
-            type: 'success'
+            type: 'success',
           });
           fetchPatients();
         } else {
           showNotification({
             title: 'Error',
             message: 'Failed to delete patient',
-            type: 'error'
+            type: 'error',
           });
         }
       } catch (error) {
         showNotification({
           title: 'Error',
           message: 'Failed to delete patient',
-          type: 'error'
+          type: 'error',
         });
       }
     }
   };
 
-  const filteredData = patients.filter((patient) => {
+  const filteredData = patients.filter(patient => {
     const matchesSearch =
       !searchTerm ||
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,8 +134,8 @@ const PatientManager = () => {
 
   return (
     <CRUDTemplate
-      title="Patient Management"
-      description="Manage patient information"
+      title='Patient Management'
+      description='Manage patient information'
       data={patients}
       filteredData={filteredData}
       searchTerm={searchTerm}
@@ -148,11 +148,11 @@ const PatientManager = () => {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      addButtonText="Add Patient"
-      searchPlaceholder="Search by name, phone or ID card..."
-      filterPlaceholder="Filter by gender"
-      emptyStateIcon="mdi:account-group"
-      emptyStateMessage="No patients found"
+      addButtonText='Add Patient'
+      searchPlaceholder='Search by name, phone or ID card...'
+      filterPlaceholder='Filter by gender'
+      emptyStateIcon='mdi:account-group'
+      emptyStateMessage='No patients found'
     />
   );
 };

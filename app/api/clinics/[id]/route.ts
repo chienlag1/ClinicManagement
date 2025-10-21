@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import Clinic from "@/models/Clinic";
-import { connectMongo } from "@/lib/mongodb";
+import Clinic from '@/models/Clinic';
+import { connectMongo } from '@/lib/mongodb';
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> }
 ) {
   await connectMongo();
   const { id } = await context.params;
@@ -13,7 +13,7 @@ export async function GET(
   const clinic = await Clinic.findById(id);
 
   if (!clinic) {
-    return NextResponse.json({ error: "Clinic not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Clinic not found' }, { status: 404 });
   }
 
   return NextResponse.json(clinic);
@@ -21,7 +21,7 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  context: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> }
 ) {
   await connectMongo();
   const { id } = await context.params;
@@ -32,7 +32,7 @@ export async function PUT(
   });
 
   if (!updatedClinic) {
-    return NextResponse.json({ error: "Clinic not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Clinic not found' }, { status: 404 });
   }
 
   return NextResponse.json(updatedClinic);
@@ -40,7 +40,7 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  context: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> }
 ) {
   await connectMongo();
   const { id } = await context.params;
@@ -48,8 +48,8 @@ export async function DELETE(
   const deleted = await Clinic.findByIdAndDelete(id);
 
   if (!deleted) {
-    return NextResponse.json({ error: "Clinic not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Clinic not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ message: "Clinic deleted successfully" });
+  return NextResponse.json({ message: 'Clinic deleted successfully' });
 }
