@@ -1,4 +1,3 @@
-// models/Appointment.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAppointment extends Document {
@@ -7,6 +6,7 @@ export interface IAppointment extends Document {
   time: Date;
   type: string;
   notes?: string;
+  priority: boolean;
 }
 
 const AppointmentSchema: Schema = new Schema(
@@ -16,9 +16,9 @@ const AppointmentSchema: Schema = new Schema(
     time: { type: Date, required: true },
     type: { type: String, required: true },
     notes: { type: String },
+    priority: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Appointment ||
-  mongoose.model<IAppointment>('Appointment', AppointmentSchema);
+export default mongoose.models.Appointment || mongoose.model<IAppointment>('Appointment', AppointmentSchema);
