@@ -14,7 +14,7 @@ import {
   crudUtils,
   CRUDColumn,
   CRUDField,
-} from "@/components/crud-template";
+} from "@/components/DataTable";
 import { NotificationModal } from "@/components/notification-popup";
 
 export default function ClinicManager() {
@@ -143,13 +143,13 @@ export default function ClinicManager() {
       label: "Trạng thái",
       render: (value) => {
         const statusInfo = CLINIC_STATUS.find(
-          (s) => s.key === value.toLowerCase(),
+          (s) => s.key === value?.toLowerCase(),
         );
         return (
           <span
             className={`px-2 py-1 rounded-full text-xs font-medium ${statusInfo?.color || "bg-gray-100 text-gray-600"}`}
           >
-            {statusInfo?.label || value}
+            {statusInfo?.label || value || "Không xác định"}
           </span>
         );
       },

@@ -1,59 +1,30 @@
-// app/api/appointments/[doctorId]/route.ts
 import { NextResponse } from 'next/server';
-import Appointment from '@/models/Appointment';
 import { connectMongo } from '@/lib/mongodb';
+import Appointment from '@/models/Appointment';
 
-const USE_MOCK = true;
-
+// GET /api/appointments/[doctorId]
 export async function GET(
-  req: Request,
-  ctx: { params: Promise<{ doctorId: string }> }
+  request: Request,
+  { params }: { params: { doctorId: string } }
 ) {
-  if (USE_MOCK) {
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  try {
+    await connectMongo();
+    
+    const { doctorId } = params;
+    
+    // Lấy appointments theo doctor_id
+    const appointments = await Appointment.find({ doctor_id: doctorId })
+      .populate('patient_id', 'patient_id name phone')
+      .sort({ appointment_date: 1, appointment_time: 1 });
 
-    const mockAppointments = [
-      {
-        id: '1',
-        date: today,
-        time: '08:30 AM - 09:00 AM',
-        type: 'Checkup',
-        notes: 'General health check',
-        patient: 'John Doe',
-      },
-      {
-        id: '2',
-        date: today,
-        time: '09:15 AM - 09:45 AM',
-        type: 'Follow-up',
-        notes: 'Review blood test results',
-        patient: 'Jane Smith',
-      },
-      {
-        id: '3',
-        date: tomorrow,
-        time: '10:00 AM - 10:30 AM',
-        type: 'Consultation',
-        notes: '',
-        patient: 'Alice Johnson',
-      },
-    ];
-    return NextResponse.json(mockAppointments);
+    console.log(`Found ${appointments.length} appointments for doctor ${doctorId}`);
+    
+    return NextResponse.json(appointments, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching doctor appointments:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch appointments' },
+      { status: 500 }
+    );
   }
-
-  await connectMongo();
-  const { doctorId } = await ctx.params;
-  const appointments = await Appointment.find({ doctorId }).populate('patientId');
-
-  const formatted = appointments.map(a => ({
-    id: a._id,
-    date: new Date(a.time).toISOString().split('T')[0],
-    time: new Date(a.time).toLocaleTimeString(),
-    type: a.type,
-    notes: a.notes,
-    patient: (a.patientId as any)?.name || 'Unknown',
-  }));
-
-  return NextResponse.json(formatted);
 }

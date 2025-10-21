@@ -3,22 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Icon } from '@iconify/react';
-import AppointmentForm from '@/components/AppointmentForm';
-
-interface Appointment {
-  _id: string;
-  patient_id: { _id: string; name: string } | string;
-  clinic_id: { _id: string; name: string; address: string } | string;
-  doctor_id: { _id: string; name: string; specialty: string } | string;
-  priority: boolean;
-  symptoms: string;
-  note: string;
-  createdAt: string;
-  updatedAt: string;
-  date?: string;
-  time?: string;
-  type?: string;
-}
+import { Appointment } from '@/types/appointment';
 
 export default function StaffDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -42,34 +27,6 @@ export default function StaffDashboard() {
     fetchAppointments();
   }, []);
 
-  const handleSubmit = (
-    isNewPatient: boolean,
-    patientData: { patient_id: string; id_card: string; name: string; gender: 'male' | 'female'; birth_date: string; phone: string; address: string } | null,
-    selectedPatientId: string | null,
-    clinic_id: string,
-    doctor_id: string,
-    priority: boolean,
-    symptoms: string,
-    note: string
-  ) => {
-    console.log({
-      isNewPatient,
-      patientData,
-      selectedPatientId,
-      clinic_id,
-      doctor_id,
-      priority,
-      symptoms,
-      note,
-    });
-    fetch('/api/appointments')
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        return res.json();
-      })
-      .then(data => setAppointments(data))
-      .catch(err => console.error('Error refreshing appointments:', err));
-  };
 
   const handleDetail = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -210,61 +167,58 @@ export default function StaffDashboard() {
           </CardHeader>
           <CardBody>
             <div className='grid grid-cols-2 gap-3'>
-              <button className='p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-center transition-colors'>
+              <a href='/staff/appointment' className='p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-center transition-colors block'>
                 <Icon
                   className='w-6 h-6 text-blue-600 mx-auto mb-2'
                   icon='lucide:calendar-plus'
                 />
                 <p className='text-sm font-medium text-blue-900'>
-                  New Appointment
+                  Đặt lịch khám
                 </p>
-              </button>
-              <button className='p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center transition-colors'>
+              </a>
+              <a href='/staff/patient-manager' className='p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center transition-colors block'>
                 <Icon
                   className='w-6 h-6 text-green-600 mx-auto mb-2'
                   icon='lucide:user-plus'
                 />
                 <p className='text-sm font-medium text-green-900'>
-                  Add Patient
+                  Quản lý bệnh nhân
                 </p>
-              </button>
-              <button className='p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center transition-colors'>
+              </a>
+              <a href='/staff/clinics' className='p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center transition-colors block'>
                 <Icon
                   className='w-6 h-6 text-purple-600 mx-auto mb-2'
-                  icon='lucide:file-text'
+                  icon='lucide:building'
                 />
                 <p className='text-sm font-medium text-purple-900'>
-                  View Records
+                  Quản lý phòng khám
                 </p>
-              </button>
-              <button className='p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-center transition-colors'>
+              </a>
+              <a href='/staff/medicine-manager' className='p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-center transition-colors block'>
                 <Icon
                   className='w-6 h-6 text-orange-600 mx-auto mb-2'
                   icon='lucide:pill'
                 />
                 <p className='text-sm font-medium text-orange-900'>
-                  Prescriptions
+                  Quản lý thuốc
                 </p>
-              </button>
+              </a>
             </div>
           </CardBody>
         </Card>
       </div>
 
-      {/* Appointment Form */}
-      <Card>
-        <CardHeader>
-          <h3 className='text-lg font-semibold'>Đặt lịch khám</h3>
-        </CardHeader>
-        <CardBody>
-          <AppointmentForm onSubmit={handleSubmit} />
-        </CardBody>
-      </Card>
 
       {/* Today's Schedule */}
       <Card>
-        <CardHeader>
-          <h3 className='text-lg font-semibold'>Today&apos;s Schedule</h3>
+        <CardHeader className='flex justify-between items-center'>
+          <h3 className='text-lg font-semibold'>Lịch hẹn hôm nay</h3>
+          <a 
+            href='/staff/appointment' 
+            className='text-sm text-blue-600 hover:text-blue-800 font-medium'
+          >
+            Xem tất cả →
+          </a>
         </CardHeader>
         <CardBody>
           {loading ? (
@@ -279,16 +233,22 @@ export default function StaffDashboard() {
                   className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'
                 >
                   <div className='flex items-center gap-3'>
-                    <div className='text-sm font-medium text-gray-900 w-16'>
-                      {appointment.time ? appointment.time : new Date(appointment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <div className='text-sm font-medium text-gray-900 w-20'>
+                      {appointment.appointment_time || appointment.time || new Date(appointment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
-                  <div>
-                    <p className='font-medium text-gray-900'>
-                      {typeof appointment.patient_id === 'string' ? appointment.patient_id : appointment.patient_id?.name || `Patient ${index + 1}`}
-                    </p>
-                    <p className='text-sm text-gray-600'>{appointment.type || 'Consultation'}</p>
+                    <div>
+                      <p className='font-medium text-gray-900'>
+                        {typeof appointment.patient_id === 'string' ? appointment.patient_id : appointment.patient_id?.name || `Patient ${index + 1}`}
+                      </p>
+                      <p className='text-sm text-gray-600'>
+                        {typeof appointment.doctor_id === 'string' ? appointment.doctor_id : appointment.doctor_id?.name || 'Bác sĩ'}
+                        {typeof appointment.doctor_id === 'object' && appointment.doctor_id?.specialty && ` - ${appointment.doctor_id.specialty}`}
+                      </p>
+                      <p className='text-xs text-gray-500'>
+                        {appointment.symptoms ? appointment.symptoms.substring(0, 50) + (appointment.symptoms.length > 50 ? '...' : '') : 'Không có triệu chứng'}
+                      </p>
+                    </div>
                   </div>
-                </div>
                 <div className='flex gap-2'>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -308,7 +268,16 @@ export default function StaffDashboard() {
             ))}
           </div>
         ) : (
-          <p className='text-center text-gray-500'>Không có lịch hẹn hôm nay.</p>
+          <div className='text-center py-8'>
+            <Icon icon='lucide:calendar-x' className='w-12 h-12 text-gray-400 mx-auto mb-4' />
+            <p className='text-gray-500 mb-2'>Không có lịch hẹn hôm nay.</p>
+            <a 
+              href='/staff/appointment' 
+              className='text-blue-600 hover:text-blue-800 font-medium'
+            >
+              Đặt lịch khám ngay →
+            </a>
+          </div>
         )}
       </CardBody>
     </Card>
@@ -331,7 +300,8 @@ export default function StaffDashboard() {
             <p><strong>Bệnh nhân:</strong> {typeof selectedAppointment.patient_id === 'string' ? selectedAppointment.patient_id : selectedAppointment.patient_id?.name || 'Không xác định'}</p>
             <p><strong>Phòng khám:</strong> {typeof selectedAppointment.clinic_id === 'string' ? selectedAppointment.clinic_id : selectedAppointment.clinic_id?.name || 'Không xác định'} - {typeof selectedAppointment.clinic_id === 'string' ? '' : selectedAppointment.clinic_id?.address || ''}</p>
             <p><strong>Bác sĩ:</strong> {typeof selectedAppointment.doctor_id === 'string' ? selectedAppointment.doctor_id : selectedAppointment.doctor_id?.name || 'Không xác định'} {typeof selectedAppointment.doctor_id === 'string' ? '' : `(${selectedAppointment.doctor_id?.specialty || ''})`}</p>
-            <p><strong>Thời gian:</strong> {selectedAppointment.time || new Date(selectedAppointment.createdAt).toLocaleString()}</p>
+            <p><strong>Ngày hẹn:</strong> {selectedAppointment.appointment_date ? new Date(selectedAppointment.appointment_date).toLocaleDateString('vi-VN') : 'Chưa xác định'}</p>
+            <p><strong>Giờ hẹn:</strong> {selectedAppointment.appointment_time || selectedAppointment.time || 'Chưa xác định'}</p>
             <p><strong>Ưu tiên:</strong> {selectedAppointment.priority ? 'Có' : 'Không'}</p>
             <p><strong>Triệu chứng:</strong> {selectedAppointment.symptoms || 'Không có'}</p>
             <p><strong>Ghi chú:</strong> {selectedAppointment.note || 'Không có'}</p>

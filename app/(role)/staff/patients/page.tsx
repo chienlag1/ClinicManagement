@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNotification } from '@/components/notification-popup';
-import { CRUDTemplate, CRUDColumn } from '@/components/crud-template';
+import { CRUDTemplate, CRUDColumn } from '@/components/DataTable';
 import { useUser } from '@clerk/nextjs';
 import {
   Modal,

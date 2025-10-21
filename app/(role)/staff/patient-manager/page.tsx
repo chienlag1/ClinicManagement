@@ -11,7 +11,7 @@ import {
   crudUtils,
   CRUDColumn,
   CRUDField,
-} from '@/components/crud-template';
+} from '@/components/DataTable';
 import { NotificationModal } from '@/components/notification-popup';
 
 // Kiểu dữ liệu patient (khớp với model Patient)
