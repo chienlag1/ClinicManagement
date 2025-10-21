@@ -61,6 +61,8 @@ export default function UserProfile() {
           phone: data.items[0].phone,
           address: data.items[0].address,
         });
+      } else {
+        setPatient(null);
       }
     } catch (error) {
       console.error('Failed to fetch patient data:', error);
@@ -181,8 +183,14 @@ export default function UserProfile() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p>No patient information found.</p>
+            <div className="text-center py-8 space-y-4">
+              <p className="text-gray-600">You haven't created your profile yet.</p>
+              <Button 
+                color="primary"
+                onClick={() => router.push('/patient-registration')}
+              >
+                Go back
+              </Button>
             </div>
           )}
         </CardBody>

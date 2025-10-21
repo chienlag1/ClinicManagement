@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IPatient extends Document {
   patient_id: string;
+  userId: string;
   id_card: string;
   name: string;
   gender: 'male' | 'female';
@@ -19,8 +20,8 @@ const PatientSchema: Schema = new Schema(
       type: String, 
       required: true, 
       unique: true,
-      default: () => 'PT' + Math.random().toString(36).substring(2, 8).toUpperCase()
     },
+    userId: { type: String, required: true, unique: true },
     id_card: { type: String, required: true, unique: true, trim: true },
     name: { type: String, required: true, trim: true },
     gender: { type: String, required: true, enum: ['male', 'female'] },

@@ -17,6 +17,8 @@ import { NotificationModal } from '@/components/notification-popup';
 // Kiểu dữ liệu patient (khớp với model Patient)
 export interface Patient {
   _id?: string;
+  patient_id: string;
+  id_card: string;
   name: string;
   gender: 'male' | 'female';
   birth_date: string; // dùng string để binding form
@@ -27,8 +29,8 @@ export interface Patient {
 }
 
 const GENDER_OPTIONS = [
-  { key: 'male', label: 'Nam' },
-  { key: 'female', label: 'Nữ' },
+  { key: 'male', label: 'Nam', color: 'bg-blue-100 text-blue-800' },
+  { key: 'female', label: 'Nữ', color: 'bg-pink-100 text-pink-800' },
 ];
 
 export default function PatientManagerNew() {
@@ -70,7 +72,7 @@ export default function PatientManagerNew() {
       patients,
       searchTerm,
       filterValue,
-      ['name', 'phone'],
+      ['name', 'phone', 'patient_id', 'id_card'],
       'gender'
     );
     setFilteredData(filtered);
@@ -142,11 +144,30 @@ export default function PatientManagerNew() {
 
   // Cột hiển thị
   const columns: CRUDColumn<Patient>[] = [
+    {
+      key: 'patient_id',
+      label: 'Mã bệnh nhân',
+      render: value => <span className='font-medium'>{value}</span>,
+    },
+    {
+      key: 'id_card',
+      label: 'Số CMND/CCCD',
+      render: value => <span className='font-medium'>{value}</span>,
+    },
     { key: 'name', label: 'Họ tên' },
     {
       key: 'gender',
       label: 'Giới tính',
-      render: value => (value === 'male' ? 'Nam' : 'Nữ'),
+      render: value => {
+        const genderInfo = GENDER_OPTIONS.find(g => g.key === value);
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${genderInfo?.color || 'bg-gray-100 text-gray-600'}`}
+          >
+            {genderInfo?.label || value}
+          </span>
+        );
+      },
     },
     {
       key: 'birth_date',
@@ -159,6 +180,20 @@ export default function PatientManagerNew() {
 
   // Trường form
   const fields: CRUDField<Patient>[] = [
+    {
+      key: 'patient_id',
+      label: 'Mã bệnh nhân',
+      type: 'text',
+      placeholder: 'Nhập mã bệnh nhân',
+      required: true,
+    },
+    {
+      key: 'id_card',
+      label: 'Số CMND/CCCD',
+      type: 'text',
+      placeholder: 'Nhập số CMND/CCCD',
+      required: true,
+    },
     {
       key: 'name',
       label: 'Họ tên',
@@ -209,7 +244,7 @@ export default function PatientManagerNew() {
         filterPlaceholder='Lọc theo giới tính'
         filterValue={filterValue}
         filteredData={filteredData}
-        searchFields={['name', 'phone']}
+        searchFields={['name', 'phone', 'patient_id', 'id_card']}
         searchPlaceholder='Tìm kiếm bệnh nhân...'
         searchTerm={searchTerm}
         setFilterValue={setFilterValue}
