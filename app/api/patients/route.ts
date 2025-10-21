@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
-
+import { NextResponse, NextRequest } from 'next/server';
+import { getAuth } from '@clerk/nextjs/server';
 import { connectMongo } from '@/lib/mongodb';
 import Patient from '@/models/Patient';
 
 // GET /api/patients?search=&gender=&page=1&limit=10
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     await connectMongo();
 
@@ -49,17 +49,27 @@ export async function GET(req: Request) {
 }
 
 // POST /api/patients
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const auth = getAuth(req);
+    if (!auth.userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     await connectMongo();
     const body = await req.json();
 
+    // Validate required fields
     if (
       !body?.name ||
       !body?.gender ||
       !body?.birth_date ||
       !body?.phone ||
-      !body?.address
+      !body?.address ||
+      !body?.id_card
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -68,6 +78,7 @@ export async function POST(req: Request) {
     }
 
     const created = await Patient.create({
+      id_card: body.id_card,
       name: body.name,
       gender: body.gender,
       birth_date: new Date(body.birth_date),
@@ -78,9 +89,10 @@ export async function POST(req: Request) {
     return NextResponse.json(created, { status: 201 });
   } catch (error: any) {
     if (error?.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
       return NextResponse.json(
-        { error: 'Phone already exists' },
-        { status: 409 }
+        { error: `${field} already exists` },
+        { status: 400 }
       );
     }
     return NextResponse.json(
