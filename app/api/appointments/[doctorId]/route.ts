@@ -5,12 +5,12 @@ import Appointment from '@/models/Appointment';
 // GET /api/appointments/[doctorId]
 export async function GET(
   request: Request,
-  { params }: { params: { doctorId: string } }
+  context: any
 ) {
   try {
     await connectMongo();
     
-    const { doctorId } = params;
+    const { doctorId } = context.params;
     
     // Lấy appointments theo doctor_id
     const appointments = await Appointment.find({ doctor_id: doctorId })
