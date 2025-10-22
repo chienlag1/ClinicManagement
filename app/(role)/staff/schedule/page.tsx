@@ -36,9 +36,11 @@ export default function StaffSchedulePage() {
       try {
         setLoading(true);
         const response = await fetch('http://localhost:3000/api/appointments');
+
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
+
         setAppointments(data);
       } catch (err) {
         setError(
@@ -50,6 +52,7 @@ export default function StaffSchedulePage() {
         setLoading(false);
       }
     };
+
     fetchAppointments();
   }, []);
 
@@ -62,16 +65,21 @@ export default function StaffSchedulePage() {
       return appointments.filter(a => {
         if (!a.appointment_date) return false;
         const date = new Date(a.appointment_date);
+
         if (isNaN(date.getTime())) return false;
         const appointmentDate = date.toISOString().split('T')[0];
+
         return appointmentDate === today;
       });
     }
+
     return appointments.filter(a => {
       if (!a.appointment_date) return false;
       const date = new Date(a.appointment_date);
+
       if (isNaN(date.getTime())) return false;
       const appointmentDate = date.toISOString().split('T')[0];
+
       return appointmentDate === selectedDate;
     });
   };
@@ -109,12 +117,12 @@ export default function StaffSchedulePage() {
             {(['today', 'all'] as const).map(mode => (
               <button
                 key={mode}
-                onClick={() => handleModeChange(mode)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   filterMode === mode
                     ? 'bg-blue-600 text-white shadow'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
+                onClick={() => handleModeChange(mode)}
               >
                 {mode === 'today' ? 'Hôm nay' : 'Tất cả'}
               </button>
@@ -123,16 +131,16 @@ export default function StaffSchedulePage() {
 
           {/* Bộ chọn ngày thủ công */}
           <div className='flex items-center gap-2'>
-            <label htmlFor='selectedDate' className='font-medium text-gray-700'>
+            <label className='font-medium text-gray-700' htmlFor='selectedDate'>
               hoặc chọn ngày:
             </label>
 
             <div className='relative'>
               <input
                 ref={datePickerRef}
+                className='absolute opacity-0 w-0 h-0'
                 id='selectedDate'
                 type='date'
-                className='absolute opacity-0 w-0 h-0'
                 value={selectedDate}
                 onChange={e => {
                   setSelectedDate(e.target.value);
@@ -143,12 +151,12 @@ export default function StaffSchedulePage() {
 
               {/* Nút hiển thị ngày + icon lịch */}
               <button
-                onClick={() => datePickerRef.current?.showPicker()}
                 className='flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition text-gray-700'
+                onClick={() => datePickerRef.current?.showPicker()}
               >
                 <Icon
-                  icon='lucide:calendar'
                   className='w-5 h-5 text-blue-600'
+                  icon='lucide:calendar'
                 />
                 <span>
                   {selectedDate
@@ -164,28 +172,28 @@ export default function StaffSchedulePage() {
       {/* Danh sách lịch khám */}
       <AppointmentList
         appointments={paginatedAppointments}
-        loading={loading}
-        error={error}
-        onAppointmentClick={setSelectedAppointment}
         emptyMessage='Không có lịch khám nào.'
+        error={error}
+        loading={loading}
+        onAppointmentClick={setSelectedAppointment}
       />
 
       {/* Pagination */}
       {filteredAppointments.length > 0 && (
         <div className='mt-6'>
           <Pagination
-            totalItems={filteredAppointments.length}
+            className='bg-white p-4 rounded-lg shadow border border-gray-200'
+            color='primary'
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
-            onItemsPerPageChange={handleItemsPerPageChange}
             itemsPerPageOptions={[5, 10, 20, 50]}
-            showTotal={true}
-            showItemsPerPage={true}
             showFirstLast={true}
+            showItemsPerPage={true}
+            showTotal={true}
             size='md'
-            color='primary'
-            className='bg-white p-4 rounded-lg shadow border border-gray-200'
+            totalItems={filteredAppointments.length}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

@@ -15,6 +15,7 @@ export async function GET(request: Request, context: any) {
 
     return NextResponse.json(appointments, { status: 200 });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error fetching doctor appointments:', error);
 
     return NextResponse.json(
