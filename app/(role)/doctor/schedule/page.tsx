@@ -8,7 +8,7 @@ import { AppointmentList } from '@/components/appointment/appointment-list';
 import { AppointmentDetailModal } from '@/components/appointment/appointment-detail-modal';
 import { Appointment, FilterMode } from '@/types/appointment';
 
-export default function StaffSchedulePage() {
+export default function DoctorSchedulePage() {
   const datePickerRef = React.useRef<HTMLInputElement>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
