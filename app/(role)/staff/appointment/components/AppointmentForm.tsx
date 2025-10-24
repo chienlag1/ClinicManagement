@@ -1,22 +1,33 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PatientData, Patient, Clinic, Doctor, AppointmentFormData } from '@/types/appointment';
+import { 
+  PatientData, 
+  Patient, 
+  Doctor,
+  AppointmentFormProps,
+  AppointmentFormState,
+  AppointmentFormData,
+  FormEventHandlers,
+  FormValidation,
+  FormSubmission,
+  TimeSlot,
+  
+  FormConfig,
+  APPOINTMENT_TIME_SLOTS,
+  FORM_CONFIG
+} from '@/types';
+import { Clinic } from '@/types/clinic';
+import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
+import { Select, SelectItem } from '@heroui/select';
+import { Autocomplete, AutocompleteItem } from '@heroui/autocomplete';
+import { Switch } from '@heroui/switch';
+import { Card, CardBody, CardHeader } from '@heroui/card';
+import { Divider } from '@heroui/divider';
+import { Alert } from '@heroui/alert';
+import { Spinner } from '@heroui/spinner';
 
-interface AppointmentFormProps {
-  onSubmit: (
-    isNewPatient: boolean,
-    patientData: PatientData | null,
-    selectedPatientId: string | null,
-    clinic_id: string,
-    doctor_id: string,
-    appointment_date: string,
-    appointment_time: string,
-    priority: boolean,
-    symptoms: string,
-    note: string
-  ) => void;
-}
 
 export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
   const [isNewPatient, setIsNewPatient] = useState(false);
@@ -39,6 +50,7 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -46,24 +58,32 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('Fetching data...');
         const [clinicResponse, doctorResponse, patientResponse] = await Promise.all([
-          fetch('http://localhost:3000/api/clinics'),
-          fetch('http://localhost:3000/api/doctors'),
-          fetch('http://localhost:3000/api/patients'),
+          fetch('/api/clinics'),
+          fetch('/api/doctors'),
+          fetch('/api/patients'),
         ]);
+        
+        console.log('Responses:', { clinicResponse, doctorResponse, patientResponse });
         
         if (!clinicResponse.ok) throw new Error('Không thể lấy danh sách phòng khám.');
         const clinicData = await clinicResponse.json();
+        console.log('Clinic data:', clinicData);
         setClinics(clinicData);
 
         if (!doctorResponse.ok) throw new Error('Không thể lấy danh sách bác sĩ.');
         const doctorData = await doctorResponse.json();
+        console.log('Doctor data:', doctorData);
         setDoctors(doctorData);
 
         if (!patientResponse.ok) throw new Error('Không thể lấy danh sách bệnh nhân.');
         const patientData = await patientResponse.json();
-        if (Array.isArray(patientData.items)) {
+        console.log('Patient data:', patientData);
+        if (patientData.items && Array.isArray(patientData.items)) {
           setPatients(patientData.items);
+        } else if (Array.isArray(patientData)) {
+          setPatients(patientData);
         } else {
           setPatients([]);
           console.warn('API /api/patients returned non-array data:', patientData);
@@ -81,24 +101,28 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setIsLoading(true);
 
     if (!clinicId || !doctorId || !appointmentDate || !appointmentTime) {
       setError('Vui lòng điền đầy đủ thông tin: phòng khám, bác sĩ, ngày và giờ hẹn.');
+      setIsLoading(false);
       return;
     }
 
     if (isNewPatient && (!patientData.patient_id || !patientData.id_card || !patientData.name || !patientData.birth_date || !patientData.phone || !patientData.address)) {
       setError('Vui lòng điền đầy đủ thông tin bệnh nhân.');
+      setIsLoading(false);
       return;
     }
 
     if (!isNewPatient && !selectedPatientId) {
       setError('Vui lòng chọn ID bệnh nhân.');
+      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/appointments', {
+      const response = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -144,289 +168,286 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
       setNote('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Có lỗi xảy ra.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <form className='space-y-4' onSubmit={handleSubmit}>
-      {error && (
-        <div className='p-3 bg-red-50 border border-red-200 rounded-md'>
-          <p className='text-red-600 text-sm'>{error}</p>
-        </div>
-      )}
-      {success && (
-        <div className='p-3 bg-green-50 border border-green-200 rounded-md'>
-          <p className='text-green-600 text-sm'>{success}</p>
-        </div>
-      )}
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold text-center">Đặt lịch khám bệnh</h2>
+        <p className="text-small text-default-500 text-center">
+          Điền thông tin để đặt lịch khám cho bệnh nhân
+        </p>
+      </CardHeader>
+      <CardBody className="gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <Alert color="danger" variant="flat">
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert color="success" variant="flat">
+              {success}
+            </Alert>
+          )}
 
-      <div className='flex items-center gap-2'>
-        <label htmlFor='isNewPatient' className='text-sm font-medium'>
-          Bệnh nhân mới
-          <input
-            id='isNewPatient'
-            type='checkbox'
-            checked={isNewPatient}
-            onChange={e => setIsNewPatient(e.target.checked)}
-            className='h-4 w-4 ml-2'
-          />
-        </label>
-      </div>
+          <div className="flex items-center gap-3">
+            <Switch
+              isSelected={isNewPatient}
+              onValueChange={setIsNewPatient}
+              color="primary"
+            />
+            <label className="text-medium font-medium">
+              Bệnh nhân mới
+            </label>
+          </div>
 
-      {isNewPatient ? (
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label htmlFor='patientId' className='block text-sm font-medium text-gray-700 mb-1'>
-              ID bệnh nhân
-            </label>
-            <input
-              id='patientId'
-              type='text'
-              value={patientData.patient_id}
-              onChange={e => setPatientData({ ...patientData, patient_id: e.target.value })}
-              className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-              required
-            />
+          {isNewPatient ? (
+            <Card className="bg-blue-50/50">
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-blue-800">Thông tin bệnh nhân mới</h3>
+              </CardHeader>
+              <CardBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="ID bệnh nhân"
+                    placeholder="Nhập ID bệnh nhân"
+                    value={patientData.patient_id}
+                    onChange={(e) => setPatientData({ ...patientData, patient_id: e.target.value })}
+                    isRequired
+                    variant="bordered"
+                  />
+                  <Input
+                    label="Số CMND/CCCD"
+                    placeholder="Nhập số CMND/CCCD"
+                    value={patientData.id_card}
+                    onChange={(e) => setPatientData({ ...patientData, id_card: e.target.value })}
+                    isRequired
+                    variant="bordered"
+                  />
+                  <Input
+                    label="Tên bệnh nhân"
+                    placeholder="Nhập tên bệnh nhân"
+                    value={patientData.name}
+                    onChange={(e) => setPatientData({ ...patientData, name: e.target.value })}
+                    isRequired
+                    variant="bordered"
+                  />
+                  <Select
+                    label="Giới tính"
+                    placeholder="Chọn giới tính"
+                    selectedKeys={[patientData.gender]}
+                    onSelectionChange={(keys) => {
+                      const selected = Array.from(keys)[0] as string;
+                      setPatientData({ ...patientData, gender: selected as 'male' | 'female' });
+                    }}
+                    isRequired
+                    variant="bordered"
+                  >
+                    <SelectItem key="male">Nam</SelectItem>
+                    <SelectItem key="female">Nữ</SelectItem>
+                  </Select>
+                  <Input
+                    label="Ngày sinh"
+                    type="date"
+                    value={patientData.birth_date}
+                    onChange={(e) => setPatientData({ ...patientData, birth_date: e.target.value })}
+                    isRequired
+                    variant="bordered"
+                  />
+                  <Input
+                    label="Số điện thoại"
+                    placeholder="Nhập số điện thoại"
+                    value={patientData.phone}
+                    onChange={(e) => setPatientData({ ...patientData, phone: e.target.value })}
+                    isRequired
+                    variant="bordered"
+                  />
+                  <div className="md:col-span-2">
+                    <Input
+                      label="Địa chỉ"
+                      placeholder="Nhập địa chỉ"
+                      value={patientData.address}
+                      onChange={(e) => setPatientData({ ...patientData, address: e.target.value })}
+                      isRequired
+                      variant="bordered"
+                    />
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          ) : (
+            <Card className="bg-green-50/50">
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-green-800">Chọn bệnh nhân hiện có</h3>
+              </CardHeader>
+              <CardBody>
+                <div className="space-y-2">
+                  <label className="text-small font-medium text-foreground">Chọn bệnh nhân</label>
+                  <div className="relative">
+                    <Input
+                      placeholder="Chọn bệnh nhân từ danh sách"
+                      value={selectedPatientId ? patients.find(p => p._id === selectedPatientId)?.name || '' : ''}
+                      readOnly
+                      variant="bordered"
+                      className="max-w-xs"
+                    />
+                    <select
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      value={selectedPatientId || ''}
+                      onChange={(e) => {
+                        console.log('Selected patient:', e.target.value);
+                        setSelectedPatientId(e.target.value || null);
+                      }}
+                    >
+                      <option value="">Chọn bệnh nhân</option>
+                      {Array.isArray(patients) && patients.map((patient) => (
+                        <option key={patient._id} value={patient._id}>
+                          {patient.name} (ID: {patient.patient_id})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          )}
+
+          <Divider />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-small font-medium text-foreground">Phòng khám</label>
+              <div className="relative">
+                <Input
+                  placeholder="Chọn phòng khám"
+                  value={clinicId ? clinics.find(c => c._id === clinicId)?.clinic_code || '' : ''}
+                  readOnly
+                  variant="bordered"
+                />
+                <select
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  value={clinicId || ''}
+                  onChange={(e) => {
+                    console.log('Selected clinic:', e.target.value);
+                    setClinicId(e.target.value || '');
+                  }}
+                >
+                  <option value="">Chọn phòng khám</option>
+                  {clinics.map((clinic) => (
+                    <option key={clinic._id} value={clinic._id}>
+                      {clinic.clinic_code} - {clinic.description || clinic.status || 'Không có mô tả'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-small font-medium text-foreground">Bác sĩ</label>
+              <div className="relative">
+                <Input
+                  placeholder="Chọn bác sĩ"
+                  value={doctorId ? doctors.find(d => d._id === doctorId)?.name || '' : ''}
+                  readOnly
+                  variant="bordered"
+                />
+                <select
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  value={doctorId || ''}
+                  onChange={(e) => {
+                    console.log('Selected doctor:', e.target.value);
+                    setDoctorId(e.target.value || '');
+                  }}
+                >
+                  <option value="">Chọn bác sĩ</option>
+                  {doctors.map((doctor) => (
+                    <option key={doctor._id} value={doctor._id}>
+                      {doctor.name} ({doctor.specialty})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
-          <div>
-            <label htmlFor='idCard' className='block text-sm font-medium text-gray-700 mb-1'>
-              Số CMND/CCCD
-            </label>
-            <input
-              id='idCard'
-              type='text'
-              value={patientData.id_card}
-              onChange={e => setPatientData({ ...patientData, id_card: e.target.value })}
-              className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-              required
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Ngày hẹn"
+              type="date"
+              value={appointmentDate}
+              onChange={(e) => setAppointmentDate(e.target.value)}
+              min={FORM_CONFIG.minDate}
+              isRequired
+              variant="bordered"
             />
-          </div>
-          <div>
-            <label htmlFor='patientName' className='block text-sm font-medium text-gray-700 mb-1'>
-              Tên bệnh nhân
-            </label>
-            <input
-              id='patientName'
-              type='text'
-              value={patientData.name}
-              onChange={e => setPatientData({ ...patientData, name: e.target.value })}
-              className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor='gender' className='block text-sm font-medium text-gray-700 mb-1'>
-              Giới tính
-            </label>
-            <select
-              id='gender'
-              value={patientData.gender}
-              onChange={e => setPatientData({ ...patientData, gender: e.target.value as 'male' | 'female' })}
-              className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-              required
+            <Select
+              label="Giờ hẹn"
+              placeholder="Chọn giờ hẹn"
+              selectedKeys={appointmentTime ? new Set([appointmentTime]) : new Set()}
+              onSelectionChange={(keys) => {
+                const selected = Array.from(keys)[0] as string;
+                setAppointmentTime(selected || '');
+              }}
+              isRequired
+              variant="bordered"
             >
-              <option value='male'>Nam</option>
-              <option value='female'>Nữ</option>
-            </select>
+              {APPOINTMENT_TIME_SLOTS.all.map((slot) => (
+                <SelectItem key={slot.value}>
+                  {slot.label}
+                </SelectItem>
+              ))}
+            </Select>
           </div>
-          <div>
-            <label htmlFor='birthDate' className='block text-sm font-medium text-gray-700 mb-1'>
-              Ngày sinh
+
+          <div className="flex items-center gap-3">
+            <Switch
+              isSelected={priority}
+              onValueChange={setPriority}
+              color="warning"
+            />
+            <label className="text-medium font-medium">
+              Ưu tiên (Xếp số 1)
             </label>
-            <input
-              id='birthDate'
-              type='date'
-              value={patientData.birth_date}
-              onChange={e => setPatientData({ ...patientData, birth_date: e.target.value })}
-              className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-              required
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-small font-medium text-foreground">Triệu chứng</label>
+            <textarea
+              placeholder="Mô tả triệu chứng của bệnh nhân..."
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+              className="w-full px-3 py-2 border border-default-200 rounded-medium bg-background text-foreground text-small focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              rows={3}
             />
           </div>
-          <div>
-            <label htmlFor='phone' className='block text-sm font-medium text-gray-700 mb-1'>
-              Số điện thoại
-            </label>
-            <input
-              id='phone'
-              type='text'
-              value={patientData.phone}
-              onChange={e => setPatientData({ ...patientData, phone: e.target.value })}
-              className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-              required
+
+          <div className="space-y-2">
+            <label className="text-small font-medium text-foreground">Ghi chú</label>
+            <textarea
+              placeholder="Ghi chú thêm (nếu có)..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="w-full px-3 py-2 border border-default-200 rounded-medium bg-background text-foreground text-small focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              rows={2}
             />
           </div>
-          <div className='md:col-span-2'>
-            <label htmlFor='address' className='block text-sm font-medium text-gray-700 mb-1'>
-              Địa chỉ
-            </label>
-            <input
-              id='address'
-              type='text'
-              value={patientData.address}
-              onChange={e => setPatientData({ ...patientData, address: e.target.value })}
-              className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-              required
-            />
-          </div>
-        </div>
-      ) : (
-        <div>
-          <label htmlFor='patientId' className='block text-sm font-medium text-gray-700 mb-1'>
-            Chọn bệnh nhân
-          </label>
-          <select
-            id='patientId'
-            value={selectedPatientId || ''}
-            onChange={e => setSelectedPatientId(e.target.value)}
-            className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-            required
+
+          <Button
+            type="submit"
+            color="primary"
+            size="lg"
+            className="w-full font-semibold"
+            isLoading={isLoading}
+            spinner={<Spinner size="sm" />}
           >
-            <option value=''>Chọn bệnh nhân</option>
-            {Array.isArray(patients) && patients.map((patient) => (
-              <option key={patient._id} value={patient._id}>
-                {patient.name} (ID: {patient.patient_id})
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        <div>
-          <label htmlFor='clinicId' className='block text-sm font-medium text-gray-700 mb-1'>
-            Phòng khám
-          </label>
-          <select
-            id='clinicId'
-            value={clinicId}
-            onChange={e => setClinicId(e.target.value)}
-            className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-            required
-          >
-            <option value=''>Chọn phòng khám</option>
-            {clinics.map((clinic) => (
-              <option key={clinic._id} value={clinic._id}>
-                {clinic.name} - {clinic.address}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor='doctorId' className='block text-sm font-medium text-gray-700 mb-1'>
-            Bác sĩ
-          </label>
-          <select
-            id='doctorId'
-            value={doctorId}
-            onChange={e => setDoctorId(e.target.value)}
-            className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-            required
-          >
-            <option value=''>Chọn bác sĩ</option>
-            {doctors.map((doctor) => (
-              <option key={doctor._id} value={doctor._id}>
-                {doctor.name} ({doctor.specialty})
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        <div>
-          <label htmlFor='appointmentDate' className='block text-sm font-medium text-gray-700 mb-1'>
-            Ngày hẹn
-          </label>
-          <input
-            id='appointmentDate'
-            type='date'
-            value={appointmentDate}
-            onChange={e => setAppointmentDate(e.target.value)}
-            min={new Date().toISOString().split('T')[0]}
-            className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor='appointmentTime' className='block text-sm font-medium text-gray-700 mb-1'>
-            Giờ hẹn
-          </label>
-          <select
-            id='appointmentTime'
-            value={appointmentTime}
-            onChange={e => setAppointmentTime(e.target.value)}
-            className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-            required
-          >
-            <option value=''>Chọn giờ</option>
-            <option value='08:00'>08:00</option>
-            <option value='08:30'>08:30</option>
-            <option value='09:00'>09:00</option>
-            <option value='09:30'>09:30</option>
-            <option value='10:00'>10:00</option>
-            <option value='10:30'>10:30</option>
-            <option value='11:00'>11:00</option>
-            <option value='11:30'>11:30</option>
-            <option value='14:00'>14:00</option>
-            <option value='14:30'>14:30</option>
-            <option value='15:00'>15:00</option>
-            <option value='15:30'>15:30</option>
-            <option value='16:00'>16:00</option>
-            <option value='16:30'>16:30</option>
-            <option value='17:00'>17:00</option>
-            <option value='17:30'>17:30</option>
-          </select>
-        </div>
-      </div>
-
-      <div className='flex items-center gap-2'>
-        <label htmlFor='priority' className='text-sm font-medium'>
-          Ưu tiên (Xếp số 1)
-          <input
-            id='priority'
-            type='checkbox'
-            checked={priority}
-            onChange={e => setPriority(e.target.checked)}
-            className='h-4 w-4 ml-2'
-          />
-        </label>
-      </div>
-
-      <div>
-        <label htmlFor='symptoms' className='block text-sm font-medium text-gray-700 mb-1'>
-          Triệu chứng
-        </label>
-        <textarea
-          id='symptoms'
-          value={symptoms}
-          onChange={e => setSymptoms(e.target.value)}
-          className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-          rows={3}
-          placeholder='Mô tả triệu chứng của bệnh nhân...'
-        />
-      </div>
-
-      <div>
-        <label htmlFor='note' className='block text-sm font-medium text-gray-700 mb-1'>
-          Ghi chú
-        </label>
-        <textarea
-          id='note'
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          className='w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-          rows={2}
-          placeholder='Ghi chú thêm (nếu có)...'
-        />
-      </div>
-
-      <button
-        type='submit'
-        className='w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium'
-      >
-        Đặt lịch khám
-      </button>
-    </form>
+            {isLoading ? 'Đang xử lý...' : 'Đặt lịch khám'}
+          </Button>
+        </form>
+      </CardBody>
+    </Card>
   );
 }

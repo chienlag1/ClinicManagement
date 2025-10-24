@@ -214,7 +214,7 @@ export default function StaffDashboard() {
         <CardHeader className='flex justify-between items-center'>
           <h3 className='text-lg font-semibold'>Lịch hẹn hôm nay</h3>
           <a 
-            href='/staff/appointment' 
+            href='/staff/schedule' 
             className='text-sm text-blue-600 hover:text-blue-800 font-medium'
           >
             Xem tất cả →
