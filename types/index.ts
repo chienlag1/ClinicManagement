@@ -1,5 +1,8 @@
-import { SVGProps } from 'react';
-
-export type IconSvgProps = SVGProps<SVGSVGElement> & {
-  size?: number;
-};
+// Export all types
+export * from './appointment';
+export * from './clinic';
+export * from './medicine';
+export * from './form';
+export * from './ui';
+export * from './api';
+export * from './validation';

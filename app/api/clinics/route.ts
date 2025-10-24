@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectMongo } from "@/lib/mongodb";
 import Clinic from "@/models/Clinic";
 
-const USE_MOCK = true; // Sử dụng mock data để test
+const USE_MOCK = false; // Sử dụng dữ liệu thật từ database
 
 export async function GET() {
   try {
@@ -29,36 +29,35 @@ export async function POST(req: Request) {
   try {
     await connectMongo();
     const body = await req.json();
+    
+    // Validate required fields
     if (!body.clinic_id || !body.clinic_code || !body.status) {
-      return NextResponse.json({ error: "Thiếu clinic_id, clinic_code hoặc status" }, { status: 400 });
+      return NextResponse.json({ 
+        error: "Thiếu thông tin bắt buộc: clinic_id, clinic_code hoặc status" 
+      }, { status: 400 });
     }
+
+    // Check if clinic_id or clinic_code already exists
+    const existingClinic = await Clinic.findOne({
+      $or: [
+        { clinic_id: body.clinic_id },
+        { clinic_code: body.clinic_code }
+      ]
+    });
+
+    if (existingClinic) {
+      return NextResponse.json({ 
+        error: "Phòng khám với ID hoặc mã này đã tồn tại" 
+      }, { status: 409 });
+    }
+
     const newClinic = await Clinic.create(body);
+    console.log('Created new clinic:', newClinic);
     return NextResponse.json(newClinic, { status: 201 });
   } catch (error) {
     console.error('Error creating clinic:', error);
-    return NextResponse.json({ error: "Failed to create clinic" }, { status: 500 });
-  }
-}
-
-export async function DELETE(req: Request) {
-  try {
-    await connectMongo();
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json({ error: "Clinic ID is required" }, { status: 400 });
-    }
-
-    const deleted = await Clinic.findByIdAndDelete(id);
-
-    if (!deleted) {
-      return NextResponse.json({ error: "Clinic not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ message: "Clinic deleted successfully" });
-  } catch (error) {
-    console.error('Error deleting clinic:', error);
-    return NextResponse.json({ error: "Failed to delete clinic" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Không thể tạo phòng khám mới. Vui lòng thử lại." 
+    }, { status: 500 });
   }
 }
