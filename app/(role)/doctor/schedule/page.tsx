@@ -1,23 +1,24 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Icon } from '@iconify/react';
-
+import React, { useEffect, useState, useRef } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { Card, CardBody, CardHeader } from '@heroui/card';
+import { Button } from '@heroui/button';
+import { Calendar } from 'lucide-react';
 import { Pagination, usePagination } from '@/components/pagination';
+
 import { AppointmentList } from '@/components/appointment/appointment-list';
 import { AppointmentDetailModal } from '@/components/appointment/appointment-detail-modal';
 import { Appointment, FilterMode } from '@/types/appointment';
 
-export default function DoctorSchedulePage() {
-  const datePickerRef = React.useRef<HTMLInputElement>(null);
+export default function SchedulePage() {
+  const { user } = useUser();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null);
+  const [selected, setSelected] = useState<Appointment | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [filterMode, setFilterMode] = useState<FilterMode>('today');
-
+  
   // Pagination state
   const {
     currentPage,
@@ -27,74 +28,62 @@ export default function DoctorSchedulePage() {
     resetPagination,
   } = usePagination(1, 10);
 
-  // Ngày hiện tại dạng yyyy-mm-dd
+  const dateInputRef = useRef<HTMLInputElement>(null);
+
+  // ✅ Ngày hiện tại dạng yyyy-mm-dd
   const today = new Date().toISOString().split('T')[0];
 
-  // Fetch danh sách appointments
+  // ✅ Fetch danh sách appointments
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('http://localhost:3000/api/appointments');
+    if (!user) return;
 
-        if (!response.ok)
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        const data = await response.json();
-
+    setLoading(true);
+    // Tạm thời sử dụng doctor_id cố định, sau này có thể lấy từ user profile
+    const doctorId = '1'; // Thay bằng doctor_id thực tế của user
+    
+    fetch(`/api/appointments/${doctorId}`)
+      .then(res => res.json())
+      .then(data => {
         setAppointments(data);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Có lỗi xảy ra khi lấy danh sách lịch khám.'
-        );
-      } finally {
         setLoading(false);
-      }
-    };
-
-    fetchAppointments();
-  }, []);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [user]);
 
   // Status colors are imported from shared types
 
-  // Lọc danh sách theo chế độ
+  // ✅ Lọc danh sách theo chế độ
   const getFilteredAppointments = () => {
     if (filterMode === 'all') return appointments;
     if (filterMode === 'today') {
       return appointments.filter(a => {
         if (!a.appointment_date) return false;
         const date = new Date(a.appointment_date);
-
         if (isNaN(date.getTime())) return false;
         const appointmentDate = date.toISOString().split('T')[0];
-
         return appointmentDate === today;
       });
     }
-
     return appointments.filter(a => {
       if (!a.appointment_date) return false;
       const date = new Date(a.appointment_date);
-
       if (isNaN(date.getTime())) return false;
       const appointmentDate = date.toISOString().split('T')[0];
-
       return appointmentDate === selectedDate;
     });
   };
 
   const filteredAppointments = getFilteredAppointments();
-
+  
   // Áp dụng pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedAppointments = filteredAppointments.slice(
-    startIndex,
-    endIndex
-  );
+  const paginatedAppointments = filteredAppointments.slice(startIndex, endIndex);
 
-  // Khi chọn "Today" hoặc "All", cập nhật selectedDate về hôm nay
+  // ✅ Khi chọn "Today" hoặc "All", cập nhật selectedDate về hôm nay
   const handleModeChange = (mode: FilterMode) => {
     setFilterMode(mode);
     if (mode === 'today' || mode === 'all') {
@@ -104,104 +93,98 @@ export default function DoctorSchedulePage() {
   };
 
   return (
-    <div className='p-6 space-y-6'>
-      <h1 className='text-3xl font-bold text-gray-900 mb-4'>
-        Danh sách lịch khám
-      </h1>
+    <div className="p-6 space-y-6">
+      <h1 className="text-3xl font-bold text-gray-900 mb-4">Danh sách lịch khám</h1>
 
       {/* Bộ lọc ngày */}
-      <div className='bg-white rounded-lg shadow p-4 border border-gray-200'>
-        <div className='flex flex-wrap gap-3 items-center justify-between'>
+      <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
+        <div className="flex flex-wrap gap-3 items-center justify-between">
           {/* Nút chọn nhanh */}
-          <div className='flex flex-wrap gap-2'>
+          <div className="flex flex-wrap gap-2">
             {(['today', 'all'] as const).map(mode => (
               <button
                 key={mode}
+                onClick={() => handleModeChange(mode)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   filterMode === mode
                     ? 'bg-blue-600 text-white shadow'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
-                onClick={() => handleModeChange(mode)}
               >
-                {mode === 'today' ? 'Hôm nay' : 'Tất cả'}
+                {mode === 'today' ? 'Today' : 'All'}
               </button>
             ))}
           </div>
 
           {/* Bộ chọn ngày thủ công */}
-          <div className='flex items-center gap-2'>
-            <label className='font-medium text-gray-700' htmlFor='selectedDate'>
-              hoặc chọn ngày:
+          <div className="flex items-center gap-2">
+            <label htmlFor="selectedDate" className="font-medium text-gray-700">
+              or pick date:
             </label>
 
-            <div className='relative'>
+            <div className="relative flex items-center">
+              {/* Input chọn ngày */}
               <input
-                ref={datePickerRef}
-                className='absolute opacity-0 w-0 h-0'
-                id='selectedDate'
-                type='date'
+                ref={dateInputRef}
+                id="selectedDate"
+                type="date"
+                className="border border-gray-300 rounded-md pl-3 pr-8 py-1 text-gray-900 focus:ring-2 focus:ring-blue-400 cursor-pointer"
                 value={selectedDate}
                 onChange={e => {
                   setSelectedDate(e.target.value);
                   setFilterMode('custom');
-                  resetPagination();
                 }}
               />
 
-              {/* Nút hiển thị ngày + icon lịch */}
-              <button
-                className='flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition text-gray-700'
-                onClick={() => datePickerRef.current?.showPicker()}
-              >
-                <Icon
-                  className='w-5 h-5 text-blue-600'
-                  icon='lucide:calendar'
-                />
-                <span>
-                  {selectedDate
-                    ? new Date(selectedDate).toLocaleDateString('vi-VN')
-                    : new Date(today).toLocaleDateString('vi-VN')}
-                </span>
-              </button>
+              {/* Icon lịch — nằm bên phải */}
+              <Calendar
+                className="absolute right-2 text-gray-500 w-4 h-4 cursor-pointer hover:text-blue-500 transition"
+                onClick={() => dateInputRef.current?.showPicker()} // 👈 mở date picker
+              />
             </div>
           </div>
         </div>
       </div>
 
+      {/* Danh sách lịch hẹn */}
+      {loading && <p>Loading...</p>}
+      {!loading && filteredAppointments.length === 0 && (
+        <p>No appointments found for this selection.</p>
+      )}
+
       {/* Danh sách lịch khám */}
       <AppointmentList
         appointments={paginatedAppointments}
-        emptyMessage='Không có lịch khám nào.'
-        error={error}
         loading={loading}
-        onAppointmentClick={setSelectedAppointment}
+        error={null}
+        onAppointmentClick={setSelected}
+        emptyMessage="No appointments found for this selection."
       />
 
       {/* Pagination */}
       {filteredAppointments.length > 0 && (
-        <div className='mt-6'>
+        <div className="mt-6">
           <Pagination
-            className='bg-white p-4 rounded-lg shadow border border-gray-200'
-            color='primary'
+            totalItems={filteredAppointments.length}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            itemsPerPageOptions={[5, 10, 20, 50]}
-            showFirstLast={true}
-            showItemsPerPage={true}
-            showTotal={true}
-            size='md'
-            totalItems={filteredAppointments.length}
-            onItemsPerPageChange={handleItemsPerPageChange}
             onPageChange={handlePageChange}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            itemsPerPageOptions={[5, 10, 20, 50]}
+            showTotal={true}
+            showItemsPerPage={true}
+            showFirstLast={true}
+            size="md"
+            color="primary"
+            className="bg-white p-4 rounded-lg shadow border border-gray-200"
           />
         </div>
       )}
 
       {/* Modal chi tiết */}
       <AppointmentDetailModal
-        appointment={selectedAppointment}
-        onClose={() => setSelectedAppointment(null)}
+        appointment={selected}
+        onClose={() => setSelected(null)}
       />
     </div>
   );
