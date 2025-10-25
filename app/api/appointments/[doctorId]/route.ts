@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { connectMongo } from '@/lib/mongodb';
 import Appointment from '@/models/Appointment';
+import Patient from '@/models/Patient';
+void Patient; // ensure Patient model is registered so populate() works
 
 // GET /api/appointments/[doctorId]
 export async function GET(
