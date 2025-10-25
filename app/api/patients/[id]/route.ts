@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { connectMongo } from '@/lib/mongodb';
 import Patient from '@/models/Patient';
@@ -12,9 +12,11 @@ export async function GET(req: NextRequest, context: Ctx) {
     const { id } = await context.params;
 
     const doc = await Patient.findById(id);
+
     if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
     return NextResponse.json(doc);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch patient' },
       { status: 500 }
@@ -25,11 +27,9 @@ export async function GET(req: NextRequest, context: Ctx) {
 export async function PUT(req: NextRequest, context: Ctx) {
   try {
     const auth = getAuth(req);
+
     if (!auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectMongo();
@@ -37,6 +37,7 @@ export async function PUT(req: NextRequest, context: Ctx) {
     const body = await req.json();
 
     const data: any = {};
+
     if (body.name !== undefined) data.name = body.name;
     if (body.gender !== undefined) data.gender = body.gender;
     if (body.birth_date !== undefined)
@@ -49,17 +50,21 @@ export async function PUT(req: NextRequest, context: Ctx) {
       new: true,
       runValidators: true,
     });
+
     if (!updated)
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
     return NextResponse.json(updated);
   } catch (error: any) {
     if (error?.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
+
       return NextResponse.json(
         { error: `${field} already exists` },
         { status: 409 }
       );
     }
+
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }
@@ -70,6 +75,7 @@ export async function DELETE(req: NextRequest, context: Ctx) {
     const { id } = await context.params;
 
     const deleted = await Patient.findByIdAndDelete(id);
+
     if (!deleted) {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
     }
@@ -78,7 +84,7 @@ export async function DELETE(req: NextRequest, context: Ctx) {
       { message: 'Patient deleted successfully' },
       { status: 200 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to delete patient' },
       { status: 500 }
@@ -86,7 +92,9 @@ export async function DELETE(req: NextRequest, context: Ctx) {
   }
   const { id } = await context.params;
   const deleted = await Patient.findByIdAndDelete(id);
+
   if (!deleted)
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
   return NextResponse.json({ message: 'Deleted' });
 }

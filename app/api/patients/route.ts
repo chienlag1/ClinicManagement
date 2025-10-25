@@ -1,5 +1,6 @@
-import { NextResponse, NextRequest } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
+
 import { connectMongo } from '@/lib/mongodb';
 import Patient from '@/models/Patient';
 
@@ -18,11 +19,13 @@ export async function GET(req: NextRequest) {
     );
 
     const filter: any = {};
+
     if (search) {
       const regex = new RegExp(
         search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
         'i'
       );
+
       filter.$or = [{ name: regex }, { phone: regex }];
     }
     if (gender === 'male' || gender === 'female') {
@@ -40,7 +43,7 @@ export async function GET(req: NextRequest) {
       { items, total, page, limit, pages: Math.ceil(total / limit) },
       { status: 200 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch patients' },
       { status: 500 }
@@ -52,11 +55,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const auth = getAuth(req);
+
     if (!auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectMongo();
@@ -90,11 +91,13 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     if (error?.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
+
       return NextResponse.json(
         { error: `${field} already exists` },
         { status: 400 }
       );
     }
+
     return NextResponse.json(
       { error: 'Failed to create patient' },
       { status: 500 }

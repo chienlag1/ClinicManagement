@@ -71,7 +71,7 @@ export const StaffSidebar = () => {
           icon: 'lucide:users',
           href: '/staff/patient-manager',
         },
-       
+
         {
           label: 'Billing',
           icon: 'lucide:credit-card',
@@ -83,13 +83,12 @@ export const StaffSidebar = () => {
           href: '/staff/medicine-manager',
         },
         {
-          label: "Clinic Manager",
-          icon: "lucide:building",
-          href: "/staff/clinics",
+          label: 'Clinic Manager',
+          icon: 'lucide:building',
+          href: '/staff/clinics',
         },
       ],
     },
-
   ];
 
   return (

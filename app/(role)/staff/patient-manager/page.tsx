@@ -73,6 +73,7 @@ export default function PatientManagerNew() {
       ['name', 'phone'],
       'gender'
     );
+
     setFilteredData(filtered);
   }, [searchTerm, filterValue, patients, setFilteredData]);
 
@@ -80,6 +81,7 @@ export default function PatientManagerNew() {
     try {
       setIsLoading(true);
       const res = await axios.get('/api/patients');
+
       setPatients(res.data.items || res.data); // API patients trả về {items, total} → lấy items
     } catch {
       showError('Lỗi', 'Không thể tải danh sách bệnh nhân.');
@@ -103,6 +105,7 @@ export default function PatientManagerNew() {
           `/api/patients/${editingItem._id}`,
           payload
         );
+
         setPatients(
           patients.map(p => (p._id === editingItem._id ? res.data : p))
         );
@@ -110,6 +113,7 @@ export default function PatientManagerNew() {
       } else {
         // Create
         const res = await axios.post('/api/patients', payload);
+
         setPatients([...patients, res.data]);
         showSuccess('Thành công', 'Thêm bệnh nhân mới thành công!');
       }

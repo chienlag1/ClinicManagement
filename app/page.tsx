@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Button } from '@heroui/button';
+import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Input } from '@heroui/input';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { useNotification } from '@/components/notification-popup';
 
 export default function PatientRegistration() {
@@ -36,7 +37,8 @@ export default function PatientRegistration() {
       });
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error || 'Failed to register patient');
+      if (!response.ok)
+        throw new Error(data.error || 'Failed to register patient');
 
       showNotification({
         title: 'Success',
@@ -56,117 +58,134 @@ export default function PatientRegistration() {
   if (!isSignedIn) return null;
 
   return (
-    <div className="flex justify-center items-start min-h-screen bg-gray-50 px-4 pt-24">
-      <Card className="w-full max-w-3xl shadow-lg rounded-2xl p-8">
-        <CardHeader className="flex flex-col items-center space-y-3 mb-4">
-          <h1 className="text-3xl font-bold text-center text-gray-800">
-            Patient <span className="text-blue-600">Registration</span>
+    <div className='flex justify-center items-start min-h-screen bg-gray-50 px-4 pt-24'>
+      <Card className='w-full max-w-3xl shadow-lg rounded-2xl p-8'>
+        <CardHeader className='flex flex-col items-center space-y-3 mb-4'>
+          <h1 className='text-3xl font-bold text-center text-gray-800'>
+            Patient <span className='text-blue-600'>Registration</span>
           </h1>
-          <p className="text-gray-600 text-center text-base">
+          <p className='text-gray-600 text-center text-base'>
             Please fill in your information accurately
           </p>
         </CardHeader>
 
         <CardBody>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form className='space-y-6' onSubmit={handleSubmit}>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <Input
-                label="ID Card Number"
-                placeholder="Enter your ID card number"
                 required
-                value={formData.id_card}
-                onChange={(e) => setFormData({ ...formData, id_card: e.target.value })}
                 classNames={{
                   inputWrapper:
                     'rounded-xl border border-gray-300 focus-within:border-blue-500 hover:border-blue-400 transition-all',
                   label: 'text-sm font-medium text-gray-700',
                 }}
+                label='ID Card Number'
+                placeholder='Enter your ID card number'
+                value={formData.id_card}
+                onChange={e =>
+                  setFormData({ ...formData, id_card: e.target.value })
+                }
               />
 
               <Input
-                label="Full Name"
-                placeholder="Enter your full name"
                 required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 classNames={{
                   inputWrapper:
                     'rounded-xl border border-gray-300 focus-within:border-blue-500 hover:border-blue-400 transition-all',
                   label: 'text-sm font-medium text-gray-700',
                 }}
+                label='Full Name'
+                placeholder='Enter your full name'
+                value={formData.name}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  className='block text-sm font-medium text-gray-700 mb-1'
+                  htmlFor='gender-select'
+                >
                   Gender
                 </label>
                 <select
-                  value={formData.gender}
-                  onChange={(e) =>
-                    setFormData({ ...formData, gender: e.target.value as 'male' | 'female' })
-                  }
-                  className="w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all px-3 py-2 bg-white"
                   required
+                  className='w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all px-3 py-2 bg-white'
+                  id='gender-select'
+                  value={formData.gender}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      gender: e.target.value as 'male' | 'female',
+                    })
+                  }
                 >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
+                  <option value='male'>Male</option>
+                  <option value='female'>Female</option>
                 </select>
               </div>
 
               <Input
-                type="date"
-                label="Birth Date"
                 required
+                classNames={{
+                  inputWrapper:
+                    'rounded-xl border border-gray-300 focus-within:border-blue-500 hover:border-blue-400 transition-all',
+                  label: 'text-sm font-medium text-gray-700',
+                }}
+                label='Birth Date'
+                type='date'
                 value={formData.birth_date}
-                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, birth_date: e.target.value })
+                }
+              />
+
+              <Input
+                required
                 classNames={{
                   inputWrapper:
                     'rounded-xl border border-gray-300 focus-within:border-blue-500 hover:border-blue-400 transition-all',
                   label: 'text-sm font-medium text-gray-700',
                 }}
-              />
-
-              <Input
-                label="Phone Number"
-                placeholder="Enter your phone number"
-                required
+                label='Phone Number'
+                placeholder='Enter your phone number'
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                classNames={{
-                  inputWrapper:
-                    'rounded-xl border border-gray-300 focus-within:border-blue-500 hover:border-blue-400 transition-all',
-                  label: 'text-sm font-medium text-gray-700',
-                }}
+                onChange={e =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
               />
 
               <Input
-                label="Address"
-                placeholder="Enter your complete address"
                 required
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 classNames={{
                   inputWrapper:
                     'rounded-xl border border-gray-300 focus-within:border-blue-500 hover:border-blue-400 transition-all',
                   label: 'text-sm font-medium text-gray-700',
                 }}
+                label='Address'
+                placeholder='Enter your complete address'
+                value={formData.address}
+                onChange={e =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
               />
             </div>
 
-            <div className="flex justify-end gap-4 pt-6">
+            <div className='flex justify-end gap-4 pt-6'>
               <Button
-                variant="bordered"
+                className='rounded-xl px-8 py-2 text-gray-700 hover:bg-gray-100 transition'
+                variant='bordered'
                 onClick={() => router.push('/user/profile')}
-                className="rounded-xl px-8 py-2 text-gray-700 hover:bg-gray-100 transition"
               >
                 Cancel
               </Button>
 
               <Button
-                type="submit"
-                color="primary"
-                variant="solid"
-                className="rounded-xl px-8 py-2 text-white text-base font-semibold shadow-md hover:opacity-90 transition"
+                className='rounded-xl px-8 py-2 text-white text-base font-semibold shadow-md hover:opacity-90 transition'
+                color='primary'
+                type='submit'
+                variant='solid'
               >
                 Register
               </Button>

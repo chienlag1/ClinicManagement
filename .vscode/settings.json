@@ -6,5 +6,6 @@
   "typescript.suggest.includeCompletionsForModuleExports": true,
   "typescript.suggest.includeCompletionsWithSnippetText": true,
   "typescript.suggest.includeCompletionsWithInsertText": true,
-  "typescript.preferences.includePackageJsonAutoImports": "on"
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "postman.settings.dotenv-detection-notification-visibility": false
 }

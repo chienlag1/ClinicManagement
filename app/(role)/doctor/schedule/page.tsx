@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Card, CardBody, CardHeader } from '@heroui/card';
-import { Button } from '@heroui/button';
 import { Calendar } from 'lucide-react';
-import { Pagination, usePagination } from '@/components/pagination';
+import { useEffect, useRef, useState } from 'react';
 
-import { AppointmentList } from '@/components/appointment/appointment-list';
 import { AppointmentDetailModal } from '@/components/appointment/appointment-detail-modal';
+import { AppointmentList } from '@/components/appointment/appointment-list';
+import { Pagination, usePagination } from '@/components/pagination';
 import { Appointment, FilterMode } from '@/types/appointment';
 
 export default function SchedulePage() {
@@ -18,7 +16,7 @@ export default function SchedulePage() {
   const [selected, setSelected] = useState<Appointment | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [filterMode, setFilterMode] = useState<FilterMode>('today');
-  
+
   // Pagination state
   const {
     currentPage,
@@ -40,15 +38,14 @@ export default function SchedulePage() {
     setLoading(true);
     // Tạm thời sử dụng doctor_id cố định, sau này có thể lấy từ user profile
     const doctorId = '1'; // Thay bằng doctor_id thực tế của user
-    
+
     fetch(`/api/appointments/${doctorId}`)
       .then(res => res.json())
       .then(data => {
         setAppointments(data);
         setLoading(false);
       })
-      .catch(err => {
-        console.error(err);
+      .catch(() => {
         setLoading(false);
       });
   }, [user]);
@@ -62,26 +59,34 @@ export default function SchedulePage() {
       return appointments.filter(a => {
         if (!a.appointment_date) return false;
         const date = new Date(a.appointment_date);
+
         if (isNaN(date.getTime())) return false;
         const appointmentDate = date.toISOString().split('T')[0];
+
         return appointmentDate === today;
       });
     }
+
     return appointments.filter(a => {
       if (!a.appointment_date) return false;
       const date = new Date(a.appointment_date);
+
       if (isNaN(date.getTime())) return false;
       const appointmentDate = date.toISOString().split('T')[0];
+
       return appointmentDate === selectedDate;
     });
   };
 
   const filteredAppointments = getFilteredAppointments();
-  
+
   // Áp dụng pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedAppointments = filteredAppointments.slice(startIndex, endIndex);
+  const paginatedAppointments = filteredAppointments.slice(
+    startIndex,
+    endIndex
+  );
 
   // ✅ Khi chọn "Today" hoặc "All", cập nhật selectedDate về hôm nay
   const handleModeChange = (mode: FilterMode) => {
@@ -93,23 +98,25 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">Danh sách lịch khám</h1>
+    <div className='p-6 space-y-6'>
+      <h1 className='text-3xl font-bold text-gray-900 mb-4'>
+        Danh sách lịch khám
+      </h1>
 
       {/* Bộ lọc ngày */}
-      <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-        <div className="flex flex-wrap gap-3 items-center justify-between">
+      <div className='bg-white rounded-lg shadow p-4 border border-gray-200'>
+        <div className='flex flex-wrap gap-3 items-center justify-between'>
           {/* Nút chọn nhanh */}
-          <div className="flex flex-wrap gap-2">
+          <div className='flex flex-wrap gap-2'>
             {(['today', 'all'] as const).map(mode => (
               <button
                 key={mode}
-                onClick={() => handleModeChange(mode)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   filterMode === mode
                     ? 'bg-blue-600 text-white shadow'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
+                onClick={() => handleModeChange(mode)}
               >
                 {mode === 'today' ? 'Today' : 'All'}
               </button>
@@ -117,18 +124,18 @@ export default function SchedulePage() {
           </div>
 
           {/* Bộ chọn ngày thủ công */}
-          <div className="flex items-center gap-2">
-            <label htmlFor="selectedDate" className="font-medium text-gray-700">
+          <div className='flex items-center gap-2'>
+            <label className='font-medium text-gray-700' htmlFor='selectedDate'>
               or pick date:
             </label>
 
-            <div className="relative flex items-center">
+            <div className='relative flex items-center'>
               {/* Input chọn ngày */}
               <input
                 ref={dateInputRef}
-                id="selectedDate"
-                type="date"
-                className="border border-gray-300 rounded-md pl-3 pr-8 py-1 text-gray-900 focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                className='border border-gray-300 rounded-md pl-3 pr-8 py-1 text-gray-900 focus:ring-2 focus:ring-blue-400 cursor-pointer'
+                id='selectedDate'
+                type='date'
                 value={selectedDate}
                 onChange={e => {
                   setSelectedDate(e.target.value);
@@ -138,7 +145,7 @@ export default function SchedulePage() {
 
               {/* Icon lịch — nằm bên phải */}
               <Calendar
-                className="absolute right-2 text-gray-500 w-4 h-4 cursor-pointer hover:text-blue-500 transition"
+                className='absolute right-2 text-gray-500 w-4 h-4 cursor-pointer hover:text-blue-500 transition'
                 onClick={() => dateInputRef.current?.showPicker()} // 👈 mở date picker
               />
             </div>
@@ -155,28 +162,28 @@ export default function SchedulePage() {
       {/* Danh sách lịch khám */}
       <AppointmentList
         appointments={paginatedAppointments}
-        loading={loading}
+        emptyMessage='No appointments found for this selection.'
         error={null}
+        loading={loading}
         onAppointmentClick={setSelected}
-        emptyMessage="No appointments found for this selection."
       />
 
       {/* Pagination */}
       {filteredAppointments.length > 0 && (
-        <div className="mt-6">
+        <div className='mt-6'>
           <Pagination
-            totalItems={filteredAppointments.length}
+            className='bg-white p-4 rounded-lg shadow border border-gray-200'
+            color='primary'
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
-            onItemsPerPageChange={handleItemsPerPageChange}
             itemsPerPageOptions={[5, 10, 20, 50]}
-            showTotal={true}
-            showItemsPerPage={true}
             showFirstLast={true}
-            size="md"
-            color="primary"
-            className="bg-white p-4 rounded-lg shadow border border-gray-200"
+            showItemsPerPage={true}
+            showTotal={true}
+            size='md'
+            totalItems={filteredAppointments.length}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

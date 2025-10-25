@@ -1,4 +1,22 @@
-# Dependencies
+node_modules
+.next
+dist
+build
+coverage
+public
+/.pnp
+/.pnp.js
+*.lock
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+.turbo
+/.cache
+*.log
+env.local
+.env.local
+.env.*.local
+!.prettierrc# Dependencies
 node_modules/
 .pnp
 .pnp.js

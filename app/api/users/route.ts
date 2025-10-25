@@ -1,5 +1,5 @@
-import { NextResponse, NextRequest } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
+
 import { connectMongo } from '@/lib/mongodb';
 import { User } from '@/models/User';
 
@@ -18,15 +18,17 @@ export async function GET(req: NextRequest) {
     );
 
     const filter: any = {};
+
     if (search) {
       const regex = new RegExp(
         search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
         'i'
       );
+
       filter.$or = [
-        { firstName: regex }, 
-        { lastName: regex }, 
-        { email: regex }
+        { firstName: regex },
+        { lastName: regex },
+        { email: regex },
       ];
     }
     if (role) {
@@ -44,8 +46,7 @@ export async function GET(req: NextRequest) {
       { items, total, page, limit, pages: Math.ceil(total / limit) },
       { status: 200 }
     );
-  } catch (error) {
-    console.error('Error fetching users:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch users' },
       { status: 500 }

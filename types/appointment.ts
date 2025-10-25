@@ -1,3 +1,5 @@
+import { Clinic } from './clinic';
+
 // Base interfaces for API responses
 export interface Patient {
   _id: string;
@@ -10,14 +12,7 @@ export interface Patient {
   id_card?: string;
 }
 
-export interface Clinic {
-  _id: string;
-  clinic_id: string;
-  name: string;
-  address: string;
-  phone?: string;
-  email?: string;
-}
+// Clinic interface is exported from ./clinic.ts
 
 export interface Doctor {
   _id: string;
@@ -67,34 +62,9 @@ export interface PatientData {
   address: string;
 }
 
-export interface AppointmentFormData {
-  isNewPatient: boolean;
-  patientData: PatientData | null;
-  selectedPatientId: string | null;
-  clinic_id: string;
-  doctor_id: string;
-  appointment_date: string;
-  appointment_time: string;
-  priority: boolean;
-  symptoms: string;
-  notes: string;
-}
+// AppointmentFormData is exported from ./form.ts
 
-// API response interfaces
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+// API response interfaces are exported from ./api.ts
 
 // Filter and pagination interfaces
 export type FilterMode = 'today' | 'all' | 'custom';
@@ -117,10 +87,15 @@ export const statusColors: Record<string, string> = {
 // Status labels mapping
 export const getStatusLabel = (status: string): string => {
   switch (status) {
-    case 'scheduled': return 'Đã đặt';
-    case 'confirmed': return 'Đã xác nhận';
-    case 'completed': return 'Hoàn thành';
-    case 'cancelled': return 'Đã hủy';
-    default: return 'Không xác định';
+    case 'scheduled':
+      return 'Đã đặt';
+    case 'confirmed':
+      return 'Đã xác nhận';
+    case 'completed':
+      return 'Hoàn thành';
+    case 'cancelled':
+      return 'Đã hủy';
+    default:
+      return 'Không xác định';
   }
 };

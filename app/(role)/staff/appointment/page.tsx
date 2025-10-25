@@ -1,34 +1,31 @@
 'use client';
 
-import React from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/card';
+
 import AppointmentForm from './components/AppointmentForm';
 
 export default function AppointmentPage() {
   const handleSubmit = (
-    isNewPatient: boolean,
-    patientData: { patient_id: string; id_card: string; name: string; gender: 'male' | 'female'; birth_date: string; phone: string; address: string } | null,
-    selectedPatientId: string | null,
-    clinic_id: string,
-    doctor_id: string,
-    appointment_date: string,
-    appointment_time: string,
-    priority: boolean,
-    symptoms: string,
-    note: string
+    _isNewPatient: boolean,
+    _patientData: {
+      patient_id: string;
+      id_card: string;
+      name: string;
+      gender: 'male' | 'female';
+      birth_date: string;
+      phone: string;
+      address: string;
+    } | null,
+    _selectedPatientId: string | null,
+    _clinic_id: string,
+    _doctor_id: string,
+    _appointment_date: string,
+    _appointment_time: string,
+    _priority: boolean,
+    _symptoms: string,
+    _note: string
   ) => {
-    console.log({
-      isNewPatient,
-      patientData,
-      selectedPatientId,
-      clinic_id,
-      doctor_id,
-      appointment_date,
-      appointment_time,
-      priority,
-      symptoms,
-      note,
-    });
+    // Handle appointment submission
   };
 
   return (

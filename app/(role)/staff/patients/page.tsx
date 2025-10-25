@@ -1,19 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+import { CRUDColumn, CRUDTemplate } from '@/components/DataTable';
 import { useNotification } from '@/components/notification-popup';
-import { CRUDTemplate, CRUDColumn } from '@/components/DataTable';
-import { useUser } from '@clerk/nextjs';
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@heroui/modal';
-import { Input } from '@heroui/input';
-import { Button } from '@heroui/button';
-import { Select, SelectItem } from '@heroui/select';
 
 interface Patient {
   _id: string;
@@ -30,7 +20,7 @@ interface Patient {
 
 const PatientManager = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterValue, setFilterValue] = useState('');
   const { showNotification } = useNotification();
@@ -43,14 +33,14 @@ const PatientManager = () => {
     {
       key: 'birth_date',
       label: 'Birth Date',
-      render: (value) => new Date(value).toLocaleDateString(),
+      render: value => new Date(value).toLocaleDateString(),
     },
     { key: 'phone', label: 'Phone' },
     { key: 'address', label: 'Address' },
     {
       key: 'createdAt',
       label: 'Created At',
-      render: (value) => new Date(value).toLocaleString(),
+      render: value => new Date(value).toLocaleString(),
     },
   ];
 
@@ -68,14 +58,15 @@ const PatientManager = () => {
     try {
       const res = await fetch('/api/patients');
       const data = await res.json();
+
       if (data.items) {
         setPatients(data.items);
       }
-    } catch (error) {
+    } catch {
       showNotification({
         title: 'Error',
         message: 'Failed to fetch patients',
-        type: 'error'
+        type: 'error',
       });
     } finally {
       setLoading(false);
@@ -86,7 +77,7 @@ const PatientManager = () => {
     // TODO: Implement add patient modal
   };
 
-  const handleEdit = (patient: Patient) => {
+  const handleEdit = (_patient: Patient) => {
     // TODO: Implement edit patient modal
   };
 
@@ -96,31 +87,32 @@ const PatientManager = () => {
         const res = await fetch(`/api/patients/${patient._id}`, {
           method: 'DELETE',
         });
+
         if (res.ok) {
           showNotification({
             title: 'Success',
             message: 'Patient deleted successfully',
-            type: 'success'
+            type: 'success',
           });
           fetchPatients();
         } else {
           showNotification({
             title: 'Error',
             message: 'Failed to delete patient',
-            type: 'error'
+            type: 'error',
           });
         }
-      } catch (error) {
+      } catch {
         showNotification({
           title: 'Error',
           message: 'Failed to delete patient',
-          type: 'error'
+          type: 'error',
         });
       }
     }
   };
 
-  const filteredData = patients.filter((patient) => {
+  const filteredData = patients.filter(patient => {
     const matchesSearch =
       !searchTerm ||
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,25 +126,25 @@ const PatientManager = () => {
 
   return (
     <CRUDTemplate
-      title="Patient Management"
-      description="Manage patient information"
-      data={patients}
-      filteredData={filteredData}
-      searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-      filterValue={filterValue}
-      setFilterValue={setFilterValue}
-      filterOptions={filterOptions}
-      searchFields={['name', 'phone', 'id_card']}
+      addButtonText='Add Patient'
       columns={columns}
+      data={patients}
+      description='Manage patient information'
+      emptyStateIcon='mdi:account-group'
+      emptyStateMessage='No patients found'
+      filterOptions={filterOptions}
+      filterPlaceholder='Filter by gender'
+      filterValue={filterValue}
+      filteredData={filteredData}
+      searchFields={['name', 'phone', 'id_card']}
+      searchPlaceholder='Search by name, phone or ID card...'
+      searchTerm={searchTerm}
+      setFilterValue={setFilterValue}
+      setSearchTerm={setSearchTerm}
+      title='Patient Management'
       onAdd={handleAdd}
-      onEdit={handleEdit}
       onDelete={handleDelete}
-      addButtonText="Add Patient"
-      searchPlaceholder="Search by name, phone or ID card..."
-      filterPlaceholder="Filter by gender"
-      emptyStateIcon="mdi:account-group"
-      emptyStateMessage="No patients found"
+      onEdit={handleEdit}
     />
   );
 };

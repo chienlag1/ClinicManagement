@@ -62,7 +62,14 @@ export interface CRUDModalProps<T> {
 export interface CRUDField<T> {
   key: keyof T;
   label: string;
-  type: 'text' | 'number' | 'email' | 'password' | 'select' | 'textarea'| 'date';
+  type:
+    | 'text'
+    | 'number'
+    | 'email'
+    | 'password'
+    | 'select'
+    | 'textarea'
+    | 'date';
   placeholder?: string;
   required?: boolean;
   options?: { key: string; label: string }[];
@@ -205,8 +212,8 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
                         )}
                         <Button
                           isIconOnly
-                          size='sm'
                           color='primary'
+                          size='sm'
                           variant='light'
                           onPress={() => onEdit(item)}
                         >
@@ -214,8 +221,8 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
                         </Button>
                         <Button
                           isIconOnly
-                          size='sm'
                           color='danger'
+                          size='sm'
                           variant='light'
                           onPress={() => onDelete(item)}
                         >
@@ -325,22 +332,21 @@ export function CRUDModal<T>({
             onChange={e => handleFieldChange(field.key, e.target.value)}
           />
         );
-         case 'date':
-      return (
-        <Input
-          isRequired={field.required}
-          label={field.label}
-          placeholder={field.placeholder}
-          type="date"
-          value={
-            formData[field.key]
-              ? String(formData[field.key]).split('T')[0] // để đảm bảo format YYYY-MM-DD
-              : ''
-          }
-          onValueChange={value => handleFieldChange(field.key, value)}
-        />
-      );
-        
+      case 'date':
+        return (
+          <Input
+            isRequired={field.required}
+            label={field.label}
+            placeholder={field.placeholder}
+            type='date'
+            value={
+              formData[field.key]
+                ? String(formData[field.key]).split('T')[0] // để đảm bảo format YYYY-MM-DD
+                : ''
+            }
+            onValueChange={value => handleFieldChange(field.key, value)}
+          />
+        );
 
       default:
         return (
@@ -436,9 +442,11 @@ export function useCRUD<T extends { _id?: string; id?: string }>(
     if (editingItem) {
       // Update existing item
       const itemId = editingItem._id || editingItem.id;
+
       setData(
         data.map(d => {
           const id = d._id || d.id;
+
           return id === itemId ? item : d;
         })
       );

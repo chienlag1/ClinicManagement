@@ -9,7 +9,7 @@ export async function GET() {
     const medicines = await Medicine.find();
 
     return NextResponse.json(medicines, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch medicines' },
       { status: 500 }
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const newMed = await Medicine.create(body);
 
     return NextResponse.json(newMed, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to create medicine' },
       { status: 500 }
@@ -55,7 +55,7 @@ export async function DELETE(req: Request) {
     }
 
     return NextResponse.json({ message: 'Medicine deleted successfully' });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to delete medicine' },
       { status: 500 }

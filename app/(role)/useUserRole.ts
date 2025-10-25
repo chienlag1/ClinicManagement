@@ -26,6 +26,7 @@ export function useUserRole() {
     async function fetchRole() {
       if (!userId || !isSignedIn) {
         setIsLoading(false);
+
         return;
       }
 
