@@ -18,61 +18,75 @@ export interface IAppointment extends Document {
 
 const AppointmentSchema: Schema = new Schema(
   {
-    appointment_id: { 
-      type: String, 
-      required: true, 
+    appointment_id: {
+      type: String,
+      required: true,
       unique: true,
-      default: () => 'APT' + Math.random().toString(36).substring(2, 8).toUpperCase()
+      default: () =>
+        'APT' + Math.random().toString(36).substring(2, 8).toUpperCase(),
     },
-    patient_id: { 
-      type: Schema.Types.ObjectId, 
-      ref: 'Patient', 
-      required: true 
+    patient_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Patient',
+      required: true,
     },
-    clinic_id: { 
-      type: Schema.Types.Mixed, 
-      required: true 
+    clinic_id: {
+      type: Schema.Types.Mixed,
+      required: true,
     },
-    doctor_id: { 
-      type: Schema.Types.Mixed, 
-      required: true 
+    doctor_id: {
+      type: Schema.Types.Mixed,
+      required: true,
     },
-    appointment_date: { 
-      type: Date, 
-      required: true 
+    appointment_date: {
+      type: Date,
+      required: true,
     },
-    appointment_time: { 
-      type: String, 
+    appointment_time: {
+      type: String,
       required: true,
       enum: [
-        '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-        '11:00', '11:30', '14:00', '14:30', '15:00', '15:30',
-        '16:00', '16:30', '17:00', '17:30'
-      ]
+        '08:00',
+        '08:30',
+        '09:00',
+        '09:30',
+        '10:00',
+        '10:30',
+        '11:00',
+        '11:30',
+        '14:00',
+        '14:30',
+        '15:00',
+        '15:30',
+        '16:00',
+        '16:30',
+        '17:00',
+        '17:30',
+      ],
     },
-    status: { 
-      type: String, 
-      required: true, 
-      enum: ['scheduled', 'confirmed', 'completed', 'cancelled'],
-      default: 'scheduled'
-    },
-    priority: { 
-      type: Boolean, 
-      default: false 
-    },
-    symptoms: { 
-      type: String, 
+    status: {
+      type: String,
       required: true,
-      maxLength: 1000
+      enum: ['scheduled', 'confirmed', 'completed', 'cancelled'],
+      default: 'scheduled',
     },
-    notes: { 
-      type: String, 
-      maxLength: 1000 
+    priority: {
+      type: Boolean,
+      default: false,
     },
-    created_by: { 
-      type: String, 
-      required: true 
-    }
+    symptoms: {
+      type: String,
+      required: true,
+      maxLength: 1000,
+    },
+    notes: {
+      type: String,
+      maxLength: 1000,
+    },
+    created_by: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

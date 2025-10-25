@@ -12,10 +12,11 @@ export default function StaffSchedulePage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [filterMode, setFilterMode] = useState<FilterMode>('today');
-  
+
   // Pagination state
   const {
     currentPage,
@@ -34,11 +35,16 @@ export default function StaffSchedulePage() {
       try {
         setLoading(true);
         const response = await fetch('http://localhost:3000/api/appointments');
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         setAppointments(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi lấy danh sách lịch khám.');
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Có lỗi xảy ra khi lấy danh sách lịch khám.'
+        );
       } finally {
         setLoading(false);
       }
@@ -70,11 +76,14 @@ export default function StaffSchedulePage() {
   };
 
   const filteredAppointments = getFilteredAppointments();
-  
+
   // Áp dụng pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedAppointments = filteredAppointments.slice(startIndex, endIndex);
+  const paginatedAppointments = filteredAppointments.slice(
+    startIndex,
+    endIndex
+  );
 
   // Khi chọn "Today" hoặc "All", cập nhật selectedDate về hôm nay
   const handleModeChange = (mode: FilterMode) => {
@@ -86,14 +95,16 @@ export default function StaffSchedulePage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">Danh sách lịch khám</h1>
+    <div className='p-6 space-y-6'>
+      <h1 className='text-3xl font-bold text-gray-900 mb-4'>
+        Danh sách lịch khám
+      </h1>
 
       {/* Bộ lọc ngày */}
-      <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-        <div className="flex flex-wrap gap-3 items-center justify-between">
+      <div className='bg-white rounded-lg shadow p-4 border border-gray-200'>
+        <div className='flex flex-wrap gap-3 items-center justify-between'>
           {/* Nút chọn nhanh */}
-          <div className="flex flex-wrap gap-2">
+          <div className='flex flex-wrap gap-2'>
             {(['today', 'all'] as const).map(mode => (
               <button
                 key={mode}
@@ -110,14 +121,14 @@ export default function StaffSchedulePage() {
           </div>
 
           {/* Bộ chọn ngày thủ công */}
-          <div className="flex items-center gap-2">
-            <label htmlFor="selectedDate" className="font-medium text-gray-700">
+          <div className='flex items-center gap-2'>
+            <label htmlFor='selectedDate' className='font-medium text-gray-700'>
               hoặc chọn ngày:
             </label>
             <input
-              id="selectedDate"
-              type="date"
-              className="border border-gray-300 rounded-md px-3 py-1 text-gray-900 focus:ring-2 focus:ring-blue-400"
+              id='selectedDate'
+              type='date'
+              className='border border-gray-300 rounded-md px-3 py-1 text-gray-900 focus:ring-2 focus:ring-blue-400'
               value={selectedDate}
               onChange={e => {
                 setSelectedDate(e.target.value);
@@ -135,12 +146,12 @@ export default function StaffSchedulePage() {
         loading={loading}
         error={error}
         onAppointmentClick={setSelectedAppointment}
-        emptyMessage="Không có lịch khám nào."
+        emptyMessage='Không có lịch khám nào.'
       />
 
       {/* Pagination */}
       {filteredAppointments.length > 0 && (
-        <div className="mt-6">
+        <div className='mt-6'>
           <Pagination
             totalItems={filteredAppointments.length}
             currentPage={currentPage}
@@ -151,9 +162,9 @@ export default function StaffSchedulePage() {
             showTotal={true}
             showItemsPerPage={true}
             showFirstLast={true}
-            size="md"
-            color="primary"
-            className="bg-white p-4 rounded-lg shadow border border-gray-200"
+            size='md'
+            color='primary'
+            className='bg-white p-4 rounded-lg shadow border border-gray-200'
           />
         </div>
       )}
@@ -161,6 +172,7 @@ export default function StaffSchedulePage() {
       {/* Modal chi tiết */}
       <AppointmentDetailModal
         appointment={selectedAppointment}
+        isOpen={!!selectedAppointment}
         onClose={() => setSelectedAppointment(null)}
       />
     </div>

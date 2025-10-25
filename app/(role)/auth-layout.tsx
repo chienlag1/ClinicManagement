@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 
 import { useUserRole } from './useUserRole';
 
-import { Navbar } from '@/components/navbar';
+import { Navbar } from '@/components/sidebar/navbar';
 const StaffLayout = dynamic(() => import('./staff-layout'));
 const DoctorLayout = dynamic(() => import('./doctor-layout'));
 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { DoctorSidebar } from '@/components/doctor-sidebar';
+import { DoctorSidebar } from '@/components/sidebar/doctor-sidebar';
 
 export default function DoctorLayout({
   children,

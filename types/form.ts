@@ -175,8 +175,15 @@ export const APPOINTMENT_TIME_SLOTS: AppointmentTimeSlots = {
 export const FORM_CONFIG: FormConfig = {
   timeSlots: APPOINTMENT_TIME_SLOTS,
   minDate: new Date().toISOString().split('T')[0],
-  maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-  requiredFields: ['clinicId', 'doctorId', 'appointmentDate', 'appointmentTime'],
+  maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0], // 30 days from now
+  requiredFields: [
+    'clinicId',
+    'doctorId',
+    'appointmentDate',
+    'appointmentTime',
+  ],
   validationRules: {
     patient_id: (value: string) => value.length > 0,
     id_card: (value: string) => value.length > 0,
@@ -185,4 +192,3 @@ export const FORM_CONFIG: FormConfig = {
     email: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
   },
 };
-
