@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
 import { connectMongo } from '@/lib/mongodb';
+import { logger } from '@/lib/logger';
 import { User } from '@/models/User';
 
 // GET /api/users
@@ -24,9 +24,9 @@ export async function GET(req: NextRequest) {
         'i'
       );
       filter.$or = [
-        { firstName: regex }, 
-        { lastName: regex }, 
-        { email: regex }
+        { firstName: regex },
+        { lastName: regex },
+        { email: regex },
       ];
     }
     if (role) {
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error fetching users:', error);
+    logger.error('Error fetching users', 'API_USERS', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch users' },
       { status: 500 }

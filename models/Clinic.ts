@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IClinic extends Document {
   clinic_id: string;
@@ -16,8 +16,8 @@ const ClinicSchema: Schema = new Schema(
     capacity: { type: Number, min: 1, max: 50 },
     description: { type: String, maxLength: 500 },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export default mongoose.models.Clinic ||
-  mongoose.model<IClinic>("Clinic", ClinicSchema);
+  mongoose.model<IClinic>('Clinic', ClinicSchema);

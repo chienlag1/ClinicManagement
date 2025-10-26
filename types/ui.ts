@@ -1,10 +1,31 @@
 // UI Component Types
+export interface IconSvgProps {
+  size?: number;
+  width?: number;
+  height?: number;
+  className?: string;
+  [key: string]: any;
+}
+
 export interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'shadow' | 'ghost';
-  color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
+  variant?:
+    | 'solid'
+    | 'bordered'
+    | 'light'
+    | 'flat'
+    | 'faded'
+    | 'shadow'
+    | 'ghost';
+  color?:
+    | 'default'
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'warning'
+    | 'danger';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   isLoading?: boolean;
@@ -16,7 +37,17 @@ export interface InputProps {
   placeholder?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'time' | 'datetime-local';
+  type?:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'number'
+    | 'tel'
+    | 'url'
+    | 'search'
+    | 'date'
+    | 'time'
+    | 'datetime-local';
   variant?: 'bordered' | 'flat' | 'faded' | 'underlined';
   size?: 'sm' | 'md' | 'lg';
   isRequired?: boolean;
@@ -75,7 +106,13 @@ export interface CardBodyProps {
 export interface SwitchProps {
   isSelected: boolean;
   onValueChange: (value: boolean) => void;
-  color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
+  color?:
+    | 'default'
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'warning'
+    | 'danger';
   size?: 'sm' | 'md' | 'lg';
   isDisabled?: boolean;
   className?: string;
@@ -84,7 +121,13 @@ export interface SwitchProps {
 
 export interface AlertProps {
   children: React.ReactNode;
-  color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
+  color?:
+    | 'default'
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'warning'
+    | 'danger';
   variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'shadow';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -213,7 +256,18 @@ export interface LayoutProps {
 export interface ContainerProps {
   children: React.ReactNode;
   className?: string;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'full';
+  maxWidth?:
+    | 'sm'
+    | 'md'
+    | 'lg'
+    | 'xl'
+    | '2xl'
+    | '3xl'
+    | '4xl'
+    | '5xl'
+    | '6xl'
+    | '7xl'
+    | 'full';
   isCentered?: boolean;
 }
 

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-
 import { connectMongo } from '@/lib/mongodb';
 import Appointment from '@/models/Appointment';
 import Patient from '@/models/Patient';
-void Patient; // ensure Patient model is registered so populate() works
 
 // GET /api/appointments/[doctorId]
 export async function GET(
@@ -20,8 +18,13 @@ export async function GET(
       .populate('patient_id', 'patient_id name phone')
       .sort({ appointment_date: 1, appointment_time: 1 });
 
+    console.log(
+      `Found ${appointments.length} appointments for doctor ${doctorId}`
+    );
+
     return NextResponse.json(appointments, { status: 200 });
-  } catch {
+  } catch (error) {
+    console.error('Error fetching doctor appointments:', error);
     return NextResponse.json(
       { error: 'Failed to fetch appointments' },
       { status: 500 }

@@ -15,11 +15,12 @@ export interface IPatient extends Document {
 
 const PatientSchema: Schema = new Schema(
   {
-    patient_id: { 
-      type: String, 
-      required: true, 
+    patient_id: {
+      type: String,
+      required: true,
       unique: true,
-      default: () => 'PT' + Math.random().toString(36).substring(2, 8).toUpperCase()
+      default: () =>
+        'PT' + Math.random().toString(36).substring(2, 8).toUpperCase(),
     },
     id_card: { type: String, required: true, unique: true, trim: true },
     name: { type: String, required: true, trim: true },
@@ -27,7 +28,7 @@ const PatientSchema: Schema = new Schema(
     birth_date: { type: Date, required: true },
     phone: { type: String, required: true, unique: true, trim: true },
     address: { type: String, required: true, trim: true },
-    medical_history: [{ type: Schema.Types.ObjectId, ref: 'Diagnosis' }]
+    medical_history: [{ type: Schema.Types.ObjectId, ref: 'Diagnosis' }],
   },
   { timestamps: true }
 );

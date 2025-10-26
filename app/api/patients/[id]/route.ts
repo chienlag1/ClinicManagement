@@ -12,7 +12,9 @@ export async function GET(req: NextRequest, context: Ctx) {
     const { id } = await context.params;
 
     const doc = await Patient.findById(id);
+
     if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
     return NextResponse.json(doc);
   } catch (error) {
     return NextResponse.json(
@@ -26,14 +28,13 @@ export async function PUT(req: NextRequest, context: Ctx) {
   try {
     const auth = getAuth(req);
     if (!auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectMongo();
+
     const { id } = await context.params;
+
     const body = await req.json();
 
     const data: any = {};
@@ -49,8 +50,10 @@ export async function PUT(req: NextRequest, context: Ctx) {
       new: true,
       runValidators: true,
     });
+
     if (!updated)
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
     return NextResponse.json(updated);
   } catch (error: any) {
     if (error?.code === 11000) {
@@ -84,9 +87,4 @@ export async function DELETE(req: NextRequest, context: Ctx) {
       { status: 500 }
     );
   }
-  const { id } = await context.params;
-  const deleted = await Patient.findByIdAndDelete(id);
-  if (!deleted)
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json({ message: 'Deleted' });
 }

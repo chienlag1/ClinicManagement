@@ -1,13 +1,18 @@
 import { NextResponse, NextRequest } from 'next/server';
-
 import { getAuth } from '@clerk/nextjs/server';
-
 import { connectMongo } from '@/lib/mongodb';
 import Patient from '@/models/Patient';
+import Appointment from '@/models/Appointment';
 
-// GET /api/patients?search=&gender=&page=1&limit=10
+// GET /api/doctor/patients?search=&gender=&page=1&limit=10
 export async function GET(req: NextRequest) {
   try {
+    const auth = getAuth(req);
+
+    if (!auth.userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectMongo();
 
     const { searchParams } = new URL(req.url);
@@ -19,7 +24,24 @@ export async function GET(req: NextRequest) {
       Math.max(1, Number(searchParams.get('limit') || 10))
     );
 
-    const filter: any = {};
+    // Get doctor's patient IDs from appointments
+    const doctorAppointments = await Appointment.find({
+      doctor_id: auth.userId,
+    }).select('patient_id');
+
+    const patientIds = Array.from(new Set(doctorAppointments.map(apt => apt.patient_id)));
+
+    if (patientIds.length === 0) {
+      return NextResponse.json(
+        { items: [], total: 0, page, limit, pages: 0 },
+        { status: 200 }
+      );
+    }
+
+    const filter: any = {
+      _id: { $in: patientIds }
+    };
+
     if (search) {
       const regex = new RegExp(
         search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
@@ -43,7 +65,7 @@ export async function GET(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error fetching patients:', error);
+    console.error('Error fetching doctor patients:', error);
 
     return NextResponse.json(
       { error: 'Failed to fetch patients' },
@@ -52,7 +74,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/patients
+// POST /api/doctor/patients
 export async function POST(req: NextRequest) {
   try {
     const auth = getAuth(req);
@@ -87,6 +109,17 @@ export async function POST(req: NextRequest) {
       birth_date: new Date(body.birth_date),
       phone: body.phone,
       address: body.address,
+    });
+
+    // Create an initial appointment to associate the patient with the doctor
+    await Appointment.create({
+      patient_id: created._id,
+      doctor_id: auth.userId,
+      appointment_date: new Date(),
+      status: 'scheduled',
+      notes: 'Initial consultation',
+      symptoms: 'Initial consultation',
+      created_by: auth.userId,
     });
 
     return NextResponse.json(created, { status: 201 });

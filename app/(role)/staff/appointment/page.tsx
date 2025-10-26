@@ -7,7 +7,15 @@ import AppointmentForm from './components/AppointmentForm';
 export default function AppointmentPage() {
   const handleSubmit = (
     isNewPatient: boolean,
-    patientData: { patient_id: string; id_card: string; name: string; gender: 'male' | 'female'; birth_date: string; phone: string; address: string } | null,
+    patientData: {
+      patient_id: string;
+      id_card: string;
+      name: string;
+      gender: 'male' | 'female';
+      birth_date: string;
+      phone: string;
+      address: string;
+    } | null,
     selectedPatientId: string | null,
     clinic_id: string,
     doctor_id: string,
