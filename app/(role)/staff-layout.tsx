@@ -16,8 +16,6 @@ export default function StaffLayout({
 
       {/* Main content */}
       <div className='flex-1 flex flex-col lg:ml-0 ml-16 overflow-hidden'>
-      
-
         {/* Page content */}
         <main className='flex-1 p-6 overflow-y-auto'>{children}</main>
       </div>

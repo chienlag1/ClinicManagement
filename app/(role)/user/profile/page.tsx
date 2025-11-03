@@ -222,7 +222,10 @@ export default function UserProfile() {
                   }
                 />
                 <div className='w-full'>
-                  <label htmlFor='editGender' className='block text-sm font-medium mb-2'>
+                  <label
+                    htmlFor='editGender'
+                    className='block text-sm font-medium mb-2'
+                  >
                     Gender
                   </label>
                   <select

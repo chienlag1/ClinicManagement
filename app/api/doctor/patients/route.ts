@@ -29,7 +29,9 @@ export async function GET(req: NextRequest) {
       doctor_id: auth.userId,
     }).select('patient_id');
 
-    const patientIds = Array.from(new Set(doctorAppointments.map(apt => apt.patient_id)));
+    const patientIds = Array.from(
+      new Set(doctorAppointments.map(apt => apt.patient_id))
+    );
 
     if (patientIds.length === 0) {
       return NextResponse.json(
@@ -39,7 +41,7 @@ export async function GET(req: NextRequest) {
     }
 
     const filter: any = {
-      _id: { $in: patientIds }
+      _id: { $in: patientIds },
     };
 
     if (search) {
