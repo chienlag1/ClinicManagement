@@ -95,7 +95,10 @@ export default function PatientRegistration() {
               />
 
               <div>
-                <label htmlFor='genderSelect' className='block text-sm font-semibold text-gray-700 mb-2'>
+                <label
+                  htmlFor='genderSelect'
+                  className='block text-sm font-semibold text-gray-700 mb-2'
+                >
                   Gender
                 </label>
                 <select

@@ -235,7 +235,9 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
               onValueChange={setIsNewPatient}
               color='primary'
             />
-            <label htmlFor='isNewPatient' className='text-medium font-medium'>Bệnh nhân mới</label>
+            <label htmlFor='isNewPatient' className='text-medium font-medium'>
+              Bệnh nhân mới
+            </label>
           </div>
 
           {isNewPatient ? (
@@ -350,7 +352,10 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
               </CardHeader>
               <CardBody>
                 <div className='space-y-2'>
-                  <label htmlFor='patientSelect' className='text-small font-medium text-foreground'>
+                  <label
+                    htmlFor='patientSelect'
+                    className='text-small font-medium text-foreground'
+                  >
                     Chọn bệnh nhân
                   </label>
                   <div className='relative'>
@@ -393,7 +398,10 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <label htmlFor='clinicSelect' className='text-small font-medium text-foreground'>
+              <label
+                htmlFor='clinicSelect'
+                className='text-small font-medium text-foreground'
+              >
                 Phòng khám
               </label>
               <div className='relative'>
@@ -428,7 +436,10 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
             </div>
 
             <div className='space-y-2'>
-              <label htmlFor='doctorSelect' className='text-small font-medium text-foreground'>
+              <label
+                htmlFor='doctorSelect'
+                className='text-small font-medium text-foreground'
+              >
                 Bác sĩ
               </label>
               <div className='relative'>
@@ -504,7 +515,10 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
           </div>
 
           <div className='space-y-2'>
-            <label htmlFor='symptomsInput' className='text-small font-medium text-foreground'>
+            <label
+              htmlFor='symptomsInput'
+              className='text-small font-medium text-foreground'
+            >
               Triệu chứng
             </label>
             <textarea
@@ -518,7 +532,10 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
           </div>
 
           <div className='space-y-2'>
-            <label htmlFor='noteInput' className='text-small font-medium text-foreground'>
+            <label
+              htmlFor='noteInput'
+              className='text-small font-medium text-foreground'
+            >
               Ghi chú
             </label>
             <textarea
