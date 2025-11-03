@@ -39,11 +39,10 @@ export const StaffSidebar = () => {
           icon: 'lucide:layout-dashboard',
           href: '/staff/dashboard',
         },
-        { label: 'Patients', icon: 'lucide:users', href: '/staff/patients' },
         {
           label: 'Appointments',
           icon: 'lucide:calendar',
-          href: '/staff/appointments',
+          href: '/staff/appointment',
           badge: 5,
         },
         { label: 'Schedule', icon: 'lucide:clock', href: '/staff/schedule' },
@@ -62,11 +61,7 @@ export const StaffSidebar = () => {
           icon: 'lucide:pill',
           href: '/staff/prescriptions',
         },
-        {
-          label: 'Lab Results',
-          icon: 'lucide:flask',
-          href: '/staff/lab-results',
-        },
+
         {
           label: 'Billing',
           icon: 'lucide:credit-card',
@@ -77,26 +72,10 @@ export const StaffSidebar = () => {
           icon: 'lucide:box',
           href: '/staff/medicine-manager',
         },
-      ],
-    },
-    {
-      title: 'Tools',
-      items: [
         {
-          label: 'Reports',
-          icon: 'lucide:file-bar-chart',
-          href: '/staff/reports',
-        },
-        {
-          label: 'Inventory',
-          icon: 'lucide:package',
-          href: '/staff/inventory',
-        },
-        { label: 'Settings', icon: 'lucide:settings', href: '/staff/settings' },
-        {
-          label: 'Role Sync',
-          icon: 'lucide:refresh-cw',
-          href: '/admin/role-sync',
+          label: 'Clinic Manager',
+          icon: 'lucide:building',
+          href: '/staff/clinics',
         },
       ],
     },

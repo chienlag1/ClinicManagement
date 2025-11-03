@@ -1,35 +1,33 @@
 'use client';
 
 import React from 'react';
-import { Pagination as HeroUIPagination } from '@heroui/pagination';
 import { Select, SelectItem } from '@heroui/select';
 import { Button } from '@heroui/button';
 import { Icon } from '@iconify/react';
 
 export interface PaginationProps {
-  /** Tổng số items */
   totalItems: number;
-  /** Số items hiện tại trên trang */
+
   currentPage: number;
-  /** Số items per page */
+
   itemsPerPage: number;
-  /** Callback khi thay đổi trang */
+
   onPageChange: (page: number) => void;
-  /** Callback khi thay đổi số items per page */
+
   onItemsPerPageChange?: (itemsPerPage: number) => void;
-  /** Các options cho items per page */
+
   itemsPerPageOptions?: number[];
-  /** Có hiển thị thông tin tổng số items không */
+
   showTotal?: boolean;
-  /** Có hiển thị items per page selector không */
+
   showItemsPerPage?: boolean;
-  /** Có hiển thị quick jump không */
+
   showQuickJump?: boolean;
-  /** Có hiển thị first/last page buttons không */
+
   showFirstLast?: boolean;
-  /** Size của pagination */
+
   size?: 'sm' | 'md' | 'lg';
-  /** Color theme */
+
   color?:
     | 'default'
     | 'primary'
@@ -37,7 +35,7 @@ export interface PaginationProps {
     | 'success'
     | 'warning'
     | 'danger';
-  /** Có hiển thị compact mode không */
+
   compact?: boolean;
   /** Custom class name */
   className?: string;
@@ -73,7 +71,7 @@ export function Pagination({
     const newItemsPerPage = parseInt(value);
 
     onItemsPerPageChange?.(newItemsPerPage);
-    // Reset về trang 1 khi thay đổi items per page
+
     onPageChange(1);
   };
 
@@ -148,16 +146,37 @@ export function Pagination({
 
         {/* Page numbers */}
         {!compact && (
-          <HeroUIPagination
-            showControls
-            showShadow
-            className='mx-2'
-            color={color}
-            page={currentPage}
-            size={size}
-            total={totalPages}
-            onChange={handlePageChange}
-          />
+          <div className='flex items-center gap-1'>
+            {paginationUtils
+              .getPageNumbers(currentPage, totalPages, 5)
+              .map((item, index) => {
+                if (typeof item === 'string') {
+                  // Render dấu chấm
+                  return (
+                    <span
+                      key={`dots-${item}-${index}`}
+                      className='px-2 text-gray-500'
+                    >
+                      ...
+                    </span>
+                  );
+                } else {
+                  // Render số trang
+                  return (
+                    <Button
+                      key={`page-${item}`}
+                      className='min-w-8'
+                      color={item === currentPage ? color : 'default'}
+                      size={size}
+                      variant={item === currentPage ? 'solid' : 'bordered'}
+                      onPress={() => handlePageChange(item)}
+                    >
+                      {item}
+                    </Button>
+                  );
+                }
+              })}
+          </div>
         )}
 
         {/* Compact mode - chỉ hiển thị current page */}
@@ -283,20 +302,53 @@ export const paginationUtils = {
   },
 
   /**
-   * Tạo array các page numbers để hiển thị
+   * Tạo array các page numbers để hiển thị với dots
    */
   getPageNumbers: (currentPage: number, totalPages: number, maxVisible = 5) => {
-    const pages: number[] = [];
-    const half = Math.floor(maxVisible / 2);
-    let start = Math.max(1, currentPage - half);
-    let end = Math.min(totalPages, start + maxVisible - 1);
+    const pages: (number | string)[] = [];
 
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
+    if (totalPages <= maxVisible) {
+      // Nếu tổng số trang <= maxVisible, hiển thị tất cả
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Luôn hiển thị trang đầu
+      pages.push(1);
 
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
+      // Tính toán khoảng giữa
+      const half = Math.floor(maxVisible / 2);
+      let start = Math.max(2, currentPage - half);
+      let end = Math.min(totalPages - 1, currentPage + half);
+
+      // Điều chỉnh để đảm bảo có đủ số trang hiển thị
+      if (end - start + 1 < maxVisible - 2) {
+        if (start === 2) {
+          end = Math.min(totalPages - 1, start + maxVisible - 3);
+        } else {
+          start = Math.max(2, end - maxVisible + 3);
+        }
+      }
+
+      // Thêm dấu chấm đầu nếu cần
+      if (start > 2) {
+        pages.push('dots-start');
+      }
+
+      // Thêm các trang giữa
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      // Thêm dấu chấm cuối nếu cần
+      if (end < totalPages - 1) {
+        pages.push('dots-end');
+      }
+
+      // Luôn hiển thị trang cuối
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
     }
 
     return pages;

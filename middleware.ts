@@ -7,6 +7,7 @@ export const config = {
     // Bỏ qua static files và API công khai
     '/((?!.*\\..*|_next).*)',
     '/',
-    '/(api|trpc)(.*)',
+    // Bỏ qua API clinics khỏi authentication
+    '/((?!api/clinics|api/health).*)',
   ],
 };

@@ -57,16 +57,27 @@ export interface CRUDModalProps<T> {
   onSave: (data: T) => void;
   fields: CRUDField<T>[];
   isLoading?: boolean;
+  // Optional class applied to the form container inside the modal (allows grid layouts)
+  formClassName?: string;
 }
 
 export interface CRUDField<T> {
   key: keyof T;
   label: string;
-  type: 'text' | 'number' | 'email' | 'password' | 'select' | 'textarea';
+  type:
+    | 'text'
+    | 'number'
+    | 'email'
+    | 'password'
+    | 'select'
+    | 'textarea'
+    | 'date';
   placeholder?: string;
   required?: boolean;
   options?: { key: string; label: string }[];
   render?: (value: any, onChange: (value: any) => void) => React.ReactNode;
+  // Optional class applied to the field wrapper to control layout (e.g. col-span)
+  containerClassName?: string;
 }
 
 // Main CRUD Template Component
@@ -269,6 +280,7 @@ export function CRUDModal<T>({
   onSave,
   fields,
   isLoading = false,
+  formClassName,
 }: CRUDModalProps<T>) {
   const [formData, setFormData] = useState<T>(data);
 
@@ -325,6 +337,21 @@ export function CRUDModal<T>({
             onChange={e => handleFieldChange(field.key, e.target.value)}
           />
         );
+      case 'date':
+        return (
+          <Input
+            isRequired={field.required}
+            label={field.label}
+            placeholder={field.placeholder}
+            type='date'
+            value={
+              formData[field.key]
+                ? String(formData[field.key]).split('T')[0] // để đảm bảo format YYYY-MM-DD
+                : ''
+            }
+            onValueChange={value => handleFieldChange(field.key, value)}
+          />
+        );
 
       default:
         return (
@@ -345,9 +372,14 @@ export function CRUDModal<T>({
       <ModalContent>
         <ModalHeader>{title}</ModalHeader>
         <ModalBody>
-          <div className='space-y-4'>
+          <div className={formClassName ?? 'space-y-4'}>
             {fields.map(field => (
-              <div key={String(field.key)}>{renderField(field)}</div>
+              <div
+                key={String(field.key)}
+                className={field.containerClassName ?? ''}
+              >
+                {renderField(field)}
+              </div>
             ))}
           </div>
         </ModalBody>

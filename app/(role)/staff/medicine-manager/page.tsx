@@ -12,7 +12,7 @@ import {
   crudUtils,
   CRUDColumn,
   CRUDField,
-} from '@/components/crud-template';
+} from '@/components/DataTable';
 import { NotificationModal } from '@/components/notification-popup';
 
 export default function MedicineManager() {
