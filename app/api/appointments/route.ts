@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     // Xử lý bệnh nhân
     if (isNewPatient) {
       console.log('Creating new patient');
-      if (!patientData || !patientData.patient_id || !patientData.name) {
+      if (!patientData || !patientData.name) {
         return NextResponse.json(
           {
             error: 'Thiếu thông tin bệnh nhân mới.',
@@ -60,7 +60,6 @@ export async function POST(request: Request) {
 
       // Tạo bệnh nhân mới
       const newPatient = new Patient({
-        patient_id: patientData.patient_id,
         id_card: patientData.id_card,
         name: patientData.name,
         gender: patientData.gender,

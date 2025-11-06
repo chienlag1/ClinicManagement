@@ -58,7 +58,6 @@ export interface PopulatedAppointment extends Omit<Appointment, 'patient_id'> {
 
 // Form data interfaces
 export interface PatientData {
-  patient_id: string;
   id_card: string;
   name: string;
   gender: 'male' | 'female';
