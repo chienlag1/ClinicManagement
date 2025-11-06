@@ -196,6 +196,27 @@ export default function PrescriptionsPage() {
     );
   }
 
+  // Custom delete to call API and update local state
+const handleDeletePrescription = async (item: PrescriptionWithId) => {
+  const id = item._id;
+  if (!id) return;
+  const confirmed = window.confirm('Bạn có chắc muốn xóa đơn thuốc này?');
+  if (!confirmed) return;
+  try {
+    const res = await fetch(`/api/prescriptions/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || 'Xóa đơn thuốc thất bại');
+      return;
+    }
+    setPrescriptions(prev => prev.filter(p => p._id !== id));
+    setFilteredData(prev => prev.filter((p: any) => p._id !== id));
+  } catch (e) {
+    console.error('Delete prescription error', e);
+    alert('Có lỗi xảy ra khi xóa đơn thuốc');
+  }
+};
+
   return (
     <CRUDTemplate
       title='Quản lý đơn thuốc'
@@ -211,7 +232,7 @@ export default function PrescriptionsPage() {
       columns={TABLE_CONFIG.columns as any}
       onAdd={handleAdd}
       onEdit={handleEdit}
-      onDelete={handleDelete}
+      onDelete={handleDeletePrescription}
       onView={item => router.push(`/doctor/prescriptions/${item._id}`)}
       addButtonText='Kê đơn mới'
       searchPlaceholder='Tìm kiếm theo mã đơn hoặc chẩn đoán...'
