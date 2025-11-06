@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Button } from '@heroui/button';
@@ -18,6 +24,33 @@ export default function SchedulePage() {
   const [selected, setSelected] = useState<Appointment | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [filterMode, setFilterMode] = useState<FilterMode>('today');
+
+  // Helper to ensure appointments is always an array
+  const getAppointmentsArray = (): Appointment[] => {
+    if (!Array.isArray(appointments)) {
+      console.warn(
+        'appointments state is not an array, returning empty array',
+        appointments
+      );
+      return [];
+    }
+    return appointments;
+  };
+
+  // Wrapper to ensure setAppointments always receives an array
+  const setAppointmentsSafe = useCallback((value: Appointment[] | unknown) => {
+    if (Array.isArray(value)) {
+      setAppointments(value);
+    } else {
+      console.error(
+        'Attempted to set appointments to non-array value. Type:',
+        typeof value,
+        'Value:',
+        value
+      );
+      setAppointments([]);
+    }
+  }, []);
 
   // Pagination state
   const {
@@ -42,24 +75,47 @@ export default function SchedulePage() {
     const doctorId = '1'; // Thay bằng doctor_id thực tế của user
 
     fetch(`/api/appointments/${doctorId}`)
-      .then(res => res.json())
-      .then(data => {
-        setAppointments(data);
+      .then(async res => {
+        // Check if response is ok
+        if (!res.ok) {
+          const errorData = await res
+            .json()
+            .catch(() => ({ error: 'Unknown error' }));
+          console.error('API Response not OK:', res.status, errorData);
+          setAppointmentsSafe([]);
+          setLoading(false);
+          return;
+        }
+
+        // Parse JSON response
+        const data = await res.json();
+
+        // Ensure data is always an array using safe setter
+        setAppointmentsSafe(data);
         setLoading(false);
       })
       .catch(err => {
-        console.error(err);
+        console.error('Fetch error:', err);
+        setAppointmentsSafe([]);
         setLoading(false);
       });
-  }, [user]);
+  }, [user, setAppointmentsSafe]);
 
   // Status colors are imported from shared types
 
-  // ✅ Lọc danh sách theo chế độ
-  const getFilteredAppointments = () => {
-    if (filterMode === 'all') return appointments;
+  // ✅ Lọc danh sách theo chế độ - sử dụng useMemo để đảm bảo tính toán đúng
+  const filteredAppointments = useMemo((): Appointment[] => {
+    // Safety check: ensure appointments is always an array
+    const appointmentsArray = Array.isArray(appointments) ? appointments : [];
+
+    if (!Array.isArray(appointmentsArray)) {
+      console.error('appointments is not an array:', appointments);
+      return [];
+    }
+
+    if (filterMode === 'all') return appointmentsArray;
     if (filterMode === 'today') {
-      return appointments.filter(a => {
+      return appointmentsArray.filter(a => {
         if (!a.appointment_date) return false;
         const date = new Date(a.appointment_date);
         if (isNaN(date.getTime())) return false;
@@ -67,16 +123,14 @@ export default function SchedulePage() {
         return appointmentDate === today;
       });
     }
-    return appointments.filter(a => {
+    return appointmentsArray.filter(a => {
       if (!a.appointment_date) return false;
       const date = new Date(a.appointment_date);
       if (isNaN(date.getTime())) return false;
       const appointmentDate = date.toISOString().split('T')[0];
       return appointmentDate === selectedDate;
     });
-  };
-
-  const filteredAppointments = getFilteredAppointments();
+  }, [appointments, filterMode, today, selectedDate]);
 
   // Áp dụng pagination
   const startIndex = (currentPage - 1) * itemsPerPage;

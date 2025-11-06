@@ -33,5 +33,9 @@ const PatientSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Patient ||
-  mongoose.model<IPatient>('Patient', PatientSchema);
+// Ensure model is always registered
+// This pattern works with Next.js hot reload
+const PatientModel =
+  mongoose.models.Patient || mongoose.model<IPatient>('Patient', PatientSchema);
+
+export default PatientModel;
