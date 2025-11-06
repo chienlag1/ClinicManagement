@@ -1,46 +1,30 @@
 import { NextResponse } from 'next/server';
-import { logger } from '@/lib/logger';
-
-// Mock data cho doctors - trong thực tế sẽ lấy từ database
-const mockDoctors = [
-  {
-    _id: '1',
-    doctor_id: 'DOC001',
-    name: 'Bác sĩ Nguyễn Văn A',
-    specialty: 'Tim mạch',
-  },
-  {
-    _id: '2',
-    doctor_id: 'DOC002',
-    name: 'Bác sĩ Trần Thị B',
-    specialty: 'Nội khoa',
-  },
-  {
-    _id: '3',
-    doctor_id: 'DOC003',
-    name: 'Bác sĩ Lê Văn C',
-    specialty: 'Ngoại khoa',
-  },
-  {
-    _id: '4',
-    doctor_id: 'DOC004',
-    name: 'Bác sĩ Phạm Thị D',
-    specialty: 'Nhi khoa',
-  },
-  {
-    _id: '5',
-    doctor_id: 'DOC005',
-    name: 'Bác sĩ Hoàng Văn E',
-    specialty: 'Sản phụ khoa',
-  },
-];
+import { connectMongo } from '@/lib/mongodb';
+import { User, UserDoc } from '@/models/User';
 
 export async function GET() {
   try {
-    // Trả về mock data
-    return NextResponse.json(mockDoctors, { status: 200 });
+    await connectMongo();
+    
+    // Lấy danh sách users có role = 'doctor'
+    const users = await User.find({ role: 'doctor' })
+      .select('_id clerkUserId email firstName lastName')
+      .sort({ firstName: 1, lastName: 1 })
+      .lean();
+    
+    // Format lại để match với format mà AppointmentForm expect
+    const doctors = users.map((user: any) => ({
+      _id: user._id?.toString() || '',
+      doctor_id: user.clerkUserId || '', // Sử dụng clerkUserId làm doctor_id
+      name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown',
+      specialty: 'General', // Mặc định, có thể thêm field specialty vào User model sau
+    }));
+    
+    console.log('Fetched doctors from Users (role=doctor):', doctors.length);
+    
+    return NextResponse.json(doctors, { status: 200 });
   } catch (err) {
-    logger.error('Error fetching doctors', 'API_DOCTORS', err as Error);
+    console.error('Error fetching doctors:', err);
     return NextResponse.json(
       { error: 'Đã có lỗi xảy ra khi lấy danh sách bác sĩ' },
       { status: 500 }

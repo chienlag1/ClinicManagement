@@ -7,11 +7,13 @@ import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { useNotification } from '@/components/notification-popup';
+import { useUserRole } from './(role)/useUserRole';
 
 export default function PatientRegistration() {
   const router = useRouter();
   const { isSignedIn } = useUser();
   const { showNotification } = useNotification();
+  const { role, isLoading: isRoleLoading } = useUserRole();
 
   const [formData, setFormData] = useState({
     id_card: '',
@@ -23,8 +25,23 @@ export default function PatientRegistration() {
   });
 
   useEffect(() => {
-    if (!isSignedIn) router.push('/sign-in');
-  }, [isSignedIn, router]);
+    if (!isSignedIn) {
+      router.push('/sign-in');
+      return;
+    }
+
+    // Redirect based on role after role is loaded
+    if (!isRoleLoading && role) {
+      if (role === 'doctor') {
+        router.push('/doctor/dashboard');
+        return;
+      }
+      if (role === 'staff') {
+        router.push('/staff/dashboard');
+        return;
+      }
+    }
+  }, [isSignedIn, role, isRoleLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +71,10 @@ export default function PatientRegistration() {
     }
   };
 
-  if (!isSignedIn) return null;
+  // Show loading while checking role or redirecting
+  if (!isSignedIn || isRoleLoading || (role && (role === 'doctor' || role === 'staff'))) {
+    return null;
+  }
 
   return (
     <div className='flex justify-center items-start min-h-screen bg-gray-50 px-4 pt-24'>

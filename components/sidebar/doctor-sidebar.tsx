@@ -40,12 +40,6 @@ export const DoctorSidebar = () => {
           href: '/doctor/dashboard',
         },
         { label: 'Patients', icon: 'lucide:users', href: '/doctor/patients' },
-        {
-          label: 'Appointments',
-          icon: 'lucide:calendar',
-          href: '/doctor/appointments',
-          badge: 8,
-        },
         { label: 'Schedule', icon: 'lucide:clock', href: '/doctor/schedule' },
       ],
     },
@@ -53,45 +47,15 @@ export const DoctorSidebar = () => {
       title: 'Medical',
       items: [
         {
-          label: 'Medical Records',
-          icon: 'lucide:file-text',
-          href: '/doctor/records',
-        },
-        {
           label: 'Prescriptions',
           icon: 'lucide:pill',
           href: '/doctor/prescriptions',
-        },
-        {
-          label: 'Lab Results',
-          icon: 'lucide:flask',
-          href: '/doctor/lab-results',
-        },
-        {
-          label: 'Diagnosis',
-          icon: 'lucide:stethoscope',
-          href: '/doctor/diagnosis',
         },
       ],
     },
     {
       title: 'Tools',
       items: [
-        {
-          label: 'Reports',
-          icon: 'lucide:file-bar-chart',
-          href: '/doctor/reports',
-        },
-        {
-          label: 'Consultations',
-          icon: 'lucide:video',
-          href: '/doctor/consultations',
-        },
-        {
-          label: 'Settings',
-          icon: 'lucide:settings',
-          href: '/doctor/settings',
-        },
         {
           label: 'Role Sync',
           icon: 'lucide:refresh-cw',
