@@ -1,16 +1,15 @@
+// app/api/prescriptions/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
 import { connectMongo } from '@/lib/mongodb';
 import Prescription from '@/models/Prescription';
-import { User } from '@/models/User';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+type Ctx = { params: Promise<{ id: string }> };
+
+export async function GET(_req: NextRequest, context: Ctx) {
   try {
     await connectMongo();
-    const { id } = await params;
+    const { id } = await context.params; // await ở đây
     const prescription = await Prescription.findById(id).populate([
       'patient',
       'doctor',
@@ -18,10 +17,7 @@ export async function GET(
     ]);
 
     if (!prescription) {
-      return NextResponse.json(
-        { error: 'Prescription not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Prescription not found' }, { status: 404 });
     }
 
     return NextResponse.json({ prescription });
@@ -30,23 +26,17 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, context: Ctx) {
   try {
-    const auth = getAuth(request);
-
+    const auth = getAuth(req);
     if (!auth.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectMongo();
-    const { id } = await params;
-    const data = await request.json();
+    const { id } = await context.params; // await ở đây
+    const data = await req.json();
 
-    // Remove doctor field from update data if present (doctor should not be changed when editing)
-    // The doctor is determined by who created the prescription
     const { doctor, ...updateData } = data;
 
     const prescription = await Prescription.findByIdAndUpdate(id, updateData, {
@@ -54,10 +44,7 @@ export async function PUT(
     }).populate(['patient', 'doctor', 'medicines.medicine']);
 
     if (!prescription) {
-      return NextResponse.json(
-        { error: 'Prescription not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Prescription not found' }, { status: 404 });
     }
 
     return NextResponse.json({ prescription });
@@ -67,20 +54,14 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_req: NextRequest, context: Ctx) {
   try {
     await connectMongo();
-    const { id } = await params;
+    const { id } = await context.params; // await ở đây
     const prescription = await Prescription.findByIdAndDelete(id);
 
     if (!prescription) {
-      return NextResponse.json(
-        { error: 'Prescription not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Prescription not found' }, { status: 404 });
     }
 
     return NextResponse.json({ message: 'Prescription deleted successfully' });
