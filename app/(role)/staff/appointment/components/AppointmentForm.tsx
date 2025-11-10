@@ -2,7 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { PatientData } from '@/types/appointment';
-import { Patient, Doctor, AppointmentFormProps, APPOINTMENT_TIME_SLOTS, FORM_CONFIG } from '@/types';
+import {
+  Patient,
+  Doctor,
+  AppointmentFormProps,
+  APPOINTMENT_TIME_SLOTS,
+  FORM_CONFIG,
+} from '@/types';
 import { Clinic } from '@/types/clinic';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
@@ -23,7 +29,9 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
     phone: '',
     address: '',
   });
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null
+  );
   const [clinicId, setClinicId] = useState('');
   const [doctorId, setDoctorId] = useState('');
   const [appointmentDate, setAppointmentDate] = useState('');
@@ -41,21 +49,25 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [clinicResponse, doctorResponse, patientResponse] = await Promise.all([
-          fetch('/api/clinics'),
-          fetch('/api/doctors'),
-          fetch('/api/patients'),
-        ]);
+        const [clinicResponse, doctorResponse, patientResponse] =
+          await Promise.all([
+            fetch('/api/clinics'),
+            fetch('/api/doctors'),
+            fetch('/api/patients'),
+          ]);
 
-        if (!clinicResponse.ok) throw new Error('Không thể lấy danh sách phòng khám.');
+        if (!clinicResponse.ok)
+          throw new Error('Không thể lấy danh sách phòng khám.');
         const clinicData = await clinicResponse.json();
         setClinics(clinicData);
 
-        if (!doctorResponse.ok) throw new Error('Không thể lấy danh sách bác sĩ.');
+        if (!doctorResponse.ok)
+          throw new Error('Không thể lấy danh sách bác sĩ.');
         const doctorData = await doctorResponse.json();
         setDoctors(doctorData);
 
-        if (!patientResponse.ok) throw new Error('Không thể lấy danh sách bệnh nhân.');
+        if (!patientResponse.ok)
+          throw new Error('Không thể lấy danh sách bệnh nhân.');
         const patientData = await patientResponse.json();
         if (patientData.items && Array.isArray(patientData.items)) {
           setPatients(patientData.items);
@@ -65,7 +77,9 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
           setPatients([]);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi lấy dữ liệu.');
+        setError(
+          err instanceof Error ? err.message : 'Có lỗi xảy ra khi lấy dữ liệu.'
+        );
         setPatients([]);
       }
     };
@@ -79,7 +93,9 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
     setIsLoading(true);
 
     if (!clinicId || !doctorId || !appointmentDate || !appointmentTime) {
-      setError('Vui lòng điền đầy đủ thông tin: phòng khám, bác sĩ, ngày và giờ hẹn.');
+      setError(
+        'Vui lòng điền đầy đủ thông tin: phòng khám, bác sĩ, ngày và giờ hẹn.'
+      );
       setIsLoading(false);
       return;
     }
@@ -211,7 +227,10 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
                     placeholder='Nhập số CMND/CCCD'
                     value={patientData.id_card}
                     onChange={e =>
-                      setPatientData({ ...patientData, id_card: e.target.value })
+                      setPatientData({
+                        ...patientData,
+                        id_card: e.target.value,
+                      })
                     }
                     isRequired
                     variant='bordered'
@@ -304,7 +323,8 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
                       placeholder='Chọn bệnh nhân từ danh sách'
                       value={
                         selectedPatientId
-                          ? patients.find(p => p._id === selectedPatientId)?.name || ''
+                          ? patients.find(p => p._id === selectedPatientId)
+                              ?.name || ''
                           : ''
                       }
                       readOnly
@@ -314,7 +334,9 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
                     <select
                       className='absolute inset-0 opacity-0 cursor-pointer'
                       value={selectedPatientId || ''}
-                      onChange={e => setSelectedPatientId(e.target.value || null)}
+                      onChange={e =>
+                        setSelectedPatientId(e.target.value || null)
+                      }
                     >
                       <option value=''>Chọn bệnh nhân</option>
                       {patients.map(patient => (

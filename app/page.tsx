@@ -72,7 +72,11 @@ export default function PatientRegistration() {
   };
 
   // Show loading while checking role or redirecting
-  if (!isSignedIn || isRoleLoading || (role && (role === 'doctor' || role === 'staff'))) {
+  if (
+    !isSignedIn ||
+    isRoleLoading ||
+    (role && (role === 'doctor' || role === 'staff'))
+  ) {
     return null;
   }
 

@@ -17,7 +17,10 @@ export async function GET(_req: NextRequest, context: Ctx) {
     ]);
 
     if (!prescription) {
-      return NextResponse.json({ error: 'Prescription not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Prescription not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ prescription });
@@ -44,7 +47,10 @@ export async function PUT(req: NextRequest, context: Ctx) {
     }).populate(['patient', 'doctor', 'medicines.medicine']);
 
     if (!prescription) {
-      return NextResponse.json({ error: 'Prescription not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Prescription not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ prescription });
@@ -61,11 +67,65 @@ export async function DELETE(_req: NextRequest, context: Ctx) {
     const prescription = await Prescription.findByIdAndDelete(id);
 
     if (!prescription) {
-      return NextResponse.json({ error: 'Prescription not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Prescription not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ message: 'Prescription deleted successfully' });
   } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest, context: Ctx) {
+  try {
+    await connectMongo();
+    const { id } = await context.params;
+    const data = await req.json();
+
+    // Chỉ cho phép cập nhật một số field nhất định
+    const allowedFields = [
+      'status',
+      'notes',
+      'paymentStatus',
+      'paymentOrderCode',
+    ];
+    const updateData: any = {};
+
+    for (const field of allowedFields) {
+      if (data[field] !== undefined) {
+        updateData[field] = data[field];
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { error: 'No valid fields to update' },
+        { status: 400 }
+      );
+    }
+
+    const prescription = await Prescription.findByIdAndUpdate(
+      id,
+      { ...updateData, updatedAt: new Date() },
+      { new: true }
+    ).populate(['patient', 'doctor', 'medicines.medicine']);
+
+    if (!prescription) {
+      return NextResponse.json(
+        { error: 'Prescription not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      prescription,
+      message: 'Prescription updated successfully',
+    });
+  } catch (error: any) {
+    console.error('Error patching prescription:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -4,4 +4,3 @@ export default function DoctorPage() {
   // Redirect to dashboard
   redirect('/doctor/dashboard');
 }
-

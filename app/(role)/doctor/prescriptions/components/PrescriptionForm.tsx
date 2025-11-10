@@ -51,7 +51,9 @@ export function PrescriptionForm({
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       <div className='grid grid-cols-2 gap-6'>
         <div className='space-y-2'>
-          <label htmlFor='patient-select' className='block text-sm font-medium'>Bệnh nhân</label>
+          <label htmlFor='patient-select' className='block text-sm font-medium'>
+            Bệnh nhân
+          </label>
           <Select id='patient-select' {...register('patient')}>
             <option value=''>Chọn bệnh nhân</option>
             {patients.map(patient => (
@@ -66,8 +68,17 @@ export function PrescriptionForm({
         </div>
 
         <div className='space-y-2'>
-          <label htmlFor='diagnosis-input' className='block text-sm font-medium'>Chẩn đoán</label>
-          <Input id='diagnosis-input' {...register('diagnosis')} placeholder='Nhập chẩn đoán' />
+          <label
+            htmlFor='diagnosis-input'
+            className='block text-sm font-medium'
+          >
+            Chẩn đoán
+          </label>
+          <Input
+            id='diagnosis-input'
+            {...register('diagnosis')}
+            placeholder='Nhập chẩn đoán'
+          />
           {errors.diagnosis && (
             <p className='text-sm text-red-500'>{errors.diagnosis.message}</p>
           )}
@@ -75,7 +86,9 @@ export function PrescriptionForm({
       </div>
 
       <div className='space-y-2'>
-        <label htmlFor='notes-textarea' className='block text-sm font-medium'>Ghi chú</label>
+        <label htmlFor='notes-textarea' className='block text-sm font-medium'>
+          Ghi chú
+        </label>
         <Textarea
           id='notes-textarea'
           {...register('notes')}

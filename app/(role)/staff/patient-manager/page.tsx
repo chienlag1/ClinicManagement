@@ -4,7 +4,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Icon } from '@iconify/react';
 
-import { CRUDTemplate, CRUDModal, useCRUD, CRUDColumn, CRUDField } from '@/components/DataTable';
+import {
+  CRUDTemplate,
+  CRUDModal,
+  useCRUD,
+  CRUDColumn,
+  CRUDField,
+} from '@/components/DataTable';
 import { NotificationModal } from '@/components/notification-popup';
 import type { Patient } from '@/types/appointment';
 
@@ -64,7 +70,8 @@ export default function PatientManager() {
             .filter(Boolean)
             .some(v => String(v).toLowerCase().includes(term))
         : true;
-      const matchGender = filterValue === 'all' ? true : p.gender === (filterValue as any);
+      const matchGender =
+        filterValue === 'all' ? true : p.gender === (filterValue as any);
       return matchSearch && matchGender;
     });
     setFilteredData(filtered);
@@ -112,10 +119,16 @@ export default function PatientManager() {
         });
         handleSave(res.data);
       }
-      showSuccess('Thành công', editingItem ? 'Cập nhật bệnh nhân thành công!' : 'Thêm bệnh nhân thành công!');
+      showSuccess(
+        'Thành công',
+        editingItem
+          ? 'Cập nhật bệnh nhân thành công!'
+          : 'Thêm bệnh nhân thành công!'
+      );
       fetchPatients();
     } catch (error: any) {
-      const message = error?.response?.data?.error || 'Xử lý thất bại. Vui lòng thử lại.';
+      const message =
+        error?.response?.data?.error || 'Xử lý thất bại. Vui lòng thử lại.';
       showError('Lỗi', message);
     } finally {
       setIsLoading(false);
@@ -146,13 +159,15 @@ export default function PatientManager() {
       key: 'gender',
       label: 'Giới tính',
       width: '120px',
-      render: value => (value === 'male' ? 'Nam' : value === 'female' ? 'Nữ' : ''),
+      render: value =>
+        value === 'male' ? 'Nam' : value === 'female' ? 'Nữ' : '',
     },
     {
       key: 'birth_date',
       label: 'Ngày sinh',
       width: '150px',
-      render: value => (value ? new Date(value).toLocaleDateString('vi-VN') : ''),
+      render: value =>
+        value ? new Date(value).toLocaleDateString('vi-VN') : '',
     },
     { key: 'id_card', label: 'CMND/CCCD', width: '150px' },
     { key: 'address', label: 'Địa chỉ' },
@@ -214,7 +229,10 @@ export default function PatientManager() {
         setSearchTerm={setSearchTerm}
         filterValue={filterValue}
         setFilterValue={setFilterValue}
-        filterOptions={[{ key: 'male', label: 'Nam' }, { key: 'female', label: 'Nữ' }]}
+        filterOptions={[
+          { key: 'male', label: 'Nam' },
+          { key: 'female', label: 'Nữ' },
+        ]}
         searchFields={['name', 'phone', 'patient_id'] as any}
         columns={columns}
         onAdd={handleAdd}
@@ -254,5 +272,3 @@ export default function PatientManager() {
     </>
   );
 }
-
-

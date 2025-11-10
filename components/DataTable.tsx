@@ -71,7 +71,8 @@ export interface CRUDField<T> {
     | 'password'
     | 'select'
     | 'textarea'
-    | 'date';
+    | 'date'
+    | 'custom';
   placeholder?: string;
   required?: boolean;
   options?: { key: string; label: string }[];

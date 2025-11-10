@@ -24,63 +24,82 @@ export interface IPrescription {
 }
 
 // Create prescription schema
-const prescriptionSchema = new Schema({
-  patient: {
-    type: Schema.Types.ObjectId,
-    ref: 'Patient',
-    required: true
-  },
-  doctor: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  diagnosis: {
-    type: String,
-    required: true
-  },
-  medicines: [{
-    medicine: {
+const prescriptionSchema = new Schema(
+  {
+    prescriptionCode: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    patient: {
       type: Schema.Types.ObjectId,
-      ref: 'Medicine',
-      required: true
+      ref: 'Patient',
+      required: true,
     },
-    dosage: {
-      type: String,
-      required: true
+    doctor: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
-    frequency: {
+    diagnosis: {
       type: String,
-      required: true
+      required: true,
     },
-    duration: {
+    medicines: [
+      {
+        medicine: {
+          type: Schema.Types.ObjectId,
+          ref: 'Medicine',
+          required: true,
+        },
+        dosage: {
+          type: String,
+          required: true,
+        },
+        frequency: {
+          type: String,
+          required: true,
+        },
+        duration: {
+          type: String,
+          required: true,
+        },
+        instructions: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    notes: {
       type: String,
-      required: true
+      default: '',
     },
-    instructions: {
+    prescriptionDate: {
+      type: Date,
+      default: Date.now,
+    },
+    status: {
       type: String,
-      required: true
-    }
-  }],
-  notes: {
-    type: String,
-    default: ''
+      enum: ['active', 'completed', 'cancelled'],
+      default: 'active',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'cancelled'],
+      default: 'pending',
+    },
+    paymentOrderCode: {
+      type: Number,
+    },
+    appointment: {
+      type: Schema.Types.ObjectId,
+      ref: 'Appointment',
+    },
   },
-  prescriptionDate: {
-    type: Date,
-    default: Date.now
-  },
-  status: {
-    type: String,
-    enum: ['active', 'completed', 'cancelled'],
-    default: 'active'
-  },
-  appointment: {
-    type: Schema.Types.ObjectId,
-    ref: 'Appointment'
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true
-});
+);
 
-export default mongoose.models.Prescription || mongoose.model('Prescription', prescriptionSchema);
+export default mongoose.models.Prescription ||
+  mongoose.model('Prescription', prescriptionSchema);

@@ -44,16 +44,21 @@ export default function DoctorDashboardPage() {
         const appointmentsRes = await fetch(`/api/appointments/${doctorId}`);
         if (appointmentsRes.ok) {
           const appointmentsData = await appointmentsRes.json();
-          setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
+          setAppointments(
+            Array.isArray(appointmentsData) ? appointmentsData : []
+          );
         }
 
         // Fetch prescriptions count
-        const prescriptionsRes = await fetch(`/api/prescriptions?doctorId=${user.id}`);
+        const prescriptionsRes = await fetch(
+          `/api/prescriptions?doctorId=${user.id}`
+        );
         if (prescriptionsRes.ok) {
           const prescriptionsData = await prescriptionsRes.json();
-          const pendingPrescriptions = prescriptionsData.prescriptions?.filter(
-            (p: any) => p.status === 'active'
-          ) || [];
+          const pendingPrescriptions =
+            prescriptionsData.prescriptions?.filter(
+              (p: any) => p.status === 'active'
+            ) || [];
           setPrescriptionsCount(pendingPrescriptions.length);
         }
 
@@ -259,7 +264,9 @@ export default function DoctorDashboardPage() {
               </div>
             ) : todayAppointments.length === 0 ? (
               <div className='text-center py-8'>
-                <p className='text-gray-500'>No appointments scheduled for today</p>
+                <p className='text-gray-500'>
+                  No appointments scheduled for today
+                </p>
               </div>
             ) : (
               <>
