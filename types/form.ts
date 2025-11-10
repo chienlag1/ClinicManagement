@@ -185,7 +185,6 @@ export const FORM_CONFIG: FormConfig = {
     'appointmentTime',
   ],
   validationRules: {
-    patient_id: (value: string) => value.length > 0,
     id_card: (value: string) => value.length > 0,
     name: (value: string) => value.length > 0,
     phone: (value: string) => /^[0-9]{10,11}$/.test(value),
