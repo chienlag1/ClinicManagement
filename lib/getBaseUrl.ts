@@ -8,15 +8,19 @@ export function getBaseUrl() {
   
   // SSR should use NEXT_PUBLIC_BASE_URL if set
   if (process.env.NEXT_PUBLIC_BASE_URL) {
+    console.log('Using NEXT_PUBLIC_BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL);
     return process.env.NEXT_PUBLIC_BASE_URL;
   }
   
   // Reference for Vercel
   if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+    const url = `https://${process.env.VERCEL_URL}`;
+    console.log('Using VERCEL_URL:', url);
+    return url;
   }
   
   // Assume localhost
+  console.log('Using localhost fallback');
   return 'http://localhost:3000';
 }
 
@@ -25,5 +29,7 @@ export function getBaseUrl() {
  */
 export function getAbsoluteUrl(path: string = '') {
   const baseUrl = getBaseUrl();
-  return `${baseUrl}${path}`;
+  const fullUrl = `${baseUrl}${path}`;
+  console.log('Generated absolute URL:', fullUrl);
+  return fullUrl;
 }
