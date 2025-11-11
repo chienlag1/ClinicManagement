@@ -30,7 +30,7 @@ export interface CRUDTemplateProps<T> {
   filterOptions: { key: string; label: string }[];
   searchFields: (keyof T)[];
   columns: CRUDColumn<T>[];
-  onAdd: () => void;
+  onAdd?: () => void; // Made optional
   onEdit: (item: T) => void;
   onDelete: (item: T) => void;
   onView?: (item: T) => void;
@@ -132,7 +132,9 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
       {/* Filters */}
       <Card>
         <CardBody>
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          <div
+            className={`grid grid-cols-1 gap-4 ${onAdd ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}
+          >
             <Input
               placeholder={searchPlaceholder}
               startContent={
@@ -157,13 +159,15 @@ export function CRUDTemplate<T extends { _id?: string; id?: string }>({
                 )) as any
               }
             </Select>
-            <Button
-              color='primary'
-              startContent={<Icon className='w-4 h-4' icon='lucide:plus' />}
-              onPress={onAdd}
-            >
-              {addButtonText}
-            </Button>
+            {onAdd && (
+              <Button
+                color='primary'
+                startContent={<Icon className='w-4 h-4' icon='lucide:plus' />}
+                onPress={onAdd}
+              >
+                {addButtonText}
+              </Button>
+            )}
           </div>
         </CardBody>
       </Card>

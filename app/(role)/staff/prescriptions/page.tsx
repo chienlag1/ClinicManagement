@@ -121,6 +121,32 @@ export default function PrescriptionsPage() {
     fetchPrescriptions();
   }, [setFilteredData]);
 
+  // Apply filter when filterValue changes
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      try {
+        const response = await fetch('/api/prescriptions');
+        const result = await response.json();
+        const allPrescriptions = result.prescriptions || [];
+
+        // Apply filter
+        if (filterValue && filterValue !== 'all') {
+          const filtered = allPrescriptions.filter(
+            (p: PrescriptionWithId) => p.status === filterValue
+          );
+          setFilteredData(filtered);
+        } else {
+          setFilteredData(allPrescriptions);
+        }
+      } catch (error) {
+        console.error('Error fetching prescriptions:', error);
+        setFilteredData([]);
+      }
+    };
+
+    fetchPrescriptions();
+  }, [filterValue, setFilteredData]);
+
   // Fetch dropdown options
   useEffect(() => {
     const fetchOptions = async () => {
@@ -269,7 +295,6 @@ export default function PrescriptionsPage() {
         setFilterValue={setFilterValue}
         filterOptions={TABLE_CONFIG.filterOptions}
         searchFields={['diagnosis', 'notes'] as any}
-        onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={handleDeletePrescription}
         onView={item => router.push(`/staff/prescriptions/${item._id}`)}

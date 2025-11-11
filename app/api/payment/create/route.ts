@@ -43,8 +43,12 @@ export async function POST(request: NextRequest) {
       orderCode: orderCode,
       amount: amount,
       description: `Don thuoc ${orderCode}`, // Max 25 ký tự
-      returnUrl: getAbsoluteUrl(`/staff/prescriptions/${prescriptionId}?payment=success`),
-      cancelUrl: getAbsoluteUrl(`/staff/prescriptions/${prescriptionId}?payment=cancel`),
+      returnUrl: getAbsoluteUrl(
+        `/staff/prescriptions/${prescriptionId}?payment=success`
+      ),
+      cancelUrl: getAbsoluteUrl(
+        `/staff/prescriptions/${prescriptionId}?payment=cancel`
+      ),
     };
 
     console.log('Creating payment with data:', paymentData);
