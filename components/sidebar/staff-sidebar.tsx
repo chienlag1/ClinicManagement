@@ -24,8 +24,35 @@ type NavSection = {
 export const StaffSidebar = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const [activeItem, setActiveItem] = React.useState('dashboard');
+  const [todayAppointmentsCount, setTodayAppointmentsCount] = React.useState(0);
   const { user } = useUser();
   const router = useRouter();
+
+  // Fetch today's appointments count
+  React.useEffect(() => {
+    const fetchTodayAppointments = async () => {
+      try {
+        const response = await fetch('/api/appointments');
+        if (response.ok) {
+          const data = await response.json();
+          const today = new Date().toISOString().split('T')[0];
+
+          const todayAppts = data.filter((apt: any) => {
+            if (!apt.appointment_date) return false;
+            const aptDate = new Date(apt.appointment_date);
+            if (isNaN(aptDate.getTime())) return false;
+            return aptDate.toISOString().split('T')[0] === today;
+          });
+
+          setTodayAppointmentsCount(todayAppts.length);
+        }
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+
+    fetchTodayAppointments();
+  }, []);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -43,29 +70,22 @@ export const StaffSidebar = () => {
           label: 'Appointments',
           icon: 'lucide:calendar',
           href: '/staff/appointment',
-          badge: 5,
         },
-        { label: 'Schedule', icon: 'lucide:clock', href: '/staff/schedule' },
+        {
+          label: 'Schedule',
+          icon: 'lucide:clock',
+          href: '/staff/schedule',
+          badge: todayAppointmentsCount,
+        },
       ],
     },
     {
       title: 'Management',
       items: [
         {
-          label: 'Medical Records',
-          icon: 'lucide:file-text',
-          href: '/staff/records',
-        },
-        {
           label: 'Prescriptions',
           icon: 'lucide:pill',
           href: '/staff/prescriptions',
-        },
-
-        {
-          label: 'Billing',
-          icon: 'lucide:credit-card',
-          href: '/staff/billing',
         },
         {
           label: 'Medicine Manager',

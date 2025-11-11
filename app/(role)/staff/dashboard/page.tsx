@@ -3,14 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Icon } from '@iconify/react';
+import { Pagination, usePagination } from '@/components/pagination';
 import { Appointment } from '@/types/appointment';
 
 export default function StaffDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
+
+  // Pagination
+  const {
+    currentPage,
+    itemsPerPage,
+    handlePageChange,
+    handleItemsPerPageChange,
+  } = usePagination(1, 5);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -20,6 +30,16 @@ export default function StaffDashboard() {
           throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         setAppointments(data);
+
+        // Lọc lịch hẹn hôm nay
+        const today = new Date().toISOString().split('T')[0];
+        const todayAppts = data.filter((apt: Appointment) => {
+          if (!apt.appointment_date) return false;
+          const aptDate = new Date(apt.appointment_date);
+          if (isNaN(aptDate.getTime())) return false;
+          return aptDate.toISOString().split('T')[0] === today;
+        });
+        setTodayAppointments(todayAppts);
       } catch (err) {
         setError(
           err instanceof Error
@@ -44,29 +64,29 @@ export default function StaffDashboard() {
   const stats = [
     {
       title: "Today's Appointments",
-      value: '12',
+      value: todayAppointments.length.toString(),
       icon: 'lucide:calendar',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
-      title: 'Pending Patients',
-      value: '8',
+      title: 'Total Appointments',
+      value: appointments.length.toString(),
       icon: 'lucide:users',
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
-      title: 'Lab Results',
-      value: '5',
-      icon: 'lucide:flask',
+      title: 'Confirmed',
+      value: todayAppointments.filter(apt => apt.priority).length.toString(),
+      icon: 'lucide:check-circle',
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
     {
-      title: 'Prescriptions',
-      value: '15',
-      icon: 'lucide:pill',
+      title: 'Pending',
+      value: todayAppointments.filter(apt => !apt.priority).length.toString(),
+      icon: 'lucide:clock',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
     },
@@ -228,7 +248,9 @@ export default function StaffDashboard() {
       {/* Today's Schedule */}
       <Card>
         <CardHeader className='flex justify-between items-center'>
-          <h3 className='text-lg font-semibold'>Lịch hẹn hôm nay</h3>
+          <h3 className='text-lg font-semibold'>
+            Lịch hẹn hôm nay ({todayAppointments.length})
+          </h3>
           <a
             href='/staff/schedule'
             className='text-sm text-blue-600 hover:text-blue-800 font-medium'
@@ -241,65 +263,95 @@ export default function StaffDashboard() {
             <p className='text-center text-gray-500'>Đang tải...</p>
           ) : error ? (
             <p className='text-center text-red-500'>{error}</p>
-          ) : appointments.length > 0 ? (
-            <div className='space-y-3'>
-              {appointments.map((appointment, index) => (
-                <div
-                  key={index}
-                  className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'
-                >
-                  <div className='flex items-center gap-3'>
-                    <div className='text-sm font-medium text-gray-900 w-20'>
-                      {appointment.appointment_time ||
-                        appointment.time ||
-                        new Date(appointment.createdAt).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                    </div>
-                    <div>
-                      <p className='font-medium text-gray-900'>
-                        {typeof appointment.patient_id === 'string'
-                          ? appointment.patient_id
-                          : appointment.patient_id?.name ||
-                            `Patient ${index + 1}`}
-                      </p>
-                      <p className='text-sm text-gray-600'>
-                        {typeof appointment.doctor_id === 'string'
-                          ? appointment.doctor_id
-                          : appointment.doctor_id?.name || 'Bác sĩ'}
-                        {typeof appointment.doctor_id === 'object' &&
-                          appointment.doctor_id?.specialty &&
-                          ` - ${appointment.doctor_id.specialty}`}
-                      </p>
-                      <p className='text-xs text-gray-500'>
-                        {appointment.symptoms
-                          ? appointment.symptoms.substring(0, 50) +
-                            (appointment.symptoms.length > 50 ? '...' : '')
-                          : 'Không có triệu chứng'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className='flex gap-2'>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        appointment.priority
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
+          ) : todayAppointments.length > 0 ? (
+            <>
+              <div className='space-y-3'>
+                {todayAppointments
+                  .slice(
+                    (currentPage - 1) * itemsPerPage,
+                    currentPage * itemsPerPage
+                  )
+                  .map((appointment, index) => (
+                    <div
+                      key={appointment._id || index}
+                      className='flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
                     >
-                      {appointment.priority ? 'Confirmed' : 'Pending'}
-                    </span>
-                    <button
-                      onClick={() => handleDetail(appointment)}
-                      className='px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs'
-                    >
-                      Detail
-                    </button>
-                  </div>
+                      <div className='flex items-center gap-3'>
+                        <div className='text-sm font-medium text-gray-900 w-20'>
+                          {appointment.appointment_time ||
+                            appointment.time ||
+                            new Date(appointment.createdAt).toLocaleTimeString(
+                              [],
+                              {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              }
+                            )}
+                        </div>
+                        <div>
+                          <p className='font-medium text-gray-900'>
+                            {typeof appointment.patient_id === 'string'
+                              ? appointment.patient_id
+                              : appointment.patient_id?.name ||
+                                `Patient ${index + 1}`}
+                          </p>
+                          <p className='text-sm text-gray-600'>
+                            {typeof appointment.doctor_id === 'string'
+                              ? appointment.doctor_id
+                              : appointment.doctor_id?.name || 'Bác sĩ'}
+                            {typeof appointment.doctor_id === 'object' &&
+                              appointment.doctor_id?.specialty &&
+                              ` - ${appointment.doctor_id.specialty}`}
+                          </p>
+                          <p className='text-xs text-gray-500'>
+                            {appointment.symptoms
+                              ? appointment.symptoms.substring(0, 50) +
+                                (appointment.symptoms.length > 50 ? '...' : '')
+                              : 'Không có triệu chứng'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className='flex gap-2'>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            appointment.priority
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {appointment.priority ? 'Confirmed' : 'Pending'}
+                        </span>
+                        <button
+                          onClick={() => handleDetail(appointment)}
+                          className='px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs'
+                        >
+                          Detail
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+
+              {/* Pagination */}
+              {todayAppointments.length > itemsPerPage && (
+                <div className='mt-4'>
+                  <Pagination
+                    color='primary'
+                    currentPage={currentPage}
+                    itemsPerPage={itemsPerPage}
+                    itemsPerPageOptions={[5, 10, 15, 20]}
+                    showFirstLast={true}
+                    showItemsPerPage={true}
+                    showQuickJump={false}
+                    showTotal={true}
+                    size='md'
+                    totalItems={todayAppointments.length}
+                    onItemsPerPageChange={handleItemsPerPageChange}
+                    onPageChange={handlePageChange}
+                  />
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className='text-center py-8'>
               <Icon
