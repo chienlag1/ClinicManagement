@@ -198,7 +198,10 @@ export default function MedicineSelector({
                 <CardBody className='space-y-4'>
                   {/* Medicine Name */}
                   <div>
-                    <label htmlFor={`medicine-${index}`} className='block text-sm font-medium text-gray-700 mb-2'>
+                    <label
+                      htmlFor={`medicine-${index}`}
+                      className='block text-sm font-medium text-gray-700 mb-2'
+                    >
                       Tên thuốc <span className='text-red-500'>*</span>
                     </label>
                     <Dropdown id={`medicine-${index}`}>
@@ -246,7 +249,10 @@ export default function MedicineSelector({
                   {/* Dosage and Frequency */}
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div>
-                      <label htmlFor={`dosage-${index}`} className='block text-sm font-medium text-gray-700 mb-2'>
+                      <label
+                        htmlFor={`dosage-${index}`}
+                        className='block text-sm font-medium text-gray-700 mb-2'
+                      >
                         Liều lượng <span className='text-red-500'>*</span>
                       </label>
                       <Input
@@ -261,7 +267,10 @@ export default function MedicineSelector({
                     </div>
 
                     <div>
-                      <label htmlFor={`frequency-${index}`} className='block text-sm font-medium text-gray-700 mb-2'>
+                      <label
+                        htmlFor={`frequency-${index}`}
+                        className='block text-sm font-medium text-gray-700 mb-2'
+                      >
                         Tần suất <span className='text-red-500'>*</span>
                       </label>
                       <Input
@@ -278,7 +287,10 @@ export default function MedicineSelector({
 
                   {/* Duration */}
                   <div>
-                    <label htmlFor={`duration-${index}`} className='block text-sm font-medium text-gray-700 mb-2'>
+                    <label
+                      htmlFor={`duration-${index}`}
+                      className='block text-sm font-medium text-gray-700 mb-2'
+                    >
                       Thời gian dùng <span className='text-red-500'>*</span>
                     </label>
                     <Input
@@ -294,7 +306,10 @@ export default function MedicineSelector({
 
                   {/* Instructions */}
                   <div>
-                    <label htmlFor={`instructions-${index}`} className='block text-sm font-medium text-gray-700 mb-2'>
+                    <label
+                      htmlFor={`instructions-${index}`}
+                      className='block text-sm font-medium text-gray-700 mb-2'
+                    >
                       Hướng dẫn sử dụng
                     </label>
                     <Input

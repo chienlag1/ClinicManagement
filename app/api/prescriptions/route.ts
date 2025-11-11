@@ -3,6 +3,7 @@ import { getAuth } from '@clerk/nextjs/server';
 import { connectMongo } from '@/lib/mongodb';
 import Prescription from '@/models/Prescription';
 import { User } from '@/models/User';
+import { generatePrescriptionCode } from '@/lib/generatePrescriptionCode';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,9 +25,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Tạo mã đơn thuốc tự động
+    const prescriptionCode = await generatePrescriptionCode();
+
     // Replace doctor field with User ObjectId
     const prescriptionData = {
       ...data,
+      prescriptionCode,
       doctor: user._id,
     };
 

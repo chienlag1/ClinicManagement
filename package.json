@@ -60,6 +60,7 @@
     "@heroui/user": "2.2.21",
     "@hookform/resolvers": "^5.2.2",
     "@iconify/react": "^6.0.2",
+    "@payos/node": "^2.0.3",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@react-aria/ssr": "3.9.10",
     "@react-aria/visually-hidden": "3.8.27",

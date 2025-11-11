@@ -10,7 +10,6 @@ import {
   Button,
   Input,
   Textarea,
-  Chip,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
@@ -258,18 +257,6 @@ export default function PrescriptionFormPage() {
       : allMedicines;
   }, [selectedMedicineType, allMedicines]);
 
-  const statusLabels = {
-    active: 'Đang xử lý',
-    completed: 'Đã hoàn thành',
-    cancelled: 'Đã hủy',
-  };
-
-  const statusColors = {
-    active: 'warning',
-    completed: 'success',
-    cancelled: 'danger',
-  } as const;
-
   if (loading) {
     return (
       <div className='flex items-center justify-center min-h-[400px]'>
@@ -306,114 +293,50 @@ export default function PrescriptionFormPage() {
         </div>
       </div>
 
-      {/* Status Chip (only when editing) */}
-      {isEdit && (
-        <div>
-          <Chip
-            color={statusColors[formData.status as keyof typeof statusColors]}
-            variant='flat'
-            size='lg'
-          >
-            {statusLabels[formData.status as keyof typeof statusLabels]}
-          </Chip>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className='space-y-6'>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-          {/* Patient Information */}
-          <Card>
-            <CardHeader className='flex gap-3'>
-              <Icon icon='lucide:user' className='w-5 h-5 text-primary' />
-              <h2 className='text-xl font-semibold'>Thông tin bệnh nhân</h2>
-            </CardHeader>
-            <CardBody className='space-y-4'>
-              <div>
-                <label htmlFor='patient-select' className='block text-sm font-medium text-gray-700 mb-2'>
-                  Bệnh nhân <span className='text-red-500'>*</span>
-                </label>
-                <Dropdown id='patient-select'>
-                  <DropdownTrigger>
-                    <Button variant='bordered' className='w-full justify-start'>
-                      {formData.patient
-                        ? formOptions.patients.find(
-                            p => p.id === formData.patient
-                          )?.fullName || 'Chọn bệnh nhân'
-                        : 'Chọn bệnh nhân'}
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    aria-label='Chọn bệnh nhân'
-                    selectedKeys={formData.patient ? [formData.patient] : []}
-                    onSelectionChange={keys => {
-                      const selected = Array.from(keys)[0] as string;
-                      handleFieldChange('patient', selected || '');
-                    }}
-                    selectionMode='single'
-                  >
-                    {formOptions.patients.map(patient => (
-                      <DropdownItem key={patient.id}>
-                        {patient.fullName}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
-            </CardBody>
-          </Card>
-
-          {/* Date and Status */}
-          <Card>
-            <CardHeader className='flex gap-3'>
-              <Icon icon='lucide:calendar' className='w-5 h-5 text-primary' />
-              <h2 className='text-xl font-semibold'>Thông tin ngày tháng</h2>
-            </CardHeader>
-            <CardBody className='space-y-4'>
-              <div>
-                <label htmlFor='prescription-date' className='block text-sm font-medium text-gray-700 mb-2'>
-                  Ngày kê đơn
-                </label>
-                <Input
-                  id='prescription-date'
-                  type='date'
-                  value={formData.prescriptionDate}
-                  onValueChange={value =>
-                    handleFieldChange('prescriptionDate', value)
-                  }
-                />
-              </div>
-              <div>
-                <label htmlFor='status-select' className='block text-sm font-medium text-gray-700 mb-2'>
-                  Trạng thái
-                </label>
-                <Dropdown id='status-select'>
-                  <DropdownTrigger>
-                    <Button variant='bordered' className='w-full justify-start'>
-                      {
-                        statusLabels[
-                          formData.status as keyof typeof statusLabels
-                        ]
-                      }
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    aria-label='Chọn trạng thái'
-                    selectedKeys={[formData.status]}
-                    onSelectionChange={keys => {
-                      const selected = Array.from(keys)[0] as string;
-                      handleFieldChange('status', selected || 'active');
-                    }}
-                    selectionMode='single'
-                  >
-                    <DropdownItem key='active'>Đang xử lý</DropdownItem>
-                    <DropdownItem key='completed'>Đã hoàn thành</DropdownItem>
-                    <DropdownItem key='cancelled'>Đã hủy</DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+        {/* Patient Information */}
+        <Card>
+          <CardHeader className='flex gap-3'>
+            <Icon icon='lucide:user' className='w-5 h-5 text-primary' />
+            <h2 className='text-xl font-semibold'>Thông tin bệnh nhân</h2>
+          </CardHeader>
+          <CardBody className='space-y-4'>
+            <div>
+              <label
+                htmlFor='patient-select'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
+                Bệnh nhân <span className='text-red-500'>*</span>
+              </label>
+              <Dropdown id='patient-select'>
+                <DropdownTrigger>
+                  <Button variant='bordered' className='w-full justify-start'>
+                    {formData.patient
+                      ? formOptions.patients.find(
+                          p => p.id === formData.patient
+                        )?.fullName || 'Chọn bệnh nhân'
+                      : 'Chọn bệnh nhân'}
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label='Chọn bệnh nhân'
+                  selectedKeys={formData.patient ? [formData.patient] : []}
+                  onSelectionChange={keys => {
+                    const selected = Array.from(keys)[0] as string;
+                    handleFieldChange('patient', selected || '');
+                  }}
+                  selectionMode='single'
+                >
+                  {formOptions.patients.map(patient => (
+                    <DropdownItem key={patient.id}>
+                      {patient.fullName}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          </CardBody>
+        </Card>
 
         {/* Diagnosis */}
         <Card>

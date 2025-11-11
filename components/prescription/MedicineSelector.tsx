@@ -88,7 +88,10 @@ export default function MedicineSelector({
 
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
             <div className='lg:col-span-2'>
-              <label htmlFor={`medicine-${index}`} className='block text-sm font-medium text-gray-900 mb-2'>
+              <label
+                htmlFor={`medicine-${index}`}
+                className='block text-sm font-medium text-gray-900 mb-2'
+              >
                 Tên thuốc
               </label>
               <Select
@@ -106,7 +109,10 @@ export default function MedicineSelector({
             </div>
 
             <div>
-              <label htmlFor={`dosage-${index}`} className='block text-sm font-medium text-gray-900 mb-2'>
+              <label
+                htmlFor={`dosage-${index}`}
+                className='block text-sm font-medium text-gray-900 mb-2'
+              >
                 Liều lượng
               </label>
               <Input
@@ -118,7 +124,10 @@ export default function MedicineSelector({
             </div>
 
             <div>
-              <label htmlFor={`frequency-${index}`} className='block text-sm font-medium text-gray-900 mb-2'>
+              <label
+                htmlFor={`frequency-${index}`}
+                className='block text-sm font-medium text-gray-900 mb-2'
+              >
                 Tần suất
               </label>
               <Input
@@ -130,7 +139,10 @@ export default function MedicineSelector({
             </div>
 
             <div>
-              <label htmlFor={`duration-${index}`} className='block text-sm font-medium text-gray-900 mb-2'>
+              <label
+                htmlFor={`duration-${index}`}
+                className='block text-sm font-medium text-gray-900 mb-2'
+              >
                 Thời gian dùng
               </label>
               <Input
@@ -142,7 +154,10 @@ export default function MedicineSelector({
             </div>
 
             <div className='lg:col-span-2'>
-              <label htmlFor={`instructions-${index}`} className='block text-sm font-medium text-gray-900 mb-2'>
+              <label
+                htmlFor={`instructions-${index}`}
+                className='block text-sm font-medium text-gray-900 mb-2'
+              >
                 Hướng dẫn sử dụng
               </label>
               <Input

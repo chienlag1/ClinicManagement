@@ -3,12 +3,13 @@
 // Note: cleaned up modal/form state and removed duplicate/malformed fragments
 // to resolve earlier TypeScript "Expression expected" / "Declaration expected" errors.
 
-import { IPrescription } from '@/models/Prescription';
-import { CRUDTemplate, useCRUD, crudUtils } from '@/components/DataTable';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+
+import { CRUDTemplate, useCRUD, crudUtils } from '@/components/DataTable';
+import { IPrescription } from '@/models/Prescription';
 
 // Table configuration
 const TABLE_CONFIG = {
@@ -18,8 +19,8 @@ const TABLE_CONFIG = {
       label: 'Mã đơn',
       render: (value: string) => (
         <a
-          href={`/doctor/prescriptions/${value}`}
           className='text-blue-600 hover:underline'
+          href={`/doctor/prescriptions/${value}`}
         >
           {value}
         </a>
@@ -43,6 +44,7 @@ const TABLE_CONFIG = {
           completed: 'Đã hoàn thành',
           cancelled: 'Đã hủy',
         };
+
         return (
           <span className={crudUtils.getStatusColor(value)}>
             {statusLabels[value]}
@@ -106,6 +108,7 @@ export default function PrescriptionsPage() {
           ? `/api/prescriptions?doctorId=${user.id}`
           : '/api/prescriptions';
         const response = await fetch(url);
+
         if (response.ok) {
           const result = await response.json();
           const prescriptionsData = result.prescriptions || [];
@@ -153,6 +156,7 @@ export default function PrescriptionsPage() {
     // Apply search
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
+
       filtered = filtered.filter(item => {
         // Search in _id and diagnosis
         const matchesId = item._id?.toLowerCase().includes(searchLower);
@@ -181,14 +185,41 @@ export default function PrescriptionsPage() {
     router.push(`/doctor/prescriptions/form?id=${item._id}`);
   };
 
+  // Delete prescription with API call
+  const handleDeleteWithApi = async (item: PrescriptionWithId) => {
+    const id = item._id;
+
+    if (!id) return;
+    const confirmed = window.confirm('Bạn có chắc muốn xóa đơn thuốc này?');
+
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/prescriptions/${id}`, { method: 'DELETE' });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+
+        throw new Error(err?.error || 'Xóa thất bại');
+      }
+      // Remove from local list
+      setPrescriptions(prev => prev.filter(p => p._id !== id));
+      // Also update filtered view immediately
+      setFilteredData(prev => prev.filter(p => (p as any)._id !== id));
+    } catch (e) {
+      console.error('Delete prescription failed:', e);
+      alert('Xóa đơn thuốc thất bại');
+    }
+  };
+
   // Render
   if (loading) {
     return (
       <div className='flex items-center justify-center min-h-[400px]'>
         <div className='text-center'>
           <Icon
-            icon='lucide:loader-2'
             className='w-8 h-8 animate-spin mx-auto mb-4 text-primary'
+            icon='lucide:loader-2'
           />
           <p className='text-gray-500'>Đang tải danh sách đơn thuốc...</p>
         </div>
@@ -198,24 +229,24 @@ export default function PrescriptionsPage() {
 
   return (
     <CRUDTemplate
-      title='Quản lý đơn thuốc'
-      description='Quản lý danh sách đơn thuốc của bệnh nhân'
-      data={prescriptions as any[]}
-      filteredData={filteredData as any[]}
-      searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-      filterValue={filterValue}
-      setFilterValue={setFilterValue}
-      filterOptions={TABLE_CONFIG.filterOptions}
-      searchFields={['_id', 'diagnosis'] as Array<keyof PrescriptionWithId>}
-      columns={TABLE_CONFIG.columns as any}
-      onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onView={item => router.push(`/doctor/prescriptions/${item._id}`)}
       addButtonText='Kê đơn mới'
-      searchPlaceholder='Tìm kiếm theo mã đơn hoặc chẩn đoán...'
+      columns={TABLE_CONFIG.columns as any}
+      data={prescriptions as any[]}
+      description='Quản lý danh sách đơn thuốc của bệnh nhân'
+      filterOptions={TABLE_CONFIG.filterOptions}
       filterPlaceholder='Lọc theo trạng thái'
+      filterValue={filterValue}
+      filteredData={filteredData as any[]}
+      searchFields={['_id', 'diagnosis'] as Array<keyof PrescriptionWithId>}
+      searchPlaceholder='Tìm kiếm theo mã đơn hoặc chẩn đoán...'
+      searchTerm={searchTerm}
+      setFilterValue={setFilterValue}
+      setSearchTerm={setSearchTerm}
+      title='Quản lý đơn thuốc'
+      onAdd={handleAdd}
+      onDelete={handleDeleteWithApi}
+      onEdit={handleEdit}
+      onView={item => router.push(`/doctor/prescriptions/${item._id}`)}
     />
   );
 }

@@ -157,7 +157,6 @@ export const validateForm = <T extends Record<string, any>>(
 
 // Specific Form Validations
 export const APPOINTMENT_VALIDATION_RULES = {
-  patient_id: VALIDATION_RULES.required('ID bệnh nhân là bắt buộc'),
   id_card: VALIDATION_RULES.idCard(),
   name: VALIDATION_RULES.required('Tên là bắt buộc'),
   phone: VALIDATION_RULES.phone(),
@@ -175,7 +174,6 @@ export const APPOINTMENT_VALIDATION_RULES = {
 };
 
 export const PATIENT_VALIDATION_RULES = {
-  patient_id: VALIDATION_RULES.required('ID bệnh nhân là bắt buộc'),
   id_card: VALIDATION_RULES.idCard(),
   name: VALIDATION_RULES.required('Tên là bắt buộc'),
   phone: VALIDATION_RULES.phone(),
