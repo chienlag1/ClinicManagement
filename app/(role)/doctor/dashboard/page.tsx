@@ -36,8 +36,8 @@ export default function DoctorDashboardPage() {
 
     const fetchData = async () => {
       setLoading(true);
-      // Tạm thời sử dụng doctor_id cố định, sau này có thể lấy từ user profile
-      const doctorId = '1'; // Thay bằng doctor_id thực tế của user
+      // Sử dụng clerkUserId của user hiện tại làm doctor_id
+      const doctorId = user.id; // clerkUserId
 
       try {
         // Fetch appointments
@@ -47,6 +47,12 @@ export default function DoctorDashboardPage() {
           setAppointments(
             Array.isArray(appointmentsData) ? appointmentsData : []
           );
+        } else {
+          console.error(
+            'Failed to fetch appointments:',
+            appointmentsRes.status
+          );
+          setAppointments([]);
         }
 
         // Fetch prescriptions count

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Icon } from '@iconify/react';
+
 import { Appointment, statusColors, getStatusLabel } from '@/types/appointment';
 
 interface AppointmentListProps {
@@ -22,7 +23,7 @@ export function AppointmentList({
   if (loading) {
     return (
       <div className='flex items-center justify-center py-8'>
-        <Icon icon='lucide:loader-2' className='w-6 h-6 animate-spin mr-2' />
+        <Icon className='w-6 h-6 animate-spin mr-2' icon='lucide:loader-2' />
         <p className='text-gray-500'>Đang tải...</p>
       </div>
     );
@@ -32,8 +33,8 @@ export function AppointmentList({
     return (
       <div className='text-center py-8'>
         <Icon
-          icon='lucide:alert-circle'
           className='w-8 h-8 text-red-500 mx-auto mb-2'
+          icon='lucide:alert-circle'
         />
         <p className='text-red-500'>{error}</p>
       </div>
@@ -44,8 +45,8 @@ export function AppointmentList({
     return (
       <div className='text-center py-8'>
         <Icon
-          icon='lucide:calendar-x'
           className='w-12 h-12 text-gray-400 mx-auto mb-4'
+          icon='lucide:calendar-x'
         />
         <p className='text-gray-500'>{emptyMessage}</p>
       </div>
@@ -80,12 +81,7 @@ export function AppointmentList({
                   </span>
                 )}
               </div>
-              <p className='text-sm text-gray-600'>
-                Bác sĩ ID:{' '}
-                {typeof appointment.doctor_id === 'object'
-                  ? appointment.doctor_id?.doctor_id
-                  : appointment.doctor_id}
-              </p>
+
               <p className='text-xs text-gray-500'>
                 {appointment.symptoms
                   ? appointment.symptoms.substring(0, 60) +
@@ -96,6 +92,7 @@ export function AppointmentList({
                 {appointment.appointment_date
                   ? (() => {
                       const date = new Date(appointment.appointment_date);
+
                       return isNaN(date.getTime())
                         ? 'Ngày không hợp lệ'
                         : date.toLocaleDateString('vi-VN');
@@ -111,8 +108,8 @@ export function AppointmentList({
               {getStatusLabel(appointment.status)}
             </span>
             <button
-              onClick={() => onAppointmentClick(appointment)}
               className='px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs transition-colors'
+              onClick={() => onAppointmentClick(appointment)}
             >
               Chi tiết
             </button>
