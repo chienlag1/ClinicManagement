@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PayOS } from '@payos/node';
+import { getAbsoluteUrl } from '@/lib/getBaseUrl';
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,8 +43,8 @@ export async function POST(request: NextRequest) {
       orderCode: orderCode,
       amount: amount,
       description: `Don thuoc ${orderCode}`, // Max 25 ký tự
-      returnUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/staff/prescriptions/${prescriptionId}?payment=success`,
-      cancelUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/staff/prescriptions/${prescriptionId}?payment=cancel`,
+      returnUrl: getAbsoluteUrl(`/staff/prescriptions/${prescriptionId}?payment=success`),
+      cancelUrl: getAbsoluteUrl(`/staff/prescriptions/${prescriptionId}?payment=cancel`),
     };
 
     console.log('Creating payment with data:', paymentData);
