@@ -71,8 +71,8 @@ export default function SchedulePage() {
     if (!user) return;
 
     setLoading(true);
-    // Tạm thời sử dụng doctor_id cố định, sau này có thể lấy từ user profile
-    const doctorId = '1'; // Thay bằng doctor_id thực tế của user
+    // Sử dụng clerkUserId của user hiện tại làm doctor_id
+    const doctorId = user.id; // clerkUserId
 
     fetch(`/api/appointments/${doctorId}`)
       .then(async res => {
