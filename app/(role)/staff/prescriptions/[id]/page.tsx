@@ -81,36 +81,52 @@ export default function PrescriptionDetailPage() {
       const paymentStatus = urlParams.get('payment');
 
       if (paymentStatus && prescription) {
-        let newStatus: 'completed' | 'cancelled' | null = null;
+        let updateData: {
+          status?: 'completed' | 'cancelled';
+          paymentStatus?: 'paid' | 'cancelled';
+        } | null = null;
         let message = '';
 
         if (paymentStatus === 'success') {
-          newStatus = 'completed';
+          updateData = {
+            status: 'completed',
+            paymentStatus: 'paid',
+          };
           message = 'Thanh toán thành công! Đơn thuốc đã được hoàn thành.';
         } else if (paymentStatus === 'cancel') {
-          newStatus = 'cancelled';
+          updateData = {
+            status: 'cancelled',
+            paymentStatus: 'cancelled',
+          };
           message =
             'Thanh toán đã bị hủy. Đơn thuốc đã được đánh dấu là đã hủy.';
         }
 
-        if (newStatus) {
+        if (updateData) {
           try {
-            // Cập nhật trạng thái đơn thuốc
+            // Cập nhật trạng thái đơn thuốc và payment status
             const response = await fetch(
               `/api/prescriptions/${prescription._id}`,
               {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus }),
+                body: JSON.stringify(updateData),
               }
             );
 
             if (response.ok) {
-              // Cập nhật state local
-              setPrescription({ ...prescription, status: newStatus });
+              const responseData = await response.json();
+              // Cập nhật state local với dữ liệu từ server
+              const updatedPrescription = responseData.prescription || {
+                ...prescription,
+                ...updateData,
+              };
+              setPrescription(updatedPrescription);
+
+              // Hiển thị thông báo thành công
               alert(message);
 
-              // Xóa query parameter khỏi URL
+              // Xóa query parameter khỏi URL để tránh xử lý lại
               window.history.replaceState({}, '', window.location.pathname);
             }
           } catch (error) {
@@ -375,51 +391,56 @@ export default function PrescriptionDetailPage() {
           >
             Đóng
           </Button>
-          <Button
-            onClick={async () => {
-              try {
-                const response = await fetch('/api/payment/create', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    prescriptionId: prescription._id,
-                    amount: totalAmount,
-                    description: `Don thuoc ${prescription._id.slice(-6)}`,
-                  }),
-                });
-
-                if (!response.ok) {
-                  const text = await response.text();
-                  console.error('Payment Error Response:', {
-                    status: response.status,
-                    text,
+          {/* Chỉ hiển thị nút thanh toán nếu đơn thuốc chưa completed và chưa cancelled */}
+          {prescription.status === 'active' && (
+            <Button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/payment/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      prescriptionId: prescription._id,
+                      amount: totalAmount,
+                      description: `Don thuoc ${prescription._id.slice(-6)}`,
+                    }),
                   });
-                  let errorData;
-                  try {
-                    errorData = JSON.parse(text);
-                  } catch {
-                    errorData = { error: text || 'Không thể tạo thanh toán' };
-                  }
-                  throw new Error(
-                    errorData.error || 'Không thể tạo thanh toán'
-                  );
-                }
 
-                const data = await response.json();
-                if (data.checkoutUrl) {
-                  window.location.href = data.checkoutUrl;
-                } else {
-                  throw new Error('Không nhận được link thanh toán');
+                  if (!response.ok) {
+                    const text = await response.text();
+                    console.error('Payment Error Response:', {
+                      status: response.status,
+                      text,
+                    });
+                    let errorData;
+                    try {
+                      errorData = JSON.parse(text);
+                    } catch {
+                      errorData = {
+                        error: text || 'Không thể tạo thanh toán',
+                      };
+                    }
+                    throw new Error(
+                      errorData.error || 'Không thể tạo thanh toán'
+                    );
+                  }
+
+                  const data = await response.json();
+                  if (data.checkoutUrl) {
+                    window.location.href = data.checkoutUrl;
+                  } else {
+                    throw new Error('Không nhận được link thanh toán');
+                  }
+                } catch (error: any) {
+                  console.error('Error:', error);
+                  alert(error.message || 'Có lỗi xảy ra khi tạo thanh toán');
                 }
-              } catch (error: any) {
-                console.error('Error:', error);
-                alert(error.message || 'Có lỗi xảy ra khi tạo thanh toán');
-              }
-            }}
-            className='bg-blue-600 hover:bg-blue-700 text-white'
-          >
-            💳 Thanh toán ({totalAmount.toLocaleString('vi-VN')} đ)
-          </Button>
+              }}
+              className='bg-blue-600 hover:bg-blue-700 text-white'
+            >
+              💳 Thanh toán ({totalAmount.toLocaleString('vi-VN')} đ)
+            </Button>
+          )}
         </div>
       </div>
     </div>

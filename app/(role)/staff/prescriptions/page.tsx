@@ -56,6 +56,7 @@ const TABLE_CONFIG = {
     },
   ],
   filterOptions: [
+    { key: 'all', label: 'Tất cả' },
     { key: 'active', label: 'Đang xử lý' },
     { key: 'completed', label: 'Đã hoàn thành' },
     { key: 'cancelled', label: 'Đã hủy' },
