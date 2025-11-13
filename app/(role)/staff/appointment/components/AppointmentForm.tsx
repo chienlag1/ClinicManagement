@@ -402,7 +402,8 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
                   placeholder='Chọn bác sĩ'
                   value={
                     doctorId
-                      ? doctors.find(d => d._id === doctorId)?.name || ''
+                      ? doctors.find(d => (d.doctor_id || d._id) === doctorId)
+                          ?.name || ''
                       : ''
                   }
                   readOnly
@@ -415,7 +416,10 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
                 >
                   <option value=''>Chọn bác sĩ</option>
                   {doctors.map(doctor => (
-                    <option key={doctor._id} value={doctor._id}>
+                    <option
+                      key={doctor._id}
+                      value={doctor.doctor_id || doctor._id}
+                    >
                       {doctor.name} ({doctor.specialty})
                     </option>
                   ))}

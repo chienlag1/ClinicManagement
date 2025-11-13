@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PayOS } from '@payos/node';
 import { connectMongo } from '@/lib/mongodb';
 import Prescription from '@/models/Prescription';
+import Bill from '@/models/Bill';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,17 +23,81 @@ export async function POST(request: NextRequest) {
       const { orderCode, description } = webhookData.data;
 
       // Trích xuất prescriptionId từ description
-      const prescriptionId = description.match(/([a-f0-9]{24})/)?.[0];
+      // PayOS description format: "Don thuoc {orderCode}" - cần lấy từ request body hoặc từ prescription
+      await connectMongo();
 
-      if (prescriptionId) {
+      // Tìm prescription bằng paymentOrderCode nếu có
+      let prescription = null;
+      if (orderCode) {
+        prescription = await Prescription.findOne({
+          paymentOrderCode: orderCode,
+        })
+          .populate('patient')
+          .populate('medicines.medicine');
+      }
+
+      // Nếu không tìm thấy bằng orderCode, thử tìm bằng prescriptionId trong description
+      if (!prescription) {
+        const prescriptionId = description.match(/([a-f0-9]{24})/)?.[0];
+        if (prescriptionId) {
+          prescription = await Prescription.findById(prescriptionId)
+            .populate('patient')
+            .populate('medicines.medicine');
+        }
+      }
+
+      if (prescription) {
         // Cập nhật trạng thái đơn thuốc
-        await connectMongo();
-        await Prescription.findByIdAndUpdate(prescriptionId, {
+        await Prescription.findByIdAndUpdate(prescription._id, {
           status: 'completed',
           paymentStatus: 'paid',
           paymentOrderCode: orderCode,
           updatedAt: new Date(),
         });
+
+        // Tính tổng tiền từ medicines
+        const totalAmount = (prescription.medicines || []).reduce(
+          (sum: number, item: any) => {
+            const medicine = item.medicine;
+            if (medicine && typeof medicine.price === 'number') {
+              return sum + medicine.price;
+            }
+            return sum;
+          },
+          0
+        );
+
+        // Tìm hoặc tạo Bill
+        // Tìm bill hiện có với prescription này
+        let existingBill = await Bill.findOne({
+          prescription: prescription._id,
+        });
+
+        if (existingBill) {
+          // Cập nhật bill hiện có khi thanh toán thành công
+          existingBill.paymentStatus = 'paid';
+          existingBill.paymentDate = new Date();
+          existingBill.paymentOrderCode = orderCode;
+          existingBill.totalAmount = totalAmount; // Cập nhật lại tổng tiền
+          await existingBill.save();
+          console.log(
+            `Updated bill ${existingBill.billCode} for prescription ${prescription.prescriptionCode}`
+          );
+        } else if (prescription.patient) {
+          // Tạo bill mới nếu chưa có
+          await Bill.create({
+            patient: prescription.patient._id || prescription.patient,
+            prescription: prescription._id,
+            description: `Thanh toán đơn thuốc ${prescription.prescriptionCode || ''}`,
+            totalAmount: totalAmount,
+            paymentStatus: 'paid',
+            paymentDate: new Date(),
+            paymentOrderCode: orderCode,
+          });
+          console.log(
+            `Created bill for prescription ${prescription.prescriptionCode}`
+          );
+        }
       }
 
       return NextResponse.json({ success: true });

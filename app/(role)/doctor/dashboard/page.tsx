@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Button } from '@heroui/button';
@@ -17,10 +17,18 @@ export default function DoctorDashboardPage() {
   const [prescriptionsCount, setPrescriptionsCount] = useState(0);
   const [patientsCount, setPatientsCount] = useState(0);
 
-  // Ngày hiện tại dạng yyyy-mm-dd
-  const today = useMemo(() => {
-    return new Date().toISOString().split('T')[0];
+  // Helper function to format date to YYYY-MM-DD in local timezone
+  const formatDateLocal = useCallback((date: Date | string): string => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }, []);
+
+  // Ngày hiện tại dạng yyyy-mm-dd (local timezone)
+  const today = useMemo(() => formatDateLocal(new Date()), [formatDateLocal]);
 
   // Fetch appointments
   useEffect(() => {
@@ -33,16 +41,49 @@ export default function DoctorDashboardPage() {
 
       try {
         // Fetch appointments
+        console.log(
+          'Dashboard - Fetching appointments for doctorId:',
+          doctorId
+        );
         const appointmentsRes = await fetch(`/api/appointments/${doctorId}`);
         if (appointmentsRes.ok) {
           const appointmentsData = await appointmentsRes.json();
-          setAppointments(
-            Array.isArray(appointmentsData) ? appointmentsData : []
+          const appointmentsArray = Array.isArray(appointmentsData)
+            ? appointmentsData
+            : [];
+          setAppointments(appointmentsArray);
+          console.log(
+            'Dashboard - Fetched appointments:',
+            appointmentsArray.length
           );
+
+          // Debug: Log all appointments với thông tin chi tiết
+          if (appointmentsArray.length > 0) {
+            appointmentsArray.forEach((apt: Appointment, index: number) => {
+              console.log(`Dashboard - Appointment ${index + 1}:`, {
+                appointment_id: apt.appointment_id,
+                doctor_id: apt.doctor_id,
+                appointment_date: apt.appointment_date,
+                formatted_date: formatDateLocal(apt.appointment_date || ''),
+                appointment_time: apt.appointment_time,
+                patient:
+                  typeof apt.patient_id === 'object'
+                    ? apt.patient_id?.name
+                    : apt.patient_id,
+              });
+            });
+          } else {
+            console.log(
+              'Dashboard - No appointments found for doctor:',
+              doctorId
+            );
+          }
         } else {
+          const errorData = await appointmentsRes.json().catch(() => ({}));
           console.error(
             'Failed to fetch appointments:',
-            appointmentsRes.status
+            appointmentsRes.status,
+            errorData
           );
           setAppointments([]);
         }
@@ -58,13 +99,32 @@ export default function DoctorDashboardPage() {
               (p: any) => p.status === 'active'
             ) || [];
           setPrescriptionsCount(pendingPrescriptions.length);
+          console.log(
+            'Dashboard - Pending prescriptions:',
+            pendingPrescriptions.length
+          );
         }
 
-        // Fetch patients count
-        const patientsRes = await fetch('/api/doctor/patients');
+        // Fetch patients count - API trả về { items: [...], total: ... }
+        const patientsRes = await fetch('/api/doctor/patients?limit=100');
         if (patientsRes.ok) {
           const patientsData = await patientsRes.json();
-          setPatientsCount(patientsData.patients?.length || 0);
+          // API trả về { items: [...], total: number, page: number, limit: number, pages: number }
+          // Sử dụng total để có tổng số patients của doctor
+          const patientsCount =
+            patientsData.total ??
+            patientsData.items?.length ??
+            (Array.isArray(patientsData) ? patientsData.length : 0);
+          setPatientsCount(patientsCount || 0);
+          console.log('Dashboard - Active patients:', {
+            total: patientsData.total,
+            items: patientsData.items?.length,
+            count: patientsCount,
+            data: patientsData,
+          });
+        } else {
+          console.error('Failed to fetch patients:', patientsRes.status);
+          setPatientsCount(0);
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -76,17 +136,61 @@ export default function DoctorDashboardPage() {
     fetchData();
   }, [user]);
 
-  // Filter appointments for today
+  // Filter appointments for today - sử dụng local timezone
   const todayAppointments = useMemo(() => {
-    if (!Array.isArray(appointments)) return [];
-    return appointments.filter(apt => {
-      if (!apt.appointment_date) return false;
+    if (!Array.isArray(appointments)) {
+      console.log('Dashboard - appointments is not an array:', appointments);
+      return [];
+    }
+
+    const todayLocal = formatDateLocal(new Date());
+    console.log('Dashboard - Filtering appointments for today:', todayLocal);
+    console.log(
+      'Dashboard - Total appointments to filter:',
+      appointments.length
+    );
+
+    const filtered = appointments.filter(apt => {
+      if (!apt.appointment_date) {
+        console.log(
+          'Dashboard - Appointment missing date:',
+          apt.appointment_id
+        );
+        return false;
+      }
+
       const appointmentDate = new Date(apt.appointment_date);
-      if (isNaN(appointmentDate.getTime())) return false;
-      const appointmentDateStr = appointmentDate.toISOString().split('T')[0];
-      return appointmentDateStr === today;
+      if (isNaN(appointmentDate.getTime())) {
+        console.log(
+          'Dashboard - Invalid appointment date:',
+          apt.appointment_date,
+          apt.appointment_id
+        );
+        return false;
+      }
+
+      const appointmentDateStr = formatDateLocal(appointmentDate);
+      const matches = appointmentDateStr === todayLocal;
+
+      // Debug: Log tất cả appointments để xem tại sao không match
+      console.log('Dashboard - Comparing appointment:', {
+        appointment_id: apt.appointment_id,
+        appointment_date_raw: apt.appointment_date,
+        appointment_date_formatted: appointmentDateStr,
+        today_local: todayLocal,
+        matches: matches,
+        patient:
+          typeof apt.patient_id === 'object' ? apt.patient_id?.name : 'Unknown',
+      });
+
+      return matches;
     });
-  }, [appointments, today]);
+
+    console.log(
+      `Dashboard - Today appointments: ${filtered.length} out of ${appointments.length} (Today: ${todayLocal})`
+    );
+    return filtered;
+  }, [appointments, formatDateLocal]);
 
   // Format time for display
   const formatTime = (time: string) => {

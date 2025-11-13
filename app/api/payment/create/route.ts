@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PayOS } from '@payos/node';
 import { getAbsoluteUrl } from '@/lib/getBaseUrl';
+import { connectMongo } from '@/lib/mongodb';
+import Prescription from '@/models/Prescription';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,15 +30,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    await connectMongo();
+
+    // Tạo mã đơn hàng duy nhất
+    const orderCode = Number(String(Date.now()).slice(-6));
+
+    // Lưu paymentOrderCode vào prescription trước khi tạo payment link
+    await Prescription.findByIdAndUpdate(prescriptionId, {
+      paymentOrderCode: orderCode,
+      updatedAt: new Date(),
+    });
+
     // Khởi tạo PayOS
     const payos = new PayOS({
       clientId: process.env.PAYOS_CLIENT_ID,
       apiKey: process.env.PAYOS_API_KEY,
       checksumKey: process.env.PAYOS_CHECKSUM_KEY,
     });
-
-    // Tạo mã đơn hàng duy nhất
-    const orderCode = Number(String(Date.now()).slice(-6));
 
     // Tạo thanh toán với PayOS
     const paymentData = {
