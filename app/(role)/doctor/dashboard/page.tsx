@@ -6,15 +6,7 @@ import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Spinner } from '@heroui/spinner';
 import { useUser } from '@clerk/nextjs';
-import {
-  Calendar,
-  Users,
-  FileText,
-  FlaskConical,
-  Clock,
-  Plus,
-  FileBarChart,
-} from 'lucide-react';
+import { Calendar, Users, FileText, Clock, Plus } from 'lucide-react';
 import { Appointment } from '@/types/appointment';
 
 export default function DoctorDashboardPage() {
@@ -128,25 +120,19 @@ export default function DoctorDashboardPage() {
       label: 'New Prescription',
       icon: Plus,
       color: 'primary',
-      href: '/doctor/prescriptions/new',
+      href: '/doctor/prescriptions',
     },
     {
-      label: 'View Reports',
-      icon: FileBarChart,
+      label: 'View Schedule',
+      icon: Clock,
       color: 'secondary',
-      href: '/doctor/prescriptions',
+      href: '/doctor/schedule',
     },
     {
       label: 'Patient Records',
       icon: Users,
       color: 'success',
       href: '/doctor/patients',
-    },
-    {
-      label: 'Lab Results',
-      icon: FlaskConical,
-      color: 'warning',
-      href: '/doctor/prescriptions',
     },
   ];
 
@@ -161,7 +147,7 @@ export default function DoctorDashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         <Card className='border border-gray-200 shadow-sm hover:shadow-md transition-shadow'>
           <CardBody className='p-6'>
             <div className='flex items-center justify-between mb-4'>
@@ -232,21 +218,6 @@ export default function DoctorDashboardPage() {
                 <p className='text-sm text-gray-500'>Need review</p>
               </>
             )}
-          </CardBody>
-        </Card>
-
-        <Card className='border border-gray-200 shadow-sm hover:shadow-md transition-shadow'>
-          <CardBody className='p-6'>
-            <div className='flex items-center justify-between mb-4'>
-              <div className='p-3 bg-purple-100 rounded-lg'>
-                <FlaskConical className='w-6 h-6 text-purple-600' />
-              </div>
-            </div>
-            <h3 className='text-sm font-medium text-gray-600 mb-1'>
-              Lab Results
-            </h3>
-            <div className='text-3xl font-bold text-gray-900 mb-1'>0</div>
-            <p className='text-sm text-gray-500'>Awaiting review</p>
           </CardBody>
         </Card>
       </div>

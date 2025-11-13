@@ -7,7 +7,8 @@ import { Input } from '@heroui/input';
 import { Select, SelectItem } from '@heroui/select';
 import { Chip } from '@heroui/chip';
 import { Icon } from '@iconify/react';
-import { useUser } from '@clerk/nextjs';
+import { PatientDetailModal } from '@/components/patient/patient-detail-modal';
+import { PatientHistoryModal } from '@/components/patient/patient-history-modal';
 
 interface Patient {
   _id: string;
@@ -27,7 +28,14 @@ export default function DoctorPatientsPage() {
   const [genderFilter, setGenderFilter] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const { user } = useUser();
+
+  // Modal states
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null
+  );
+  const [selectedPatientName, setSelectedPatientName] = useState<string>('');
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const fetchPatients = async () => {
     try {
@@ -86,6 +94,17 @@ export default function DoctorPatientsPage() {
     }
 
     return age;
+  };
+
+  const handleViewDetails = (patient: Patient) => {
+    setSelectedPatientId(patient._id);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleViewHistory = (patient: Patient) => {
+    setSelectedPatientId(patient._id);
+    setSelectedPatientName(patient.name);
+    setIsHistoryModalOpen(true);
   };
 
   return (
@@ -212,6 +231,7 @@ export default function DoctorPatientsPage() {
                       startContent={
                         <Icon icon='lucide:eye' className='w-4 h-4' />
                       }
+                      onPress={() => handleViewDetails(patient)}
                     >
                       View Details
                     </Button>
@@ -220,10 +240,11 @@ export default function DoctorPatientsPage() {
                       color='secondary'
                       variant='flat'
                       startContent={
-                        <Icon icon='lucide:calendar-plus' className='w-4 h-4' />
+                        <Icon icon='lucide:history' className='w-4 h-4' />
                       }
+                      onPress={() => handleViewHistory(patient)}
                     >
-                      Schedule
+                      Xem lịch sử
                     </Button>
                   </div>
                 </div>
@@ -279,6 +300,28 @@ export default function DoctorPatientsPage() {
           </Button>
         </div>
       )}
+
+      {/* Patient Detail Modal */}
+      <PatientDetailModal
+        patientId={selectedPatientId}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedPatientId(null);
+        }}
+      />
+
+      {/* Patient History Modal */}
+      <PatientHistoryModal
+        patientId={selectedPatientId}
+        patientName={selectedPatientName}
+        isOpen={isHistoryModalOpen}
+        onClose={() => {
+          setIsHistoryModalOpen(false);
+          setSelectedPatientId(null);
+          setSelectedPatientName('');
+        }}
+      />
     </div>
   );
 }
