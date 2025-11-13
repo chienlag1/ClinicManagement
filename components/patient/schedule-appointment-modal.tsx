@@ -286,9 +286,7 @@ export function ScheduleAppointmentModal({
                         }
                       >
                         {APPOINTMENT_TIME_SLOTS.all.map(slot => (
-                          <SelectItem key={slot.value}>
-                            {slot.label}
-                          </SelectItem>
+                          <SelectItem key={slot.value}>{slot.label}</SelectItem>
                         ))}
                       </Select>
                     </div>
