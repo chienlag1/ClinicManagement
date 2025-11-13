@@ -63,8 +63,18 @@ export default function SchedulePage() {
 
   const dateInputRef = useRef<HTMLInputElement>(null);
 
-  // ✅ Ngày hiện tại dạng yyyy-mm-dd
-  const today = new Date().toISOString().split('T')[0];
+  // Helper function to format date to YYYY-MM-DD in local timezone
+  const formatDateLocal = useCallback((date: Date | string): string => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  // ✅ Ngày hiện tại dạng yyyy-mm-dd (local timezone) - tính trong useMemo để tránh thay đổi
+  const today = useMemo(() => formatDateLocal(new Date()), [formatDateLocal]);
 
   // ✅ Fetch danh sách appointments
   useEffect(() => {
@@ -90,6 +100,17 @@ export default function SchedulePage() {
         // Parse JSON response
         const data = await res.json();
 
+        // Debug: Log appointments để kiểm tra
+        console.log('Fetched appointments:', data.length, 'appointments');
+        if (data.length > 0) {
+          console.log('Sample appointment:', {
+            appointment_id: data[0].appointment_id,
+            appointment_date: data[0].appointment_date,
+            formatted_date: formatDateLocal(data[0].appointment_date),
+          });
+        }
+        console.log('Today (local):', today);
+
         // Ensure data is always an array using safe setter
         setAppointmentsSafe(data);
         setLoading(false);
@@ -99,7 +120,7 @@ export default function SchedulePage() {
         setAppointmentsSafe([]);
         setLoading(false);
       });
-  }, [user, setAppointmentsSafe]);
+  }, [user, setAppointmentsSafe, today, formatDateLocal]);
 
   // Status colors are imported from shared types
 
@@ -115,22 +136,28 @@ export default function SchedulePage() {
 
     if (filterMode === 'all') return appointmentsArray;
     if (filterMode === 'today') {
-      return appointmentsArray.filter(a => {
-        if (!a.appointment_date) return false;
+      const todayLocal = formatDateLocal(new Date());
+      const filtered = appointmentsArray.filter(a => {
+        if (!a.appointment_date) {
+          return false;
+        }
         const date = new Date(a.appointment_date);
-        if (isNaN(date.getTime())) return false;
-        const appointmentDate = date.toISOString().split('T')[0];
-        return appointmentDate === today;
+        if (isNaN(date.getTime())) {
+          return false;
+        }
+        const appointmentDate = formatDateLocal(date);
+        return appointmentDate === todayLocal;
       });
+      return filtered;
     }
     return appointmentsArray.filter(a => {
       if (!a.appointment_date) return false;
       const date = new Date(a.appointment_date);
       if (isNaN(date.getTime())) return false;
-      const appointmentDate = date.toISOString().split('T')[0];
+      const appointmentDate = formatDateLocal(date);
       return appointmentDate === selectedDate;
     });
-  }, [appointments, filterMode, today, selectedDate]);
+  }, [appointments, filterMode, selectedDate, formatDateLocal]);
 
   // Áp dụng pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
