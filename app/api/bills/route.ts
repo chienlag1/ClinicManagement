@@ -5,7 +5,9 @@ import Bill from '@/models/Bill';
 // GET /api/bills?patientId=xxx&status=paid&from=2024-01-01&to=2024-12-31&page=1&limit=10
 export async function GET(req: NextRequest) {
   try {
+    console.log('API Bills - Starting request...');
     await connectMongo();
+    console.log('API Bills - MongoDB connected');
 
     const { searchParams } = new URL(req.url);
     const patientId = searchParams.get('patientId');
@@ -55,7 +57,8 @@ export async function GET(req: NextRequest) {
         .populate('appointment', 'appointment_id')
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
       Bill.countDocuments(filter),
     ]);
 
@@ -75,10 +78,17 @@ export async function GET(req: NextRequest) {
       { items, total, page, limit, pages: Math.ceil(total / limit) },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching bills:', error);
+    console.error('Error stack:', error?.stack);
+    console.error('Error message:', error?.message);
     return NextResponse.json(
-      { error: 'Failed to fetch bills' },
+      {
+        error: 'Failed to fetch bills',
+        message: error?.message || 'Unknown error',
+        stack:
+          process.env.NODE_ENV === 'development' ? error?.stack : undefined,
+      },
       { status: 500 }
     );
   }

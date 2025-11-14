@@ -293,11 +293,12 @@ export function ScheduleAppointmentModal({
 
                     <div className='flex items-center gap-3'>
                       <Switch
+                        id='priority'
                         isSelected={priority}
                         onValueChange={setPriority}
                         color='warning'
                       />
-                      <label className='text-medium font-medium'>
+                      <label htmlFor='priority' className='text-medium font-medium'>
                         Ưu tiên (Xếp số 1)
                       </label>
                     </div>

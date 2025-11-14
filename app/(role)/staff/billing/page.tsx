@@ -311,16 +311,18 @@ export default function BillingPage() {
       <div className='bg-white rounded-lg shadow p-4 space-y-4'>
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           <div>
-            <label className='block text-sm font-medium mb-2'>Tìm kiếm</label>
+            <label htmlFor='search' className='block text-sm font-medium mb-2'>Tìm kiếm</label>
             <Input
+              id='search'
               placeholder='Mã hóa đơn, tên bệnh nhân...'
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
           <div>
-            <label className='block text-sm font-medium mb-2'>Bệnh nhân</label>
+            <label htmlFor='patient' className='block text-sm font-medium mb-2'>Bệnh nhân</label>
             <Select
+              id='patient'
               value={selectedPatientId}
               onChange={e => setSelectedPatientId(e.target.value)}
             >
@@ -333,8 +335,9 @@ export default function BillingPage() {
             </Select>
           </div>
           <div>
-            <label className='block text-sm font-medium mb-2'>Trạng thái</label>
+            <label htmlFor='status' className='block text-sm font-medium mb-2'>Trạng thái</label>
             <Select
+              id='status'
               value={filterValue}
               onChange={e => setFilterValue(e.target.value)}
             >
@@ -346,8 +349,9 @@ export default function BillingPage() {
             </Select>
           </div>
           <div>
-            <label className='block text-sm font-medium mb-2'>Từ ngày</label>
+            <label htmlFor='dateFrom' className='block text-sm font-medium mb-2'>Từ ngày</label>
             <Input
+              id='dateFrom'
               type='date'
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
@@ -356,8 +360,9 @@ export default function BillingPage() {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           <div>
-            <label className='block text-sm font-medium mb-2'>Đến ngày</label>
+            <label htmlFor='dateTo' className='block text-sm font-medium mb-2'>Đến ngày</label>
             <Input
+              id='dateTo'
               type='date'
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}
@@ -421,8 +426,13 @@ export default function BillingPage() {
                         className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'
                       >
                         {col.render
-                          ? col.render((bill as Record<string, any>)[col.key], bill)
-                          : String((bill as Record<string, any>)[col.key] || '')}
+                          ? col.render(
+                              (bill as Record<string, any>)[col.key],
+                              bill
+                            )
+                          : String(
+                              (bill as Record<string, any>)[col.key] || ''
+                            )}
                       </td>
                     ))}
                   </tr>
