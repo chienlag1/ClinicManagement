@@ -56,6 +56,9 @@ export function ScheduleAppointmentModal({
   const [isLoading, setIsLoading] = useState(false);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [loadingClinics, setLoadingClinics] = useState(false);
+  const [clinicAppointmentCounts, setClinicAppointmentCounts] = useState<
+    Record<string, number>
+  >({});
 
   useEffect(() => {
     if (isOpen) {
@@ -75,15 +78,54 @@ export function ScheduleAppointmentModal({
     }
   }, [isOpen]);
 
+  // Refetch clinics khi ngày thay đổi để cập nhật số lượng appointments
+  useEffect(() => {
+    if (isOpen && appointmentDate) {
+      fetchClinics();
+    }
+  }, [appointmentDate]);
+
   const fetchClinics = async () => {
     setLoadingClinics(true);
     try {
+      // Fetch clinics
       const response = await fetch('/api/clinics');
       if (!response.ok) {
         throw new Error('Không thể lấy danh sách phòng khám');
       }
       const data = await response.json();
-      setClinics(data);
+
+      // Lọc bỏ phòng khám đang bảo trì
+      const availableClinics = data.filter(
+        (clinic: Clinic) => clinic.status !== 'maintenance'
+      );
+
+      // Fetch số lượng appointments cho mỗi clinic trong ngày được chọn
+      if (appointmentDate) {
+        const counts: Record<string, number> = {};
+        await Promise.all(
+          availableClinics.map(async (clinic: Clinic) => {
+            const clinicId = clinic._id || '';
+            try {
+              const appointmentsRes = await fetch(
+                `/api/appointments?clinic_id=${clinicId}&date=${appointmentDate}`
+              );
+              if (appointmentsRes.ok) {
+                const appointmentsData = await appointmentsRes.json();
+                counts[clinicId] =
+                  appointmentsData.total || appointmentsData.length || 0;
+              } else {
+                counts[clinicId] = 0;
+              }
+            } catch {
+              counts[clinicId] = 0;
+            }
+          })
+        );
+        setClinicAppointmentCounts(counts);
+      }
+
+      setClinics(availableClinics);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Có lỗi xảy ra khi lấy dữ liệu'
@@ -244,18 +286,54 @@ export function ScheduleAppointmentModal({
                       startContent={
                         <Icon icon='lucide:building' className='w-4 h-4' />
                       }
+                      description={
+                        appointmentDate
+                          ? 'Phòng đang bảo trì và phòng đã đầy sẽ không hiển thị'
+                          : 'Chọn ngày hẹn để xem phòng khám khả dụng'
+                      }
                     >
-                      {clinics.map(clinic => (
-                        <SelectItem
-                          key={clinic._id}
-                          textValue={`${clinic.clinic_code || clinic.clinic_id} - ${clinic.description || clinic.status || 'Không có mô tả'}`}
-                        >
-                          {clinic.clinic_code || clinic.clinic_id} -{' '}
-                          {clinic.description ||
-                            clinic.status ||
-                            'Không có mô tả'}
-                        </SelectItem>
-                      ))}
+                      {clinics
+                        .map(clinic => {
+                          const clinicId = clinic._id || '';
+                          const currentCount =
+                            clinicAppointmentCounts[clinicId] || 0;
+                          const capacity = clinic.capacity || 0;
+                          const isFull =
+                            capacity > 0 && currentCount >= capacity;
+                          const availableText =
+                            capacity > 0
+                              ? ` (${currentCount}/${capacity})`
+                              : '';
+
+                          // Không hiển thị phòng đã đầy
+                          if (isFull) return null;
+
+                          return (
+                            <SelectItem
+                              key={clinic._id}
+                              textValue={`${clinic.clinic_code || clinic.clinic_id} - ${clinic.description || 'Không có mô tả'}${availableText}`}
+                            >
+                              <div className='flex justify-between items-center'>
+                                <span>
+                                  {clinic.clinic_code || clinic.clinic_id} -{' '}
+                                  {clinic.description || 'Không có mô tả'}
+                                </span>
+                                {capacity > 0 && (
+                                  <span
+                                    className={`text-xs ml-2 ${
+                                      currentCount >= capacity * 0.8
+                                        ? 'text-warning'
+                                        : 'text-success'
+                                    }`}
+                                  >
+                                    {currentCount}/{capacity}
+                                  </span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          );
+                        })
+                        .filter(Boolean)}
                     </Select>
 
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -298,7 +376,10 @@ export function ScheduleAppointmentModal({
                         onValueChange={setPriority}
                         color='warning'
                       />
-                      <label htmlFor='priority' className='text-medium font-medium'>
+                      <label
+                        htmlFor='priority'
+                        className='text-medium font-medium'
+                      >
                         Ưu tiên (Xếp số 1)
                       </label>
                     </div>

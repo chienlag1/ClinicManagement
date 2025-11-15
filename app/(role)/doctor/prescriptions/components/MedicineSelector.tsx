@@ -180,20 +180,21 @@ export default function MedicineSelector({
                     <h4 className='text-base font-semibold text-gray-900'>
                       Thuốc #{index + 1}
                     </h4>
-                    {selectedMedicine?.type && (() => {
-                      const typeInfo = MEDICINE_TYPES.find(
-                        t => t.key === selectedMedicine.type?.toLowerCase()
-                      );
-                      return (
-                        <Chip
-                          size='sm'
-                          variant='flat'
-                          className={typeInfo?.color || ''}
-                        >
-                          {typeInfo?.label || selectedMedicine.type}
-                        </Chip>
-                      );
-                    })()}
+                    {selectedMedicine?.type &&
+                      (() => {
+                        const typeInfo = MEDICINE_TYPES.find(
+                          t => t.key === selectedMedicine.type?.toLowerCase()
+                        );
+                        return (
+                          <Chip
+                            size='sm'
+                            variant='flat'
+                            className={typeInfo?.color || ''}
+                          >
+                            {typeInfo?.label || selectedMedicine.type}
+                          </Chip>
+                        );
+                      })()}
                   </div>
                   <Button
                     isIconOnly

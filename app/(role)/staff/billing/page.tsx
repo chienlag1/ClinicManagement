@@ -261,6 +261,22 @@ export default function BillingPage() {
     setSearchTerm('');
   };
 
+  const handleSyncStatus = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post('/api/bills/sync-status');
+      alert(
+        `Đồng bộ thành công!\nĐã cập nhật: ${response.data.updated}\nBỏ qua: ${response.data.skipped}\nTổng: ${response.data.total}`
+      );
+      await fetchBills(); // Refresh data
+    } catch (error: any) {
+      console.error('Error syncing status:', error);
+      alert('Có lỗi xảy ra khi đồng bộ trạng thái');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Calculate statistics
   const totalBills = bills.length;
   const paidBills = bills.filter(b => b.paymentStatus === 'paid').length;
@@ -279,6 +295,14 @@ export default function BillingPage() {
             Xem và quản lý các hóa đơn thanh toán
           </p>
         </div>
+        <Button
+          onClick={handleSyncStatus}
+          disabled={isLoading}
+          className='bg-blue-600 hover:bg-blue-700 text-white'
+        >
+          <Icon icon='lucide:refresh-cw' className='w-4 h-4 mr-2' />
+          Đồng bộ trạng thái
+        </Button>
       </div>
 
       {/* Statistics */}
@@ -311,7 +335,9 @@ export default function BillingPage() {
       <div className='bg-white rounded-lg shadow p-4 space-y-4'>
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           <div>
-            <label htmlFor='search' className='block text-sm font-medium mb-2'>Tìm kiếm</label>
+            <label htmlFor='search' className='block text-sm font-medium mb-2'>
+              Tìm kiếm
+            </label>
             <Input
               id='search'
               placeholder='Mã hóa đơn, tên bệnh nhân...'
@@ -320,7 +346,9 @@ export default function BillingPage() {
             />
           </div>
           <div>
-            <label htmlFor='patient' className='block text-sm font-medium mb-2'>Bệnh nhân</label>
+            <label htmlFor='patient' className='block text-sm font-medium mb-2'>
+              Bệnh nhân
+            </label>
             <Select
               id='patient'
               value={selectedPatientId}
@@ -335,7 +363,9 @@ export default function BillingPage() {
             </Select>
           </div>
           <div>
-            <label htmlFor='status' className='block text-sm font-medium mb-2'>Trạng thái</label>
+            <label htmlFor='status' className='block text-sm font-medium mb-2'>
+              Trạng thái
+            </label>
             <Select
               id='status'
               value={filterValue}
@@ -349,7 +379,12 @@ export default function BillingPage() {
             </Select>
           </div>
           <div>
-            <label htmlFor='dateFrom' className='block text-sm font-medium mb-2'>Từ ngày</label>
+            <label
+              htmlFor='dateFrom'
+              className='block text-sm font-medium mb-2'
+            >
+              Từ ngày
+            </label>
             <Input
               id='dateFrom'
               type='date'
@@ -360,7 +395,9 @@ export default function BillingPage() {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           <div>
-            <label htmlFor='dateTo' className='block text-sm font-medium mb-2'>Đến ngày</label>
+            <label htmlFor='dateTo' className='block text-sm font-medium mb-2'>
+              Đến ngày
+            </label>
             <Input
               id='dateTo'
               type='date'

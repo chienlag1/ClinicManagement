@@ -25,10 +25,11 @@ interface Prescription {
   prescriptionCode?: string;
   patient: {
     _id: string;
+    patient_id: string;
     patient_code: string;
     name: string;
     phone?: string;
-    date_of_birth: string;
+    birth_date: string;
     gender: string;
     address: string;
   };
@@ -218,7 +219,8 @@ export default function PrescriptionDetailPage() {
             <div>
               <div className='text-sm text-gray-600'>Mã bệnh nhân</div>
               <p className='text-lg font-medium'>
-                {prescription.patient.patient_code}
+                {prescription.patient.patient_id ||
+                  prescription.patient.patient_code}
               </p>
             </div>
             <div>
@@ -228,9 +230,9 @@ export default function PrescriptionDetailPage() {
             <div>
               <div className='text-sm text-gray-600'>Ngày sinh</div>
               <p className='text-lg font-medium'>
-                {new Date(
-                  prescription.patient.date_of_birth
-                ).toLocaleDateString('vi-VN')}
+                {new Date(prescription.patient.birth_date).toLocaleDateString(
+                  'vi-VN'
+                )}
               </p>
             </div>
             <div>
@@ -391,55 +393,65 @@ export default function PrescriptionDetailPage() {
           >
             Đóng
           </Button>
-          {/* Chỉ hiển thị nút thanh toán nếu đơn thuốc chưa completed và chưa cancelled */}
           {prescription.status === 'active' && (
-            <Button
-              onClick={async () => {
-                try {
-                  const response = await fetch('/api/payment/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      prescriptionId: prescription._id,
-                      amount: totalAmount,
-                      description: `Don thuoc ${prescription._id.slice(-6)}`,
-                    }),
-                  });
-
-                  if (!response.ok) {
-                    const text = await response.text();
-                    console.error('Payment Error Response:', {
-                      status: response.status,
-                      text,
-                    });
-                    let errorData;
-                    try {
-                      errorData = JSON.parse(text);
-                    } catch {
-                      errorData = {
-                        error: text || 'Không thể tạo thanh toán',
-                      };
-                    }
-                    throw new Error(
-                      errorData.error || 'Không thể tạo thanh toán'
-                    );
-                  }
-
-                  const data = await response.json();
-                  if (data.checkoutUrl) {
-                    window.location.href = data.checkoutUrl;
-                  } else {
-                    throw new Error('Không nhận được link thanh toán');
-                  }
-                } catch (error: any) {
-                  console.error('Error:', error);
-                  alert(error.message || 'Có lỗi xảy ra khi tạo thanh toán');
+            <>
+              <Button
+                variant='outline'
+                onClick={() =>
+                  router.push(`/staff/prescriptions/${prescription._id}/edit`)
                 }
-              }}
-              className='bg-blue-600 hover:bg-blue-700 text-white'
-            >
-              💳 Thanh toán ({totalAmount.toLocaleString('vi-VN')} đ)
-            </Button>
+                className='bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border-yellow-300'
+              >
+                ✏️ Chỉnh sửa
+              </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/payment/create', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        prescriptionId: prescription._id,
+                        amount: totalAmount,
+                        description: `Don thuoc ${prescription._id.slice(-6)}`,
+                      }),
+                    });
+
+                    if (!response.ok) {
+                      const text = await response.text();
+                      console.error('Payment Error Response:', {
+                        status: response.status,
+                        text,
+                      });
+                      let errorData;
+                      try {
+                        errorData = JSON.parse(text);
+                      } catch {
+                        errorData = {
+                          error: text || 'Không thể tạo thanh toán',
+                        };
+                      }
+                      throw new Error(
+                        errorData.error || 'Không thể tạo thanh toán'
+                      );
+                    }
+
+                    const data = await response.json();
+                    if (data.checkoutUrl) {
+                      window.location.href = data.checkoutUrl;
+                    } else {
+                      throw new Error('Không nhận được link thanh toán');
+                    }
+                  } catch (error: any) {
+                    console.error('Error:', error);
+                    alert(error.message || 'Có lỗi xảy ra khi tạo thanh toán');
+                  }
+                }}
+                className='bg-blue-600 hover:bg-blue-700 text-white'
+              >
+                💳 Thanh toán ({totalAmount.toLocaleString('vi-VN')} đ)
+              </Button>
+            </>
           )}
         </div>
       </div>
