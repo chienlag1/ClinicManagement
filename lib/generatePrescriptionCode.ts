@@ -8,20 +8,20 @@ import { connectMongo } from './mongodb';
 export async function generatePrescriptionCode(): Promise<string> {
   await connectMongo();
 
-  // Tìm đơn thuốc có mã lớn nhất
-  const lastPrescription = await Prescription.findOne()
-    .sort({ prescriptionCode: -1 })
-    .limit(1);
+  // Đếm tổng số prescription và cộng thêm 1
+  const count = await Prescription.countDocuments();
+  let nextNumber = count + 1;
 
-  let nextNumber = 1;
+  // Kiểm tra xem mã đã tồn tại chưa (để tránh trường hợp đã xóa prescription)
+  let prescriptionCode = String(nextNumber);
+  let exists = await Prescription.findOne({ prescriptionCode });
 
-  if (lastPrescription && lastPrescription.prescriptionCode) {
-    // Lấy số hiện tại và tăng lên 1
-    const currentNumber = parseInt(lastPrescription.prescriptionCode);
-    if (!isNaN(currentNumber)) {
-      nextNumber = currentNumber + 1;
-    }
+  // Nếu mã đã tồn tại, tìm mã tiếp theo chưa được sử dụng
+  while (exists) {
+    nextNumber++;
+    prescriptionCode = String(nextNumber);
+    exists = await Prescription.findOne({ prescriptionCode });
   }
 
-  return String(nextNumber);
+  return prescriptionCode;
 }

@@ -17,9 +17,12 @@ interface PrescriptionDetail {
   _id: string;
   patient: {
     _id: string;
+    patient_id?: string;
     fullName?: string;
     name?: string;
     phone?: string;
+    birth_date?: string;
+    gender?: string;
   };
   doctor: {
     _id: string;
@@ -185,6 +188,14 @@ export default function PrescriptionDetailPage() {
             <h2 className='text-xl font-semibold'>Thông tin bệnh nhân</h2>
           </CardHeader>
           <CardBody className='space-y-3'>
+            {prescription.patient?.patient_id && (
+              <div>
+                <p className='text-sm text-gray-500'>Mã bệnh nhân</p>
+                <p className='text-base font-medium'>
+                  {prescription.patient.patient_id}
+                </p>
+              </div>
+            )}
             <div>
               <p className='text-sm text-gray-500'>Họ tên</p>
               <p className='text-base font-medium'>
@@ -193,6 +204,24 @@ export default function PrescriptionDetailPage() {
                   'N/A'}
               </p>
             </div>
+            {prescription.patient?.birth_date && (
+              <div>
+                <p className='text-sm text-gray-500'>Ngày sinh</p>
+                <p className='text-base font-medium'>
+                  {new Date(prescription.patient.birth_date).toLocaleDateString(
+                    'vi-VN'
+                  )}
+                </p>
+              </div>
+            )}
+            {prescription.patient?.gender && (
+              <div>
+                <p className='text-sm text-gray-500'>Giới tính</p>
+                <p className='text-base font-medium'>
+                  {prescription.patient.gender === 'male' ? 'Nam' : 'Nữ'}
+                </p>
+              </div>
+            )}
             {prescription.patient?.phone && (
               <div>
                 <p className='text-sm text-gray-500'>Số điện thoại</p>

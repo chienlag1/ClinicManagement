@@ -45,6 +45,9 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [clinicAppointmentCounts, setClinicAppointmentCounts] = useState<
+    Record<string, number>
+  >({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,7 +62,12 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
         if (!clinicResponse.ok)
           throw new Error('Không thể lấy danh sách phòng khám.');
         const clinicData = await clinicResponse.json();
-        setClinics(clinicData);
+
+        // Lọc bỏ phòng khám đang bảo trì
+        const availableClinics = clinicData.filter(
+          (clinic: Clinic) => clinic.status !== 'maintenance'
+        );
+        setClinics(availableClinics);
 
         if (!doctorResponse.ok)
           throw new Error('Không thể lấy danh sách bác sĩ.');
@@ -85,6 +93,36 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
     };
     fetchData();
   }, []);
+
+  // Fetch appointment counts khi ngày hẹn thay đổi
+  useEffect(() => {
+    const fetchAppointmentCounts = async () => {
+      if (!appointmentDate || clinics.length === 0) return;
+
+      const counts: Record<string, number> = {};
+      await Promise.all(
+        clinics.map(async (clinic: Clinic) => {
+          const clinicId = clinic._id || '';
+          try {
+            const res = await fetch(
+              `/api/appointments?clinic_id=${clinicId}&date=${appointmentDate}`
+            );
+            if (res.ok) {
+              const data = await res.json();
+              counts[clinicId] = data.total || data.length || 0;
+            } else {
+              counts[clinicId] = 0;
+            }
+          } catch {
+            counts[clinicId] = 0;
+          }
+        })
+      );
+      setClinicAppointmentCounts(counts);
+    };
+
+    fetchAppointmentCounts();
+  }, [appointmentDate, clinics]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -379,12 +417,31 @@ export default function AppointmentForm({ onSubmit }: AppointmentFormProps) {
                   onChange={e => setClinicId(e.target.value || '')}
                 >
                   <option value=''>Chọn phòng khám</option>
-                  {clinics.map(clinic => (
-                    <option key={clinic._id} value={clinic._id}>
-                      {clinic.clinic_code} -{' '}
-                      {clinic.description || clinic.status || 'Không có mô tả'}
-                    </option>
-                  ))}
+                  {clinics
+                    .map(clinic => {
+                      const clinicIdKey = clinic._id || '';
+                      const currentCount =
+                        clinicAppointmentCounts[clinicIdKey] || 0;
+                      const capacity = clinic.capacity || 0;
+                      const isFull = capacity > 0 && currentCount >= capacity;
+
+                      // Không hiển thị phòng đã đầy
+                      if (isFull) return null;
+
+                      const availableText =
+                        capacity > 0 ? ` (${currentCount}/${capacity})` : '';
+
+                      return (
+                        <option key={clinic._id} value={clinic._id}>
+                          {clinic.clinic_code} -{' '}
+                          {clinic.description ||
+                            clinic.status ||
+                            'Không có mô tả'}
+                          {availableText}
+                        </option>
+                      );
+                    })
+                    .filter(Boolean)}
                 </select>
               </div>
             </div>

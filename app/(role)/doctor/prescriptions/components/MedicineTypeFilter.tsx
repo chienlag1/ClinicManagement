@@ -10,6 +10,7 @@ import {
   Chip,
 } from '@heroui/react';
 import { Icon } from '@iconify/react';
+import { MEDICINE_TYPES } from '@/types/medicine';
 
 interface MedicineTypeFilterProps {
   selectedType: string;
@@ -60,7 +61,10 @@ export default function MedicineTypeFilter({
               className='min-w-[200px] justify-between'
               isLoading={loading}
             >
-              {selectedType || 'Tất cả loại thuốc'}
+              {selectedType
+                ? MEDICINE_TYPES.find(t => t.key === selectedType.toLowerCase())
+                    ?.label || selectedType
+                : 'Tất cả loại thuốc'}
               <Icon icon='lucide:chevron-down' className='w-4 h-4' />
             </Button>
           </DropdownTrigger>
@@ -74,7 +78,15 @@ export default function MedicineTypeFilter({
             selectionMode='single'
             items={[
               { key: '', label: 'Tất cả loại thuốc' },
-              ...medicineTypes.map(type => ({ key: type, label: type })),
+              ...medicineTypes.map(type => {
+                const typeInfo = MEDICINE_TYPES.find(
+                  t => t.key === type.toLowerCase()
+                );
+                return {
+                  key: type,
+                  label: typeInfo?.label || type,
+                };
+              }),
             ]}
           >
             {item => <DropdownItem key={item.key}>{item.label}</DropdownItem>}

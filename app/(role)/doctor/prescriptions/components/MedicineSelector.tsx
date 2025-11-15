@@ -15,6 +15,7 @@ import {
   Divider,
 } from '@heroui/react';
 import { Icon } from '@iconify/react';
+import { MEDICINE_TYPES } from '@/types/medicine';
 
 interface MedicineSelectorProps {
   medicines: Array<{ id: string; name: string; type?: string }>;
@@ -179,11 +180,21 @@ export default function MedicineSelector({
                     <h4 className='text-base font-semibold text-gray-900'>
                       Thuốc #{index + 1}
                     </h4>
-                    {selectedMedicine?.type && (
-                      <Chip size='sm' variant='flat'>
-                        {selectedMedicine.type}
-                      </Chip>
-                    )}
+                    {selectedMedicine?.type &&
+                      (() => {
+                        const typeInfo = MEDICINE_TYPES.find(
+                          t => t.key === selectedMedicine.type?.toLowerCase()
+                        );
+                        return (
+                          <Chip
+                            size='sm'
+                            variant='flat'
+                            className={typeInfo?.color || ''}
+                          >
+                            {typeInfo?.label || selectedMedicine.type}
+                          </Chip>
+                        );
+                      })()}
                   </div>
                   <Button
                     isIconOnly
@@ -211,7 +222,17 @@ export default function MedicineSelector({
                           className='w-full justify-start'
                         >
                           {selectedMedicine
-                            ? `${selectedMedicine.name}${selectedMedicine.type ? ` (${selectedMedicine.type})` : ''}`
+                            ? `${selectedMedicine.name}${
+                                selectedMedicine.type
+                                  ? ` (${
+                                      MEDICINE_TYPES.find(
+                                        t =>
+                                          t.key ===
+                                          selectedMedicine.type?.toLowerCase()
+                                      )?.label || selectedMedicine.type
+                                    })`
+                                  : ''
+                              }`
                             : 'Chọn thuốc'}
                           <Icon
                             icon='lucide:chevron-down'
@@ -229,17 +250,27 @@ export default function MedicineSelector({
                         selectionMode='single'
                         className='max-h-[300px] overflow-y-auto'
                       >
-                        {medicinesToShow.map(m => (
-                          <DropdownItem key={m.id}>
-                            {m.name} {m.type ? `(${m.type})` : ''}
-                          </DropdownItem>
-                        ))}
+                        {medicinesToShow.map(m => {
+                          const typeInfo = m.type
+                            ? MEDICINE_TYPES.find(
+                                t => t.key === m.type?.toLowerCase()
+                              )
+                            : null;
+                          return (
+                            <DropdownItem key={m.id}>
+                              {m.name} {typeInfo ? `(${typeInfo.label})` : ''}
+                            </DropdownItem>
+                          );
+                        })}
                       </DropdownMenu>
                     </Dropdown>
                     {selectedType && (
                       <p className='text-xs text-gray-500 mt-1'>
                         Đang hiển thị {medicinesToShow.length} thuốc loại &quot;
-                        {selectedType}&quot;
+                        {MEDICINE_TYPES.find(
+                          t => t.key === selectedType.toLowerCase()
+                        )?.label || selectedType}
+                        &quot;
                       </p>
                     )}
                   </div>

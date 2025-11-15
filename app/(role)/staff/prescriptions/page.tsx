@@ -56,7 +56,6 @@ const TABLE_CONFIG = {
     },
   ],
   filterOptions: [
-    { key: 'all', label: 'Tất cả' },
     { key: 'active', label: 'Đang xử lý' },
     { key: 'completed', label: 'Đã hoàn thành' },
     { key: 'cancelled', label: 'Đã hủy' },
@@ -282,6 +281,11 @@ export default function PrescriptionsPage() {
     }
   };
 
+  // Edit handler - redirect to edit page
+  const handleEditPrescription = (item: PrescriptionWithId) => {
+    router.push(`/staff/prescriptions/${item._id}/edit`);
+  };
+
   return (
     <div className='p-8'>
       <CRUDTemplate<PrescriptionWithId>
@@ -296,7 +300,7 @@ export default function PrescriptionsPage() {
         setFilterValue={setFilterValue}
         filterOptions={TABLE_CONFIG.filterOptions}
         searchFields={['diagnosis', 'notes'] as any}
-        onEdit={handleEdit}
+        onEdit={handleEditPrescription}
         onDelete={handleDeletePrescription}
         onView={item => router.push(`/staff/prescriptions/${item._id}`)}
       />
