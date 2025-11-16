@@ -6,9 +6,19 @@ import { Icon } from '@iconify/react';
 import { Pagination, usePagination } from '@/components/pagination';
 import { Appointment } from '@/types/appointment';
 
+interface Activity {
+  id: string;
+  type: 'appointment' | 'prescription' | 'patient';
+  message: string;
+  time: string;
+  icon: string;
+  timestamp: Date;
+}
+
 export default function StaffDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
+  const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] =
@@ -53,6 +63,99 @@ export default function StaffDashboard() {
     fetchAppointments();
   }, []);
 
+  // Fetch recent activities from multiple sources
+  useEffect(() => {
+    const fetchRecentActivities = async () => {
+      try {
+        const [appointmentsRes, prescriptionsRes, patientsRes] = await Promise.all([
+          fetch('/api/appointments'),
+          fetch('/api/prescriptions'),
+          fetch('/api/patients')
+        ]);
+
+        const appointments = appointmentsRes.ok ? await appointmentsRes.json() : [];
+        const prescriptions = prescriptionsRes.ok ? await prescriptionsRes.json() : [];
+        const patients = patientsRes.ok ? await patientsRes.json() : [];
+
+        const activities: Activity[] = [];
+
+        // Add recent appointments (last 5)
+        appointments
+          .sort((a: any, b: any) => new Date(b.createdAt || b.appointment_date).getTime() - new Date(a.createdAt || a.appointment_date).getTime())
+          .slice(0, 5)
+          .forEach((apt: any) => {
+            const patientName = typeof apt.patient_id === 'object' ? apt.patient_id?.name : apt.patient_id || 'Bệnh nhân';
+            activities.push({
+              id: apt._id,
+              type: 'appointment',
+              message: `Đã đặt lịch khám cho ${patientName}`,
+              time: getRelativeTime(apt.createdAt || apt.appointment_date),
+              icon: 'lucide:calendar-plus',
+              timestamp: new Date(apt.createdAt || apt.appointment_date)
+            });
+          });
+
+        // Add recent prescriptions (last 5)
+        prescriptions
+          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5)
+          .forEach((pres: any) => {
+            const patientName = typeof pres.patient === 'object' ? pres.patient?.name : pres.patient || 'Bệnh nhân';
+            activities.push({
+              id: pres._id,
+              type: 'prescription',
+              message: `Đơn thuốc mới cho ${patientName}`,
+              time: getRelativeTime(pres.createdAt),
+              icon: 'lucide:pill',
+              timestamp: new Date(pres.createdAt)
+            });
+          });
+
+        // Add recent patients (last 5)
+        patients
+          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5)
+          .forEach((patient: any) => {
+            activities.push({
+              id: patient._id,
+              type: 'patient',
+              message: `Bệnh nhân mới: ${patient.name}`,
+              time: getRelativeTime(patient.createdAt),
+              icon: 'lucide:user-plus',
+              timestamp: new Date(patient.createdAt)
+            });
+          });
+
+        // Sort all activities by timestamp and take the most recent 4
+        const sortedActivities = activities
+          .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+          .slice(0, 4);
+
+        setRecentActivities(sortedActivities);
+      } catch (err) {
+        console.error('Error fetching recent activities:', err);
+      }
+    };
+
+    fetchRecentActivities();
+  }, []);
+
+  // Helper function to calculate relative time
+  const getRelativeTime = (date: string | Date): string => {
+    const now = new Date();
+    const then = new Date(date);
+    const diffMs = now.getTime() - then.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Vừa xong';
+    if (diffMins < 60) return `${diffMins} phút trước`;
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    if (diffDays < 7) return `${diffDays} ngày trước`;
+    return then.toLocaleDateString('vi-VN');
+  };
+
   const handleDetail = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
   };
@@ -89,37 +192,6 @@ export default function StaffDashboard() {
       icon: 'lucide:clock',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-    },
-  ];
-
-  const recentActivities = [
-    {
-      id: 1,
-      type: 'appointment',
-      message: 'New appointment scheduled for John Doe',
-      time: '10 minutes ago',
-      icon: 'lucide:calendar-plus',
-    },
-    {
-      id: 2,
-      type: 'lab',
-      message: 'Lab results ready for Sarah Wilson',
-      time: '25 minutes ago',
-      icon: 'lucide:flask',
-    },
-    {
-      id: 3,
-      type: 'prescription',
-      message: 'Prescription refill requested by Mike Johnson',
-      time: '1 hour ago',
-      icon: 'lucide:pill',
-    },
-    {
-      id: 4,
-      type: 'patient',
-      message: 'New patient registration: Emily Brown',
-      time: '2 hours ago',
-      icon: 'lucide:user-plus',
     },
   ];
 
