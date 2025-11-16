@@ -166,6 +166,11 @@ export default function MedicineManager() {
     {
       key: 'unit',
       label: 'Đơn vị',
+      render: value => {
+        const unitInfo = MEDICINE_UNITS.find(u => u.key === value);
+
+        return unitInfo?.label || value;
+      },
     },
   ];
 
